@@ -6,9 +6,11 @@
 namespace cozmo {
   using BodyNodePtr = dart::dynamics::BodyNodePtr;
   using SkeletonPtr = dart::dynamics::SkeletonPtr;
+  using WorldPtr = dart::simulation::WorldPtr;
+  
   void setGeometry(const BodyNodePtr& bn);
   BodyNodePtr makeRootBody(const SkeletonPtr& cozmo, const std::string& name);
-  SkeletonPtr createCubeCozmo();
+  WorldPtr createCozmo();
 }
 
 #endif  // COZMO_COZMO_HPP_

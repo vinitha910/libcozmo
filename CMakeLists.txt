@@ -4,8 +4,10 @@ project(cozmo_description)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 
-find_package(catkin REQUIRED)
+find_package(catkin REQUIRED COMPONENTS roscpp)
 catkin_package()
+
+find_package(aikido REQUIRED COMPONENTS rviz)
 
 find_package(Eigen3 REQUIRED)
 find_package(DART REQUIRED gui collision-bullet)
@@ -39,7 +41,14 @@ add_executable(createCozmo
   src/createCozmo.cpp
 )
 
+target_include_directories(createCozmo PRIVATE
+  ${catkin_INCLUDE_DIRS}
+  ${aikido_INCLUDE_DIRS}
+)
+
 target_link_libraries(createCozmo
   cozmo
+  ${catkin_LIBRARIES}
+  ${aikido_LIBRARIES}
 )
 

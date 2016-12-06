@@ -4,12 +4,12 @@
 #include "ros/ros.h"
 #include <aikido/rviz/InteractiveMarkerViewer.hpp>
 
-// using WorldPtr = dart::simulation::WorldPtr;
 static const std::string topicName("dart_markers");
 
 int main(int argc, char* argv[])
 {
-  dart::dynamics::SkeletonPtr coz = cozmo::createCubeCozmo();
+  dart::simulation::WorldPtr world = cozmo::createCozmo();
+  dart::dynamics::SkeletonPtr coz = world->getSkeleton("cozmo");
 
   // Start the RViz viewer.
   std::cout << "Starting ROS node." << std::endl;
@@ -22,16 +22,16 @@ int main(int argc, char* argv[])
   viewer.setAutoUpdate(true);
 
   std::cout << "Press <Ctrl> + C to exit." << std::endl;
+
+  std::cin.get();
+
+  coz->getBodyNode("lower_forklift_strut_right_1")->getParentJoint()->setPosition(0, M_PI/5);
+  //coz->getBodyNode("upper_forklift_strut_right_1")->getParentJoint()->setPosition(0, M_PI/5);
+  // coz->getBodyNode("lower_forklift_strut_right_1")->getShapeNode(0)->setOffset(Eigen::Vector3d(-0.014, 0.018, 0.0202));
+  
+  std::cin.get();
+
+  world->getConstraintSolver()->solve();
+  
   ros::spin();
-
-  // DART crappy viewer
-  // WorldPtr world(new dart::simulation::World);
-  // world->addSkeleton(coz);
-
-  // dart::gui::SimWindow win;
-  // win.setWorld(world);
-
-  // glutInit(&argc, argv);
-  // win.initWindow(640, 480, "Cube Cozmo");
-  // glutMainLoop();
 }
