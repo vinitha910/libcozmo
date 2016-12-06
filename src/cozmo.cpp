@@ -92,7 +92,7 @@ BodyNodePtr addBody(const SkeletonPtr& cozmo, BodyNodePtr parent, const std::str
     
     joint->setTransformFromChildBodyNode(tf); //transform from child moves only body node
 
-    // bn->getParentJoint()->setPosition(0, 0.07);
+    bn->getParentJoint()->setPosition(0, 0.07);
     
   } else if (name == "lower_forklift_strut_right_2") {
     shapeNode->getVisualAspect()->setRGB(Eigen::Vector3d(193/255., 24/255., 22/255.));
@@ -123,17 +123,18 @@ BodyNodePtr addBody(const SkeletonPtr& cozmo, BodyNodePtr parent, const std::str
       shapeNode->getVisualAspect()->setRGB(Eigen::Vector3d(230/255., 230/255., 230/255.));
     }
    
-    Eigen::Vector3d T = Eigen::Vector3d(-0.001, 0.05, 0.028);
+    Eigen::Vector3d T = Eigen::Vector3d(-0.004, 0.058, 0.028);
     tf.translation() = T;
     joint->setTransformFromParentBodyNode(tf); //transfrom from parent moves joint and body node
 
-    R = Eigen::AngleAxisd(-0.15, Eigen::Vector3d::UnitZ());
-    tf.linear() = R;
+    // R = Eigen::AngleAxisd(-0.15, Eigen::Vector3d::UnitZ());
+    // tf.linear() = R;
     
-    T = Eigen::Vector3d(0.006, 0.015, 0.0);
+    T = Eigen::Vector3d(0.003, 0.021, 0.0);
     tf.translation() = T;
     joint->setTransformFromChildBodyNode(tf); //transform from child moves only body node
-      
+
+     bn->getParentJoint()->setPosition(0, 0.15);
   }
   
   return bn;
@@ -152,9 +153,9 @@ WorldPtr createCozmo()
   // BodyNodePtr upper_forklift_strut_left_1 =
   //   addBody(cozmo, base, "upper_forklift_strut_left_1",
   // 	    "/home/vinitha910/workspaces/cozmo_workspace/src/cozmo_description/meshes/upper_forklift_strut.STL");
-  // BodyNodePtr upper_forklift_strut_right_1 =
-  //   addBody(cozmo, base, "upper_forklift_strut_right_1",
-  //           "/home/vinitha910/workspaces/cozmo_workspace/src/cozmo_description/meshes/upper_forklift_strut.STL");
+  BodyNodePtr upper_forklift_strut_right_1 =
+    addBody(cozmo, base, "upper_forklift_strut_right_1",
+            "/home/vinitha910/workspaces/cozmo_workspace/src/cozmo_description/meshes/upper_forklift_strut.STL");
   // BodyNodePtr lower_forklift_strut_left_1 =
   //   addBody(cozmo, base, "lower_forklift_strut_left_1",
   //           "/home/vinitha910/workspaces/cozmo_workspace/src/cozmo_description/meshes/lower_forklift_strut.STL");
@@ -174,9 +175,9 @@ WorldPtr createCozmo()
   // BodyNodePtr lower_forklift_strut_left_2 =
   //   addBody(cozmo, forklift, "lower_forklift_strut_left_2",
   //           "/home/vinitha910/workspaces/cozmo_workspace/src/cozmo_description/meshes/lower_forklift_strut.STL");
-  BodyNodePtr lower_forklift_strut_right_2 =
-    addBody(cozmo, base, "lower_forklift_strut_right_2",
-            "/home/vinitha910/workspaces/cozmo_workspace/src/cozmo_description/meshes/lower_forklift_strut.STL");
+  // BodyNodePtr lower_forklift_strut_right_2 =
+  //   addBody(cozmo, base, "lower_forklift_strut_right_2",
+  //           "/home/vinitha910/workspaces/cozmo_workspace/src/cozmo_description/meshes/lower_forklift_strut.STL");
 
   world->addSkeleton(cozmo);
   // auto constraint_1 = std::make_shared<WeldJointConstraint>(upper_forklift_strut_left_1, upper_forklift_strut_left_2);

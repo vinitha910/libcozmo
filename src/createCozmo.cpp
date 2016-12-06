@@ -25,8 +25,8 @@ int main(int argc, char* argv[])
 
   std::cin.get();
 
-  coz->getBodyNode("lower_forklift_strut_right_1")->getParentJoint()->setPosition(0, M_PI/5);
-  //coz->getBodyNode("upper_forklift_strut_right_1")->getParentJoint()->setPosition(0, M_PI/5);
+  coz->getBodyNode("lower_forklift_strut_right_1")->getParentJoint()->setPosition(0, M_PI/4);
+  coz->getBodyNode("upper_forklift_strut_right_1")->getParentJoint()->setPosition(0, M_PI/4);
   // coz->getBodyNode("lower_forklift_strut_right_1")->getShapeNode(0)->setOffset(Eigen::Vector3d(-0.014, 0.018, 0.0202));
   
   std::cin.get();
