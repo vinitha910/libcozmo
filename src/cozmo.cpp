@@ -80,7 +80,7 @@ BodyNodePtr addBody(const SkeletonPtr& cozmo, BodyNodePtr parent, const std::str
   } else if (name == "lower_forklift_strut_right_1") {
     shapeNode->getVisualAspect()->setRGB(Eigen::Vector3d(230/255., 230/255., 230/255.));
     
-    Eigen::Vector3d T = Eigen::Vector3d(-0.004, 0.044, 0.028);
+    Eigen::Vector3d T = Eigen::Vector3d(-0.004, 0.044, 0.0315);
     tf.translation() = T;
     joint->setTransformFromParentBodyNode(tf); //transfrom from parent moves joint and body node
     
@@ -123,7 +123,7 @@ BodyNodePtr addBody(const SkeletonPtr& cozmo, BodyNodePtr parent, const std::str
       shapeNode->getVisualAspect()->setRGB(Eigen::Vector3d(230/255., 230/255., 230/255.));
     }
    
-    Eigen::Vector3d T = Eigen::Vector3d(-0.004, 0.058, 0.028);
+    Eigen::Vector3d T = Eigen::Vector3d(-0.004, 0.058, 0.0315);
     tf.translation() = T;
     joint->setTransformFromParentBodyNode(tf); //transfrom from parent moves joint and body node
 
