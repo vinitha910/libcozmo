@@ -65,11 +65,17 @@ BodyNodePtr addBody(const SkeletonPtr& cozmo, BodyNodePtr parent, const std::str
     shapeNode->setOffset(Eigen::Vector3d(0., 0.021, 0.032));
     shapeNode->getVisualAspect()->setRGB(Eigen::Vector3d(190/255., 190/255., 190/255.));
   } else if (name == "forklift") {
-    // R = Eigen::AngleAxisd(M_PI/2, Eigen::Vector3d::UnitX());
-    // tf.linear() = R;
-    // shapeNode->setRelativeTransform(tf);
-    shapeNode->setOffset(Eigen::Vector3d(0.0512, 0.008, -0.0256));
     shapeNode->getVisualAspect()->setRGB(Eigen::Vector3d(193/255., 24/255., 22/255.));
+
+    Eigen::Vector3d T = Eigen::Vector3d(0.066, 0.001, 0.0032);
+    tf.translation() = T;
+    joint->setTransformFromParentBodyNode(tf);
+    
+    T =  Eigen::Vector3d(0.0028, 0.025, 0.0);
+    tf.translation() = T;
+    joint->setTransformFromChildBodyNode(tf);
+
+    bn->getParentJoint()->setPosition(0, -0.12);
   } else if (name == "lower_forklift_strut_left_1" ||
 	     name == "lower_forklift_strut_left_2") {
     shapeNode->getVisualAspect()->setRGB(Eigen::Vector3d(230/255., 230/255., 230/255.));
@@ -95,19 +101,18 @@ BodyNodePtr addBody(const SkeletonPtr& cozmo, BodyNodePtr parent, const std::str
     joint->setTransformFromChildBodyNode(tf); //transform from child moves only body node
 
     bn->getParentJoint()->setPosition(0, 0.07);
-    
   } else if (name == "lower_forklift_strut_right_2") {
     shapeNode->getVisualAspect()->setRGB(Eigen::Vector3d(230/255., 230/255., 230/255.));
-
-    Eigen::Vector3d T = Eigen::Vector3d(-0.004, 0.044, 0.0315);
+    
+    Eigen::Vector3d T = Eigen::Vector3d(0.001, 0.014, 0.0);
     tf.translation() = T;
     joint->setTransformFromParentBodyNode(tf); //transfrom from parent moves joint and body node
     
-    T = Eigen::Vector3d(0.006, 0.015, 0.0);
+    T = Eigen::Vector3d(0.0691, 0.0032, 0.0032);
     tf.translation() = T;
     joint->setTransformFromChildBodyNode(tf); //transform from child moves only body node
 
-    bn->getParentJoint()->setPosition(0, 0.07);
+    bn->getParentJoint()->setPosition(0, 0.04);
   } else if (name == "upper_forklift_strut_left_1" ||
 	     name == "upper_forklift_strut_left_2") {
     shapeNode->getVisualAspect()->setRGB(Eigen::Vector3d(230/255., 230/255., 230/255.));
@@ -163,27 +168,15 @@ WorldPtr createCozmo()
     addBody(cozmo, base, "lower_forklift_strut_right_1",
             "/home/vinitha910/workspaces/cozmo_workspace/src/cozmo_description/meshes/lower_forklift_strut.STL");
   
-  // BodyNodePtr forklift = addBody(cozmo, lower_forklift_strut_right_1, "forklift",
-  // 	                         "/home/vinitha910/workspaces/cozmo_workspace/src/cozmo_description/meshes/forklift.STL");
+  BodyNodePtr forklift = addBody(cozmo, upper_forklift_strut_right_1, "forklift",
+  	                         "/home/vinitha910/workspaces/cozmo_workspace/src/cozmo_description/meshes/forklift.STL");
 
-  // BodyNodePtr upper_forklift_strut_left_2 =
-  //   addBody(cozmo, forklift, "upper_forklift_strut_left_2",
-  //           "/home/vinitha910/workspaces/cozmo_workspace/src/cozmo_description/meshes/upper_forklift_strut.STL");
-  // BodyNodePtr upper_forklift_strut_right_2 =
-  //   addBody(cozmo, forklift, "upper_forklift_strut_right_2",
-  //           "/home/vinitha910/workspaces/cozmo_workspace/src/cozmo_description/meshes/upper_forklift_strut.STL");
-  // BodyNodePtr lower_forklift_strut_left_2 =
-  //   addBody(cozmo, forklift, "lower_forklift_strut_left_2",
-  //           "/home/vinitha910/workspaces/cozmo_workspace/src/cozmo_description/meshes/lower_forklift_strut.STL");
-  // BodyNodePtr lower_forklift_strut_right_2 =
-  //   addBody(cozmo, forklift, "lower_forklift_strut_right_2",
-  //           "/home/vinitha910/workspaces/cozmo_workspace/src/cozmo_description/meshes/lower_forklift_strut.STL");
+  BodyNodePtr lower_forklift_strut_right_2 =
+    addBody(cozmo, forklift, "lower_forklift_strut_right_2",
+            "/home/vinitha910/workspaces/cozmo_workspace/src/cozmo_description/meshes/lower_forklift_strut.STL");
 
   world->addSkeleton(cozmo);
-  // auto constraint_1 = std::make_shared<WeldJointConstraint>(upper_forklift_strut_left_1, upper_forklift_strut_left_2);
-  // auto constraint_2 = std::make_shared<WeldJointConstraint>(upper_forklift_strut_right_1, upper_forklift_strut_right_2);
-  // auto constraint_3 = std::make_shared<WeldJointConstraint>(lower_forklift_strut_left_1, lower_forklift_strut_left_2);
-  // auto constraint_4 = std::make_shared<WeldJointConstraint>(lower_forklift_strut_right_1, lower_forklift_strut_right_2);
+  auto constraint = std::make_shared<WeldJointConstraint>(lower_forklift_strut_right_1, lower_forklift_strut_right_2);
 
   // world->getConstraintSolver()->addConstraint(constraint_1);
   // world->getConstraintSolver()->addConstraint(constraint_2);
