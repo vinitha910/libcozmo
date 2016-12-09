@@ -59,11 +59,15 @@ BodyNodePtr addBody(const SkeletonPtr& cozmo, BodyNodePtr parent, const std::str
   Eigen::Matrix3d R = Eigen::Matrix3d::Identity();
   
   if (name == "head") {
-    R = Eigen::AngleAxisd(M_PI/2, Eigen::Vector3d::UnitX());
-    tf.linear() = R;
-    shapeNode->setRelativeTransform(tf);
-    shapeNode->setOffset(Eigen::Vector3d(0., 0.021, 0.032));
     shapeNode->getVisualAspect()->setRGB(Eigen::Vector3d(190/255., 190/255., 190/255.));
+    
+    Eigen::Vector3d T = Eigen::Vector3d(0.03, 0.0615, 0.0385);
+    tf.translation() = T;
+    joint->setTransformFromParentBodyNode(tf);
+    
+    T =  Eigen::Vector3d(0.022, 0.02, 0.0);
+    tf.translation() = T;
+    joint->setTransformFromChildBodyNode(tf);
   } else if (name == "forklift") {
     shapeNode->getVisualAspect()->setRGB(Eigen::Vector3d(193/255., 24/255., 22/255.));
 
@@ -152,8 +156,8 @@ WorldPtr createCozmo()
   
   SkeletonPtr cozmo = Skeleton::create("cozmo");  
   BodyNodePtr base = makeRootBody(cozmo, "body");
-  // BodyNodePtr head = addBody(cozmo, base, "head",
-  // 			   "/home/vinitha910/workspaces/cozmo_workspace/src/cozmo_description/meshes/head.STL");
+  BodyNodePtr head = addBody(cozmo, base, "head",
+  			   "/home/vinitha910/workspaces/cozmo_workspace/src/cozmo_description/meshes/head.STL");
   
   BodyNodePtr upper_forklift_strut_left_1 =
     addBody(cozmo, base, "upper_forklift_strut_left_1",
