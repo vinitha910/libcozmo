@@ -8,7 +8,8 @@ static const std::string topicName("dart_markers");
 
 int main(int argc, char* argv[])
 {
-  dart::simulation::WorldPtr world = cozmo::createCozmo();
+  const std::string mesh_dir = "/home/vinitha910/workspaces/cozmo_workspace/src/cozmo_description/meshes";
+  dart::simulation::WorldPtr world = cozmo::createCozmo(mesh_dir);
   dart::dynamics::SkeletonPtr coz = world->getSkeleton("cozmo");
 
   // Start the RViz viewer.

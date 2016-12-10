@@ -10,7 +10,7 @@ namespace cozmo {
   
   void setGeometry(const BodyNodePtr& bn);
   BodyNodePtr makeRootBody(const SkeletonPtr& cozmo, const std::string& name);
-  WorldPtr createCozmo();
+  WorldPtr createCozmo(const std::string& mesh_dir);
 }
 
 #endif  // COZMO_COZMO_HPP_
