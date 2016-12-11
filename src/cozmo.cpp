@@ -2,21 +2,36 @@
 #include "Eigen/Dense"
 #include <cmath>
 
-namespace cozmo{
-  using BoxShape = dart::dynamics::BoxShape;
-  using MeshShape = dart::dynamics::MeshShape;
-  using FreeJoint = dart::dynamics::FreeJoint;
-  using Joint = dart::dynamics::Joint;
-  using RevoluteJoint = dart::dynamics::RevoluteJoint;
-  using VisualAspect = dart::dynamics::VisualAspect;
-  using CollisionAspect = dart::dynamics::CollisionAspect;
-  using DynamicsAspect = dart::dynamics::DynamicsAspect;
-  using Skeleton = dart::dynamics::Skeleton; 
-  using FixedFrame = dart::dynamics::FixedFrame;  
-  using World = dart::simulation::World;
-  using WeldJointConstraint = dart::constraint::WeldJointConstraint;
-  
-  BodyNodePtr makeRootBody(const SkeletonPtr& cozmo, const std::string& name, const std::string& mesh_dir)
+using BoxShape = dart::dynamics::BoxShape;
+using MeshShape = dart::dynamics::MeshShape;
+using FreeJoint = dart::dynamics::FreeJoint;
+using Joint = dart::dynamics::Joint;
+using RevoluteJoint = dart::dynamics::RevoluteJoint;
+using VisualAspect = dart::dynamics::VisualAspect;
+using CollisionAspect = dart::dynamics::CollisionAspect;
+using DynamicsAspect = dart::dynamics::DynamicsAspect;
+using Skeleton = dart::dynamics::Skeleton; 
+using FixedFrame = dart::dynamics::FixedFrame;  
+using World = dart::simulation::World;
+using WeldJointConstraint = dart::constraint::WeldJointConstraint;
+using JacobianNode = dart::dynamics::JacobianNode;
+using InverseKinematicsPtr = dart::dynamics::InverseKinematicsPtr;
+
+Cozmo::Cozmo(const std::string& mesh_dir){
+  createCozmo(mesh_dir);
+}
+
+bool Cozmo::setPosition(float pos) {
+  cozmo->getBodyNode("lower_forklift_strut_right_1")->getParentJoint()->setPosition(0, pos);
+  cozmo->getBodyNode("upper_forklift_strut_right")->getParentJoint()->setPosition(0, pos + 0.08);
+  cozmo->getBodyNode("lower_forklift_strut_left")->getParentJoint()->setPosition(0, pos);
+  cozmo->getBodyNode("upper_forklift_strut_left")->getParentJoint()->setPosition(0, pos + 0.08);
+  InverseKinematicsPtr IK = dart::dynamics::InverseKinematics::create(cozmo->getBodyNode("lower_forklift_strut_right_2"));
+  bool solved = IK->solve(true);
+  return solved;
+}  
+
+BodyNodePtr Cozmo::makeRootBody(const SkeletonPtr& cozmo, const std::string& name, const std::string& mesh_dir)
   {
     FreeJoint::Properties properties;
 
@@ -38,8 +53,8 @@ namespace cozmo{
     return bn;
   }
 
-  BodyNodePtr addBody(const SkeletonPtr& cozmo, BodyNodePtr parent, const std::string& name, const std::string& mesh_dir,
-		      Eigen::Vector3d transformFromParent, Eigen::Vector3d transformFromChild, Eigen::Vector3d color, float initPos)
+BodyNodePtr Cozmo::addBody(const SkeletonPtr& cozmo, BodyNodePtr parent, const std::string& name, const std::string& mesh_dir,
+	                   Eigen::Vector3d transformFromParent, Eigen::Vector3d transformFromChild, Eigen::Vector3d color, float initPos)
   {
     RevoluteJoint::Properties properties;
     properties.mName = name;
@@ -70,47 +85,45 @@ namespace cozmo{
     return bn;
   }
   
-  WorldPtr createCozmo(const std::string& mesh_dir)
+SkeletonPtr Cozmo::createCozmo(const std::string& mesh_dir)
   {
-    WorldPtr world(new World);
+    //WorldPtr world(new World);
 
     Eigen::Vector3d grey = Eigen::Vector3d(190/255., 190/255., 190/255.);
     Eigen::Vector3d red = Eigen::Vector3d(193/255., 24/255., 22/255.);
     Eigen::Vector3d white = Eigen::Vector3d(230/255., 230/255., 230/255.);
     
-    SkeletonPtr cozmo = Skeleton::create("cozmo");  
-    BodyNodePtr base = makeRootBody(cozmo, "body", mesh_dir);
-    BodyNodePtr head = addBody(cozmo, base, "head", mesh_dir, Eigen::Vector3d(0.03, 0.0615, 0.0385),
+    cozmo = Skeleton::create("cozmo");  
+    base = makeRootBody(cozmo, "body", mesh_dir);
+    head = addBody(cozmo, base, "head", mesh_dir, Eigen::Vector3d(0.03, 0.0615, 0.0385),
 			        Eigen::Vector3d(0.022, 0.02, 0.0), grey, 0.0);
   
-    BodyNodePtr upper_forklift_strut_left =
+    upper_forklift_strut_left =
       addBody(cozmo, base, "upper_forklift_strut_left", mesh_dir,
 	      Eigen::Vector3d(-0.004, 0.058, 0.0805), Eigen::Vector3d(0.003, 0.021, 0.0), white, 0.15);
   
-    BodyNodePtr upper_forklift_strut_right =
+    upper_forklift_strut_right =
       addBody(cozmo, base, "upper_forklift_strut_right", mesh_dir,
 	      Eigen::Vector3d(-0.004, 0.058, 0.0315), Eigen::Vector3d(0.003, 0.021, 0.0), white, 0.15);
   
-    BodyNodePtr lower_forklift_strut_left =
+    lower_forklift_strut_left =
       addBody(cozmo, base, "lower_forklift_strut_left", mesh_dir,
 	      Eigen::Vector3d(-0.004, 0.044, 0.0805), Eigen::Vector3d(0.006, 0.015, 0.0), white, 0.07);
   
-    BodyNodePtr lower_forklift_strut_right_1 =
+    lower_forklift_strut_right_1 =
       addBody(cozmo, base, "lower_forklift_strut_right_1", mesh_dir,
 	      Eigen::Vector3d(-0.004, 0.044, 0.0315), Eigen::Vector3d(0.006, 0.015, 0.0), white, 0.07);
   
-    BodyNodePtr forklift =
+    forklift =
       addBody(cozmo, upper_forklift_strut_right, "forklift", mesh_dir,
               Eigen::Vector3d(0.066, 0.001, 0.0032), Eigen::Vector3d(0.0028, 0.025, 0.0), red, -0.12);
 
-    BodyNodePtr lower_forklift_strut_right_2 =
+    lower_forklift_strut_right_2 =
       addBody(cozmo, forklift, "lower_forklift_strut_right_2", mesh_dir,
 	      Eigen::Vector3d(0.001, 0.014, 0.0), Eigen::Vector3d(0.0691, 0.0032, 0.0032), white, 0.04);
 
-    world->addSkeleton(cozmo);
-    auto constraint = std::make_shared<WeldJointConstraint>(lower_forklift_strut_right_1, lower_forklift_strut_right_2);
-
-    return world;
+    //world->addSkeleton(cozmo);
+    auto constraint = std::make_shared<WeldJointConstraint>(lower_forklift_strut_right_1, lower_forklift_strut_right_2);    
+    return cozmo;
   }
-}
-
+  

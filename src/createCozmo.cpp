@@ -9,31 +9,28 @@ static const std::string topicName("dart_markers");
 int main(int argc, char* argv[])
 {
   const std::string mesh_dir = "/home/vinitha910/workspaces/cozmo_workspace/src/cozmo_description/meshes";
-  dart::simulation::WorldPtr world = cozmo::createCozmo(mesh_dir);
-  dart::dynamics::SkeletonPtr coz = world->getSkeleton("cozmo");
-
+  Cozmo cozmo(mesh_dir);
+  
   // Start the RViz viewer.
   std::cout << "Starting ROS node." << std::endl;
   ros::init(argc, argv, "load_cozmo");
 
   std::cout << "Starting viewer. Please subscribe to the '" << topicName
 	    << "' InteractiveMarker topic in RViz." << std::endl;
+
   aikido::rviz::InteractiveMarkerViewer viewer(topicName);
-  viewer.addSkeleton(coz);
+  viewer.addSkeleton(cozmo.getCozmoSkeleton());
   viewer.setAutoUpdate(true);
 
   std::cout << "Press <Ctrl> + C to exit." << std::endl;
 
   std::cin.get();
 
-  coz->getBodyNode("lower_forklift_strut_right_1")->getParentJoint()->setPosition(0, M_PI/4);
-  coz->getBodyNode("upper_forklift_strut_right_1")->getParentJoint()->setPosition(0, M_PI/4 + 0.08);
-  coz->getBodyNode("lower_forklift_strut_left_1")->getParentJoint()->setPosition(0, M_PI/4);
-  coz->getBodyNode("upper_forklift_strut_left_1")->getParentJoint()->setPosition(0, M_PI/4 + 0.08);
+  bool solved = cozmo.setPosition(M_PI/4);
+  std::cout << "IK solved: " << solved << std::endl;
   
   std::cin.get();
 
-  world->getConstraintSolver()->solve();
   
   ros::spin();
 }
