@@ -21,14 +21,28 @@ Cozmo::Cozmo(const std::string& mesh_dir){
   createCozmo(mesh_dir);
 }
 
-bool Cozmo::setPosition(float pos) {
-  cozmo->getBodyNode("lower_forklift_strut_right_1")->getParentJoint()->setPosition(0, pos);
-  cozmo->getBodyNode("upper_forklift_strut_right")->getParentJoint()->setPosition(0, pos + 0.08);
-  cozmo->getBodyNode("lower_forklift_strut_left")->getParentJoint()->setPosition(0, pos);
-  cozmo->getBodyNode("upper_forklift_strut_left")->getParentJoint()->setPosition(0, pos + 0.08);
-  InverseKinematicsPtr IK = dart::dynamics::InverseKinematics::create(cozmo->getBodyNode("lower_forklift_strut_right_2"));
-  bool solved = IK->solve(true);
-  return solved;
+void Cozmo::setPosition(float pos) {
+  InverseKinematicsPtr ik = dart::dynamics::InverseKinematics::create(cozmo->getBodyNode("lower_forklift_strut_right_2"));
+  ik->useChain();
+  
+  lower_forklift_strut_right_1->getParentJoint()->setPosition(0, pos);
+  upper_forklift_strut_right->getParentJoint()->setPosition(0, pos + 0.08);
+  lower_forklift_strut_left->getParentJoint()->setPosition(0, pos);
+  upper_forklift_strut_left->getParentJoint()->setPosition(0, pos + 0.08);
+  
+  Eigen::Isometry3d goal_pose;
+  goal_pose = lower_forklift_strut_right_1->getTransform(base);
+  
+  // Solve IK
+  ik->getTarget()->setTransform(goal_pose, base);
+  Eigen::VectorXd ik_solution;
+  if (ik->solve(ik_solution, true)) {
+    std::cout << "IK solution found!\n";
+    std::cout << ik_solution.head(3) << std::endl;
+  } else {
+    std::cout << "No IK solution found" << std::endl;
+  }
+
 }  
 
 BodyNodePtr Cozmo::makeRootBody(const SkeletonPtr& cozmo, const std::string& name, const std::string& mesh_dir)

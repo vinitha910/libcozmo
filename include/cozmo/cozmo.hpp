@@ -27,7 +27,7 @@ private:
   
 public:
   Cozmo(const std::string& mesh_dir);
-  bool setPosition(float pos);
+  void setPosition(float pos);
   SkeletonPtr getCozmoSkeleton() { return cozmo; };
 };
 

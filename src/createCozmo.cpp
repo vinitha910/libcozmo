@@ -26,8 +26,7 @@ int main(int argc, char* argv[])
 
   std::cin.get();
 
-  bool solved = cozmo.setPosition(M_PI/4);
-  std::cout << "IK solved: " << solved << std::endl;
+  cozmo.setPosition(M_PI/6);
   
   std::cin.get();
 
