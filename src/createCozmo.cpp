@@ -30,6 +30,13 @@ int main(int argc, char* argv[])
   
   std::cin.get();
 
+  cozmo.setPosition(M_PI/5);
+  
+  std::cin.get();
+
+  cozmo.setPosition(M_PI/4);
+  
+  std::cin.get();
   
   ros::spin();
 }
