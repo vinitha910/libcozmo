@@ -41,6 +41,10 @@ add_executable(createCozmo
   src/createCozmo.cpp
 )
 
+add_executable(dart_example
+  src/dart_example.cpp
+)  
+
 target_include_directories(createCozmo PRIVATE
   ${catkin_INCLUDE_DIRS}
   ${aikido_INCLUDE_DIRS}
@@ -52,3 +56,6 @@ target_link_libraries(createCozmo
   ${aikido_LIBRARIES}
 )
 
+target_link_libraries(dart_example
+  cozmo
+)

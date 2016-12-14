@@ -5,7 +5,7 @@
 
 using BodyNodePtr = dart::dynamics::BodyNodePtr;
 using SkeletonPtr = dart::dynamics::SkeletonPtr;
-//using WorldPtr = dart::dynamics::WorldPtr;
+using InverseKinematicsPtr = dart::dynamics::InverseKinematicsPtr;
 
 class Cozmo
 {
@@ -15,19 +15,21 @@ private:
   BodyNodePtr base;
   BodyNodePtr forklift;
   BodyNodePtr lower_forklift_strut_left;
-  BodyNodePtr lower_forklift_strut_right_1;
-  BodyNodePtr lower_forklift_strut_right_2;
+  BodyNodePtr lower_forklift_strut_right;
+  BodyNodePtr ghost_strut;
   BodyNodePtr upper_forklift_strut_left;
   BodyNodePtr upper_forklift_strut_right;
+  InverseKinematicsPtr ik;
   
   BodyNodePtr makeRootBody(const SkeletonPtr& cozmo, const std::string& name, const std::string& mesh_dir);
   BodyNodePtr addBody(const SkeletonPtr& cozmo, BodyNodePtr parent, const std::string& name, const std::string& mesh_dir,
-	              Eigen::Vector3d transformFromParent, Eigen::Vector3d transformFromChild, Eigen::Vector3d color, float initPos);
+	              Eigen::Vector3d transformFromParent, Eigen::Vector3d transformFromChild);
   SkeletonPtr createCozmo(const std::string& mesh_dir);
+  void createIKModule();
   
 public:
   Cozmo(const std::string& mesh_dir);
-  void setPosition(float pos);
+  void setPosition(double pos);
   SkeletonPtr getCozmoSkeleton() { return cozmo; };
 };
 

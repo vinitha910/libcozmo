@@ -8,7 +8,12 @@ static const std::string topicName("dart_markers");
 
 int main(int argc, char* argv[])
 {
-  const std::string mesh_dir = "/home/vinitha910/workspaces/cozmo_workspace/src/cozmo_description/meshes";
+  if (argc < 2) {
+    std::cerr << "Please include the path to the mesh directory" << std::endl;
+    return 0;
+  }
+
+  const std::string mesh_dir = argv[1];
   Cozmo cozmo(mesh_dir);
   
   // Start the RViz viewer.
@@ -22,21 +27,18 @@ int main(int argc, char* argv[])
   viewer.addSkeleton(cozmo.getCozmoSkeleton());
   viewer.setAutoUpdate(true);
 
-  std::cout << "Press <Ctrl> + C to exit." << std::endl;
+  double input;
+  do {
+    std::cout << "\nEnter forklift position (0-0.86 radians, -1 to quit): ";
+    std::cin >> input;
+    if (input > 0.86 || input < 0) {
+      std::cout << "\nThis value exceeds the joint limits, please enter a valid position" << std::endl;
+      continue;
+    }
+    cozmo.setPosition(input);
+  } while (input != -1.0);
 
-  std::cin.get();
-
-  cozmo.setPosition(M_PI/6);
-  
-  std::cin.get();
-
-  cozmo.setPosition(M_PI/5);
-  
-  std::cin.get();
-
-  cozmo.setPosition(M_PI/4);
-  
-  std::cin.get();
+  return 0;
   
   ros::spin();
 }
