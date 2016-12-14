@@ -1,9 +1,8 @@
 <package>
-    <name>cozmo_description</name>
+    <name>libcozmo</name>
     <version>0.0.1</version>
     <description>
-        This package contains a model of Cozmo, a mobile manipulator
-	designed and developed by Anki.
+        C++ library for simulating and running Cozmo based on DART and AIKIDO.
     </description>
     <maintainer email="vrangane@andrew.cmu.edu">Vinitha Ranganeni</maintainer>
     <author email="vrangane@andrew.cmu.edu">Vinitha Ranganeni</author>

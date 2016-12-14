@@ -1,4 +1,4 @@
-# libcozmo DART Library
+# libcozmo
 libcozmo is a C++ library for simulating and running Cozmo based on DART and AIKIDO.
 Current tools allow you simulate the forklift movement.
 
@@ -23,15 +23,23 @@ instructions with this `.rosinstall` file:
     version: master
 ```
 ## Usage
-To load Cozmo into the rviz viewer, run the following command:
+To load Cozmo into the Rviz viewer, run the following commands:
 ```shell
-$ rosrun cozmo_description createCozmo MESH_DIR
+$ cd libcozmo
+$ screen -S roscore
+$ roscore
+$ <CTRL><A>+<D>
+$ screen -S rviz
+$ . devel/setup.bash
+$ rviz
+$ <CTRL><A>+<D>
+$ rosrun cozmo_description rviz_example MESH_DIR
 ```
-where `MESH_DIR` is the path to the mesh directory. This script allows you
-to enter angles (in radians) for the forklift position and the movement will
-be reflected by the robot in the viewer.
+where `MESH_DIR` is the path to the mesh directory. After all the commands are run, subscribe to the InteractiveMarker topic in Rviz. Cozmo should now appear in the viewer.
 
 Similarily, to load Cozmo the in DART viewer, run the following command (currently not working):
 ```shell
 $ rosrun cozmo_description dart_example MESH_DIR
 ```
+
+These scripts allows you to enter angles (in radians) for the forklift position and the movement will be reflected by the robot in the viewer.

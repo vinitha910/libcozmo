@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.12)
-project(cozmo_description)
+project(libcozmo)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
@@ -37,20 +37,20 @@ target_link_libraries(cozmo PUBLIC
   ${DART_LIBRARIES}
 )
 
-add_executable(createCozmo
-  src/createCozmo.cpp
+add_executable(rviz_example
+  src/rviz_example.cpp
 )
 
 add_executable(dart_example
   src/dart_example.cpp
 )  
 
-target_include_directories(createCozmo PRIVATE
+target_include_directories(rviz_example PRIVATE
   ${catkin_INCLUDE_DIRS}
   ${aikido_INCLUDE_DIRS}
 )
 
-target_link_libraries(createCozmo
+target_link_libraries(rviz_example
   cozmo
   ${catkin_LIBRARIES}
   ${aikido_LIBRARIES}
