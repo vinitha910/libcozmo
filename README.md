@@ -33,13 +33,13 @@ $ screen -S rviz
 $ . devel/setup.bash
 $ rviz
 $ <CTRL><A>+<D>
-$ rosrun cozmo_description rviz_example MESH_DIR
+$ rosrun libcozmo rviz_example MESH_DIR
 ```
 where `MESH_DIR` is the path to the `libcozmo/meshes` folder. After all the commands are run, subscribe to the InteractiveMarker topic in Rviz. Cozmo should now appear in the viewer.
 
 Similarily, to load Cozmo the in DART viewer, run the following command:
 ```shell
-$ rosrun cozmo_description dart_example MESH_DIR
+$ rosrun libcozmo dart_example MESH_DIR
 ```
 
 These scripts allows you to enter angles (in radians) for the forklift position and the movement will be reflected by the robot in the viewer.

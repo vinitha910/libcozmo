@@ -14,9 +14,9 @@ private:
   BodyNodePtr head;
   BodyNodePtr base;
   BodyNodePtr forklift;
+  BodyNodePtr ghost_strut;
   BodyNodePtr lower_forklift_strut_left;
   BodyNodePtr lower_forklift_strut_right;
-  BodyNodePtr ghost_strut;
   BodyNodePtr upper_forklift_strut_left;
   BodyNodePtr upper_forklift_strut_right;
   InverseKinematicsPtr ik;

@@ -19,7 +19,7 @@ void Cozmo::createIKModule() {
   ik = dart::dynamics::InverseKinematics::create(ghost_strut);
   ik->useChain();
 }
-  
+    
 void Cozmo::setPosition(double pos) {
   lower_forklift_strut_right->getParentJoint()->setPosition(0, pos);
   upper_forklift_strut_right->getParentJoint()->setPosition(0, pos + 0.08);
@@ -119,7 +119,7 @@ SkeletonPtr Cozmo::createCozmo(const std::string& mesh_dir)
               Eigen::Vector3d(0.066, 0.001, 0.0032), Eigen::Vector3d(0.0028, 0.025, 0.0));
 
     ghost_strut =
-      addBody(cozmo, forklift, "ghost_strut", mesh_dir,
+      addBody(cozmo, forklift, "lower_forklift_strut_ghost", mesh_dir,
 	      Eigen::Vector3d(0.003, 0.01, 0.0), Eigen::Vector3d(0.0691, 0.0032, 0.0032));
 
     createIKModule();
