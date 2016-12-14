@@ -2,6 +2,7 @@
 #include "dart/dart.hpp"
 #include "dart/gui/gui.hpp"
 #include "ros/ros.h"
+#include <cstdlib>
 #include <aikido/rviz/InteractiveMarkerViewer.hpp>
 
 static const std::string topicName("dart_markers");
@@ -14,7 +15,7 @@ int main(int argc, char* argv[])
   }
 
   const std::string mesh_dir = argv[1];
-  Cozmo cozmo(mesh_dir);
+  libcozmo::Cozmo cozmo(mesh_dir);
   
   // Start the RViz viewer.
   std::cout << "Starting ROS node." << std::endl;
@@ -27,18 +28,23 @@ int main(int argc, char* argv[])
   viewer.addSkeleton(cozmo.getCozmoSkeleton());
   viewer.setAutoUpdate(true);
 
-  double input;
+  std::string input;
+  double i = 0;
   do {
     std::cout << "\nEnter forklift position (0-0.86 radians, -1 to quit): ";
     std::cin >> input;
-    if (input > 0.86 || input < 0) {
-      std::cout << "\nThis value exceeds the joint limits, please enter a valid position" << std::endl;
+    char* end;
+    i = std::strtod(input.c_str(), &end);
+    if (end == input.c_str()) {
+      std::cout << "\nPlease enter a valid double." << std::endl;
       continue;
     }
-    cozmo.setPosition(input);
-  } while (input != -1.0);
+    if (i > 0.86 || i < 0) {
+      std::cout << "\nThis value exceeds the joint limits, please enter a valid position." << std::endl;
+      continue;
+    }
+    cozmo.setForkliftPosition(i);
+  } while (i != -1.0);
 
   return 0;
-  
-  ros::spin();
 }

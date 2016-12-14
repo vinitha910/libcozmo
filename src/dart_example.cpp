@@ -12,7 +12,7 @@ int main(int argc, char* argv[])
   }
 
   const std::string mesh_dir = argv[1];
-  Cozmo cozmo(mesh_dir);
+  libcozmo::Cozmo cozmo(mesh_dir);
 
   dart::dynamics::SkeletonPtr coz = cozmo.getCozmoSkeleton();
   WorldPtr world(new dart::simulation::World);

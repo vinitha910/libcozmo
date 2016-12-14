@@ -2,6 +2,7 @@
 #include "Eigen/Dense"
 #include <cmath>
 
+namespace libcozmo{
 using BoxShape = dart::dynamics::BoxShape;
 using MeshShape = dart::dynamics::MeshShape;
 using FreeJoint = dart::dynamics::FreeJoint;
@@ -20,7 +21,7 @@ void Cozmo::createIKModule() {
   ik->useChain();
 }
     
-void Cozmo::setPosition(double pos) {
+void Cozmo::setForkliftPosition(double pos) {
   lower_forklift_strut_right->getParentJoint()->setPosition(0, pos);
   upper_forklift_strut_right->getParentJoint()->setPosition(0, pos + 0.08);
   lower_forklift_strut_left->getParentJoint()->setPosition(0, pos);
@@ -39,14 +40,19 @@ void Cozmo::setPosition(double pos) {
   } 
 }  
 
-BodyNodePtr Cozmo::makeRootBody(const SkeletonPtr& cozmo, const std::string& name, const std::string& mesh_dir)
+BodyNodePtr Cozmo::makeRootBody(const SkeletonPtr& cozmo,
+				const std::string& mesh_name,
+				const std::string& mesh_dir)
   {
     FreeJoint::Properties properties;
 
-    BodyNodePtr bn = cozmo->createJointAndBodyNodePair<FreeJoint>(nullptr, properties, 
-								  dart::dynamics::BodyNode::AspectProperties(name)).second;
+    BodyNodePtr bn = cozmo->createJointAndBodyNodePair<FreeJoint>(nullptr,
+								  properties, 
+								  dart::dynamics::BodyNode::AspectProperties(mesh_name)).second;
 
-    std::shared_ptr<MeshShape> base(new MeshShape(Eigen::Vector3d(1., 1., 1.), MeshShape::loadMesh(mesh_dir + "/cozmo_base.STL")));
+    std::shared_ptr<MeshShape> base(new MeshShape(Eigen::Vector3d(1., 1., 1.),
+						  MeshShape::loadMesh(mesh_dir + "/cozmo_base.STL")));
+    
     auto shapeNode = bn->createShapeNodeWith<VisualAspect>(std::static_pointer_cast<dart::dynamics::Shape>(base));
   
     Eigen::Isometry3d tf = Eigen::Isometry3d::Identity();
@@ -61,20 +67,29 @@ BodyNodePtr Cozmo::makeRootBody(const SkeletonPtr& cozmo, const std::string& nam
     return bn;
   }
 
-BodyNodePtr Cozmo::addBody(const SkeletonPtr& cozmo, BodyNodePtr parent, const std::string& name, const std::string& mesh_dir,
-	                   Eigen::Vector3d transformFromParent, Eigen::Vector3d transformFromChild)
+BodyNodePtr Cozmo::addBody(const SkeletonPtr& cozmo,
+			   BodyNodePtr parent,
+			   const std::string& mesh_name,
+			   const std::string& mesh_dir,
+	                   Eigen::Vector3d transformFromParent,
+			   Eigen::Vector3d transformFromChild)
   {
     RevoluteJoint::Properties properties;
-    properties.mName = name;
+    properties.mName = mesh_name;
     
-    auto joint_bn = cozmo->createJointAndBodyNodePair<RevoluteJoint>(parent, properties,
-								     dart::dynamics::BodyNode::AspectProperties(name));
+    auto joint_bn = cozmo->createJointAndBodyNodePair<RevoluteJoint>(parent,
+								     properties,
+								     dart::dynamics::BodyNode::AspectProperties(mesh_name));
     auto bn = joint_bn.second;
     auto joint = joint_bn.first;
 
-    const std::string& filepath = mesh_dir + "/"  + name.substr(0,20) + ".STL";
+    // Assumes that all mesh file names are at most 20 characters
+    // Pulls the file name out of the longer body node name and creates file path 
+    const std::string& filepath = mesh_dir + "/"  + mesh_name.substr(0,20) + ".STL";
     
-    std::shared_ptr<MeshShape> child(new MeshShape(Eigen::Vector3d(1., 1., 1.), MeshShape::loadMesh(filepath)));
+    std::shared_ptr<MeshShape> child(new MeshShape(Eigen::Vector3d(1., 1., 1.),
+						   MeshShape::loadMesh(filepath)));
+
     auto shapeNode = bn->createShapeNodeWith<VisualAspect>(std::static_pointer_cast<dart::dynamics::Shape>(child));
 
     Eigen::Isometry3d tf = Eigen::Isometry3d::Identity();
@@ -95,36 +110,61 @@ SkeletonPtr Cozmo::createCozmo(const std::string& mesh_dir)
   {
     cozmo = Skeleton::create("cozmo");  
     base = makeRootBody(cozmo, "body", mesh_dir);
-    head = addBody(cozmo, base, "head", mesh_dir, Eigen::Vector3d(0.03, 0.0615, 0.0385),
-			        Eigen::Vector3d(0.022, 0.02, 0.0));
+    head = addBody(cozmo,
+		   base,
+		   "head",
+		   mesh_dir,
+		   Eigen::Vector3d(0.03, 0.0615, 0.0385),
+		   Eigen::Vector3d(0.022, 0.02, 0.0));
   
-    upper_forklift_strut_left =
-      addBody(cozmo, base, "upper_forklift_strut_left", mesh_dir,
-	      Eigen::Vector3d(-0.0045, 0.058, 0.0805), Eigen::Vector3d(0.003, 0.021, 0.0));
+    upper_forklift_strut_left = addBody(cozmo,
+					base,
+					"upper_forklift_strut_left",
+					mesh_dir,
+					Eigen::Vector3d(-0.0045, 0.058, 0.0805),
+					Eigen::Vector3d(0.003, 0.021, 0.0));
   
-    upper_forklift_strut_right =
-      addBody(cozmo, base, "upper_forklift_strut_right", mesh_dir,
-	      Eigen::Vector3d(-0.0045, 0.058, 0.0315), Eigen::Vector3d(0.003, 0.021, 0.0));
+    upper_forklift_strut_right = addBody(cozmo,
+					 base,
+					 "upper_forklift_strut_right",
+					 mesh_dir,
+					 Eigen::Vector3d(-0.0045, 0.058, 0.0315),
+					 Eigen::Vector3d(0.003, 0.021, 0.0));
   
-    lower_forklift_strut_left =
-      addBody(cozmo, base, "lower_forklift_strut_left", mesh_dir,
-	      Eigen::Vector3d(-0.0025, 0.044, 0.0805), Eigen::Vector3d(0.006, 0.015, 0.0));
+    lower_forklift_strut_left = addBody(cozmo,
+					base,
+					"lower_forklift_strut_left",
+					mesh_dir,
+					Eigen::Vector3d(-0.0025, 0.044, 0.0805),
+					Eigen::Vector3d(0.006, 0.015, 0.0));
   
-    lower_forklift_strut_right =
-      addBody(cozmo, base, "lower_forklift_strut_right", mesh_dir,
-	      Eigen::Vector3d(-0.0025, 0.044, 0.0315), Eigen::Vector3d(0.006, 0.015, 0.0));
+    lower_forklift_strut_right = addBody(cozmo,
+					 base,
+					 "lower_forklift_strut_right",
+					 mesh_dir,
+					 Eigen::Vector3d(-0.0025, 0.044, 0.0315),
+					 Eigen::Vector3d(0.006, 0.015, 0.0));
   
-    forklift =
-      addBody(cozmo, upper_forklift_strut_right, "forklift", mesh_dir,
-              Eigen::Vector3d(0.066, 0.001, 0.0032), Eigen::Vector3d(0.0028, 0.025, 0.0));
+    forklift = addBody(cozmo,
+		       upper_forklift_strut_right,
+		       "forklift",
+		       mesh_dir,
+		       Eigen::Vector3d(0.066, 0.001, 0.0032),
+		       Eigen::Vector3d(0.0028, 0.025, 0.0));
 
-    ghost_strut =
-      addBody(cozmo, forklift, "lower_forklift_strut_ghost", mesh_dir,
-	      Eigen::Vector3d(0.003, 0.01, 0.0), Eigen::Vector3d(0.0691, 0.0032, 0.0032));
+    // We solve IK in the setForkliftPosition to make this strut exactly
+    // match lower_forklift_strut_right in order to compensate for the
+    // inability to model closed chains 
+    ghost_strut = addBody(cozmo,
+			  forklift,
+			  "lower_forklift_strut_ghost",
+			  mesh_dir,
+			  Eigen::Vector3d(0.003, 0.01, 0.0),
+			  Eigen::Vector3d(0.0691, 0.0032, 0.0032));
 
     createIKModule();
-    setPosition(0.0);
+    setForkliftPosition(0.0);
     
     return cozmo;
   }
-  
+}  
