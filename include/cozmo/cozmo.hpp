@@ -3,12 +3,18 @@
 
 #include "dart/dart.hpp"
 
+namespace libcozmo {
 using BodyNodePtr = dart::dynamics::BodyNodePtr;
 using SkeletonPtr = dart::dynamics::SkeletonPtr;
 using InverseKinematicsPtr = dart::dynamics::InverseKinematicsPtr;
 
 class Cozmo
 {
+public:
+  Cozmo(const std::string& mesh_dir);
+  void setForkliftPosition(double pos);
+  SkeletonPtr getCozmoSkeleton() { return cozmo; };
+
 private:
   SkeletonPtr cozmo;
   BodyNodePtr head;
@@ -26,11 +32,6 @@ private:
 	              Eigen::Vector3d transformFromParent, Eigen::Vector3d transformFromChild);
   SkeletonPtr createCozmo(const std::string& mesh_dir);
   void createIKModule();
-  
-public:
-  Cozmo(const std::string& mesh_dir);
-  void setPosition(double pos);
-  SkeletonPtr getCozmoSkeleton() { return cozmo; };
 };
-
+}
 #endif  // COZMO_COZMO_HPP_
