@@ -124,8 +124,6 @@ SkeletonPtr Cozmo::createCozmo(const std::string& mesh_dir)
 
     createIKModule();
     setPosition(0.0);
-
-    // auto constraint = std::make_shared<WeldJointConstraint>(lower_forklift_strut_right, ghost_strut);
     
     return cozmo;
   }
