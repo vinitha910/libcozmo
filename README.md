@@ -3,8 +3,7 @@ libcozmo is a C++ library for simulating and running [Cozmo](https://anki.com/en
 Current tools allow you simulate the forklift movement.
 
 ## Installation
-Checkout and build this package, [DART](https://github.com/dartsim/dart.git) (version 6.0 or above)
-and [aikido](https://github.com/personalrobotics/aikido.git) from source. You
+Checkout and build this package, [aikido](https://github.com/personalrobotics/aikido.git) from source, and install [DART](http://dartsim.github.io/) (version 6.0 or above). You
 can automate the checkout and build by following [development environment]
 (https://www.personalrobotics.ri.cmu.edu/software/development-environment)
 instructions with this `.rosinstall` file:
@@ -13,10 +12,6 @@ instructions with this `.rosinstall` file:
     local-name: aikido
     uri: https://github.com/personalrobotics/aikido.git
     version: xenial_fixes
-- git:
-    local-name: dart
-    uri: https://github.com/dartsim/dart.git
-    version: release-6.0
 - git:
     local-name: cozmo_description
     uri: https://github.com/personalrobotics/cozmo_description.git
@@ -37,7 +32,7 @@ $ rviz
 $ <CTRL><A>+<D>
 $ `catkin locate -b libcozmo`/rviz_example `catkin locate -s libcozmo`/meshes
 ```
-where `MESH_DIR` is the path to the `libcozmo/meshes` folder. After all the commands are run, subscribe to the InteractiveMarker topic in Rviz. Cozmo should now appear in the viewer.
+After all the commands are run, subscribe to the InteractiveMarker topic in Rviz. Cozmo should now appear in the viewer.
 
 This script allows you to enter angles (in radians) for the forklift position; the movement will be reflected by the robot in the viewer.
 
