@@ -1,5 +1,5 @@
-# LibCozmo DART Library
-LibCozmo is C++ library that creates and loads the Cozmo, a robot developed by Anki, into the DART Simulator.
+# libcozmo DART Library
+libcozmo is a C++ library for simulating and running Cozmo based on DART and AIKIDO.
 Current tools allow you simulate the forklift movement.
 
 ## Installation
