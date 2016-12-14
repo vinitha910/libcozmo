@@ -1,4 +1,4 @@
-<package>
+<package format="2">
     <name>libcozmo</name>
     <version>0.0.1</version>
     <description>
@@ -7,5 +7,13 @@
     <maintainer email="vrangane@andrew.cmu.edu">Vinitha Ranganeni</maintainer>
     <author email="vrangane@andrew.cmu.edu">Vinitha Ranganeni</author>
     <license>BSD</license>
-    <buildtool_depend>catkin</buildtool_depend>
+
+    <depend>aikido</depend>
+    <depend>dart</depend>
+    <depend>eigen</depend>
+
+    <buildtool_depend>cmake</buildtool_depend>
+    <export>
+      <build_type>cmake</build_type>
+    </export>
 </package>
