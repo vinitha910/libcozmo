@@ -25,6 +25,8 @@ instructions with this `.rosinstall` file:
 ## Usage
 To load Cozmo into the Rviz viewer, run the following commands:
 ```shell
+$ catkin build libcozmo
+$ . devel/setup.bash
 $ cd libcozmo
 $ screen -S roscore
 $ roscore
@@ -33,7 +35,7 @@ $ screen -S rviz
 $ . devel/setup.bash
 $ rviz
 $ <CTRL><A>+<D>
-$ rosrun libcozmo rviz_example MESH_DIR
+$ `catkin locate -b libcozmo`/rviz_example `catkin locate -s libcozmo`/meshes
 ```
 where `MESH_DIR` is the path to the `libcozmo/meshes` folder. After all the commands are run, subscribe to the InteractiveMarker topic in Rviz. Cozmo should now appear in the viewer.
 
@@ -41,7 +43,12 @@ This script allows you to enter angles (in radians) for the forklift position; t
 
 Similarily, to load Cozmo the in DART viewer, run the following command:
 ```shell
-$ rosrun libcozmo dart_example MESH_DIR
+$ cd libcozmo
+$ mkdir build
+$ cd build
+$ cmake .. -DCOZMO_BUILD_RVIZ_EXAMPLE=OFF # e.g. if ros/aikido not available 
+$ make
+$ ./dart_example `pwd`/../meshes
 ```
 
 ## License
