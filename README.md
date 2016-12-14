@@ -18,7 +18,7 @@ instructions with this `.rosinstall` file:
     version: master
 ```
 ## Usage
-To load Cozmo into the Rviz viewer, run the following commands:
+To load Cozmo into the Rviz viewer in a catkin and ros environment, run the following commands:
 ```shell
 $ catkin build libcozmo
 $ . devel/setup.bash
@@ -36,7 +36,7 @@ After all the commands are run, subscribe to the InteractiveMarker topic in Rviz
 
 This script allows you to enter angles (in radians) for the forklift position; the movement will be reflected by the robot in the viewer.
 
-Similarily, to load Cozmo the in DART viewer, run the following command:
+To load Cozmo in the DART viewer in a non-catkin environment, run the following commands:
 ```shell
 $ cd libcozmo
 $ mkdir build
