@@ -35,7 +35,7 @@ $ rviz
 $ <CTRL><A>+<D>
 $ rosrun cozmo_description rviz_example MESH_DIR
 ```
-where `MESH_DIR` is the path to the mesh directory. After all the commands are run, subscribe to the InteractiveMarker topic in Rviz. Cozmo should now appear in the viewer.
+where `MESH_DIR` is the path to the `libcozmo/meshes` folder. After all the commands are run, subscribe to the InteractiveMarker topic in Rviz. Cozmo should now appear in the viewer.
 
 Similarily, to load Cozmo the in DART viewer, run the following command (currently not working):
 ```shell

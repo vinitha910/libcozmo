@@ -46,7 +46,7 @@ BodyNodePtr Cozmo::makeRootBody(const SkeletonPtr& cozmo, const std::string& nam
     BodyNodePtr bn = cozmo->createJointAndBodyNodePair<FreeJoint>(nullptr, properties, 
 								  dart::dynamics::BodyNode::AspectProperties(name)).second;
 
-    std::shared_ptr<MeshShape> base(new MeshShape(Eigen::Vector3d(0., 0., 0.), MeshShape::loadMesh(mesh_dir + "/cozmo_base.STL")));
+    std::shared_ptr<MeshShape> base(new MeshShape(Eigen::Vector3d(1., 1., 1.), MeshShape::loadMesh(mesh_dir + "/cozmo_base.STL")));
     auto shapeNode = bn->createShapeNodeWith<VisualAspect>(std::static_pointer_cast<dart::dynamics::Shape>(base));
   
     Eigen::Isometry3d tf = Eigen::Isometry3d::Identity();
@@ -74,7 +74,7 @@ BodyNodePtr Cozmo::addBody(const SkeletonPtr& cozmo, BodyNodePtr parent, const s
 
     const std::string& filepath = mesh_dir + "/"  + name.substr(0,20) + ".STL";
     
-    std::shared_ptr<MeshShape> child(new MeshShape(Eigen::Vector3d(0., 0., 0.), MeshShape::loadMesh(filepath)));
+    std::shared_ptr<MeshShape> child(new MeshShape(Eigen::Vector3d(1., 1., 1.), MeshShape::loadMesh(filepath)));
     auto shapeNode = bn->createShapeNodeWith<VisualAspect>(std::static_pointer_cast<dart::dynamics::Shape>(child));
 
     Eigen::Isometry3d tf = Eigen::Isometry3d::Identity();
