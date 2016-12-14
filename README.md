@@ -32,11 +32,11 @@ $ rviz
 $ <CTRL><A>+<D>
 $ `catkin locate -b libcozmo`/rviz_example `catkin locate -s libcozmo`/meshes
 ```
-After all the commands are run, subscribe to the InteractiveMarker topic in Rviz. Cozmo should now appear in the viewer.
+After all the commands are run, subscribe to the InteractiveMarker 'dart_markers' topic in Rviz. Cozmo should now appear in the viewer.
 
 This script allows you to enter angles (in radians) for the forklift position; the movement will be reflected by the robot in the viewer.
 
-To load Cozmo in the DART viewer in a non-catkin environment, run the following commands:
+To load Cozmo in the DART viewer in a non-catkin/ros environment, run the following commands:
 ```shell
 $ cd libcozmo
 $ mkdir build
