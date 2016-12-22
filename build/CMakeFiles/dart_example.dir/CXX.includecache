@@ -1,0 +1,20 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../include/cozmo/cozmo.hpp
+dart/dart.hpp
+../include/cozmo/dart/dart.hpp
+
+/home/vinitha910/workspaces/cozmo_workspace/src/libcozmo/src/dart_example.cpp
+cozmo/cozmo.hpp
+/home/vinitha910/workspaces/cozmo_workspace/src/libcozmo/src/cozmo/cozmo.hpp
+dart/dart.hpp
+/home/vinitha910/workspaces/cozmo_workspace/src/libcozmo/src/dart/dart.hpp
+dart/gui/gui.hpp
+/home/vinitha910/workspaces/cozmo_workspace/src/libcozmo/src/dart/gui/gui.hpp
+

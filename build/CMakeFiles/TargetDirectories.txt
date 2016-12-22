@@ -1,0 +1,8 @@
+/home/vinitha910/workspaces/cozmo_workspace/src/libcozmo/build/CMakeFiles/install.dir
+/home/vinitha910/workspaces/cozmo_workspace/src/libcozmo/build/CMakeFiles/list_install_components.dir
+/home/vinitha910/workspaces/cozmo_workspace/src/libcozmo/build/CMakeFiles/edit_cache.dir
+/home/vinitha910/workspaces/cozmo_workspace/src/libcozmo/build/CMakeFiles/rebuild_cache.dir
+/home/vinitha910/workspaces/cozmo_workspace/src/libcozmo/build/CMakeFiles/cozmo.dir
+/home/vinitha910/workspaces/cozmo_workspace/src/libcozmo/build/CMakeFiles/dart_example.dir
+/home/vinitha910/workspaces/cozmo_workspace/src/libcozmo/build/CMakeFiles/install/strip.dir
+/home/vinitha910/workspaces/cozmo_workspace/src/libcozmo/build/CMakeFiles/install/local.dir

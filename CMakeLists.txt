@@ -18,15 +18,15 @@ target_include_directories(cozmo PUBLIC
 )
 
 target_include_directories(cozmo PRIVATE
-  ${DART_INCLUDE_DIRS}
+  ${DART_INCLUDE_DIRS}  
 )
 
 target_include_directories(cozmo PUBLIC
-  ${EIGEN3_INCLUDE_DIR}
+  ${EIGEN3_INCLUDE_DIR}  
 )
 
 target_link_libraries(cozmo PUBLIC
-  ${DART_LIBRARIES}
+  ${DART_LIBRARIES} 
 )
 
 
@@ -42,7 +42,8 @@ target_link_libraries(dart_example
 if(COZMO_BUILD_RVIZ_EXAMPLE)
   find_package(roscpp)
   find_package(aikido REQUIRED COMPONENTS rviz)
-
+  find_package(PythonLibs REQUIRED)
+  
   add_executable(rviz_example
     src/rviz_example.cpp
   )
@@ -57,6 +58,29 @@ if(COZMO_BUILD_RVIZ_EXAMPLE)
     ${aikido_LIBRARIES}
     ${roscpp_LIBRARIES}
   )
+
+  add_executable(sim_example
+    src/sim_example.cpp
+  )
+
+  target_include_directories(sim_example PRIVATE
+    ${aikido_INCLUDE_DIRS}
+    ${roscpp_INCLUDE_DIRS}
+    ${PYTHON_INCLUDE_DIRS} 
+  )
+
+  target_include_directories(sim_example PUBLIC
+    ${PYTHON_INCLUDE_DIRS}  
+  )
+
+  target_link_libraries(sim_example
+    cozmo
+    ${aikido_LIBRARIES}
+    ${roscpp_LIBRARIES}
+    ${PYTHON_INCLUDE_DIRS}  
+  )
+
+
 endif()
 
 
