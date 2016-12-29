@@ -43,7 +43,7 @@ add_library(cozmo SHARED IMPORTED)
 
 set_target_properties(cozmo PROPERTIES
   INTERFACE_INCLUDE_DIRECTORIES "/home/vinitha910/workspaces/cozmo_workspace/src/libcozmo/include;/usr/include/eigen3"
-  INTERFACE_LINK_LIBRARIES "dart-gui;dart-collision-bullet;dart;dart-gui;dart-collision-bullet;dart;dart-gui;dart-collision-bullet;dart"
+  INTERFACE_LINK_LIBRARIES "dart-gui;dart-collision-bullet;dart"
 )
 
 # Import target "cozmo" for configuration ""

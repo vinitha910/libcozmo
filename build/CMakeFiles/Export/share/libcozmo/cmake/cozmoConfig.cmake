@@ -49,7 +49,7 @@ add_library(cozmo SHARED IMPORTED)
 
 set_target_properties(cozmo PROPERTIES
   INTERFACE_INCLUDE_DIRECTORIES "${_IMPORT_PREFIX}/include;/usr/include/eigen3"
-  INTERFACE_LINK_LIBRARIES "dart-gui;dart-collision-bullet;dart;dart-gui;dart-collision-bullet;dart;dart-gui;dart-collision-bullet;dart"
+  INTERFACE_LINK_LIBRARIES "dart-gui;dart-collision-bullet;dart"
 )
 
 if(CMAKE_VERSION VERSION_LESS 2.8.12)

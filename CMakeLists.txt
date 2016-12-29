@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.12)
 project(libcozmo)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -I/usr/include/python3.5m")
 
 option(COZMO_BUILD_RVIZ_EXAMPLE "Build the RViz viewer integration example" ON)
 
@@ -42,7 +42,7 @@ target_link_libraries(dart_example
 if(COZMO_BUILD_RVIZ_EXAMPLE)
   find_package(roscpp)
   find_package(aikido REQUIRED COMPONENTS rviz)
-  find_package(PythonLibs REQUIRED)
+  find_package(PythonLibs 3.5 REQUIRED)
   
   add_executable(rviz_example
     src/rviz_example.cpp
@@ -77,10 +77,10 @@ if(COZMO_BUILD_RVIZ_EXAMPLE)
     cozmo
     ${aikido_LIBRARIES}
     ${roscpp_LIBRARIES}
-    ${PYTHON_INCLUDE_DIRS}  
+    ${PYTHON_LIBRARIES}  
   )
 
-
+message(STATUS "PYTHON_LIBRARIES = ${PYTHON_LIBRARIES}")
 endif()
 
 
