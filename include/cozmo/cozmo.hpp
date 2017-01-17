@@ -16,6 +16,10 @@ public:
   /// \param mesh_dir path to the libcozmo/meshes folder
   Cozmo(const std::string& mesh_dir);
 
+  /// The PyObject of the robot object returned after the connection to 
+  /// Cozmo has been established 
+  PyObject *pRobot;
+
   /// Returns SkeletonPtr to cozmo
   /// Though Cozmo only has a 1 DOF forklift, it is modelled as 6 DOF due
   /// to the inability to model the 4 bar linkage. Therefore, setting
@@ -73,6 +77,9 @@ private:
 
   /// Creates IK Module on ghost strut
   void createIKModule();
+
+  /// Frees all memory allocated by the Python Interpreter 
+  ~Cozmo();
 };
 }
 #endif  // COZMO_COZMO_HPP_

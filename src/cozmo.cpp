@@ -1,6 +1,7 @@
 #include "cozmo/cozmo.hpp"
 #include "Eigen/Dense"
 #include <cmath>
+#include <Python.h>
 
 namespace libcozmo{
 using BoxShape = dart::dynamics::BoxShape;
@@ -14,6 +15,46 @@ using InverseKinematicsPtr = dart::dynamics::InverseKinematicsPtr;
 
 Cozmo::Cozmo(const std::string& mesh_dir){
   createCozmo(mesh_dir);
+
+  Py_Initialize();
+
+  PyRun_SimpleString("import sys; 
+                      import os;
+                      sys.path.insert(0, os.getcwd)");
+
+  PYGILState_STATE gs;
+  gs = PyGILState_Ensure();
+
+  std:stringstream buf;
+  buf << "import cozmo" << std::endl
+      << "robot = None" << std::endl
+      << "def run(sdk_conn):" << std::endl
+      << "    print(\"[PYTHON] CONNECTING TO COZMO\")" << std::endl
+      << "    global robot" << std::endl
+      << "    robot = sdk_conn.wait_for_robot()" << std::endl
+      << "def connect_to_coz():" << std::endl
+      << "    cozmo.setup_basic_logging()" << std::endl
+      << "    try:" << std::endl
+      << "        cozmo.connect(run)" << std::endl
+      << "    except cozmo.ConnectionError as e:" << std::endl
+      << "        sys.exit(\"[PYTHON] A connection error occurred: %s\" % e)" <<std::endl;
+
+  PyObject *pCompiledFn;
+  pCompiledFn = Py_CompileString(buf.str().c_str(), "", Py_file_input);
+  std::cout << "[cozmo.cpp] Compiled Python Function" << std::endl;
+
+  PyObject *pModule;
+  pModule = PyImport_ExecCodeModule("cozmo_conn", pCompiledFn);
+  std::cout << "[cozmo.cpp] Created Module" << std::endl;
+
+  pRobot = PyObject_GetAttrString(pModule, "robot");
+  std::cout << "[cozmo.cpp] Obtained robot Py_Object" << std::endl;
+
+  PyGILState_Release(gs);
+}
+
+Cozmo::~Cozmo() {
+  Py_Finalize();
 }
 
 void Cozmo::createIKModule() {
