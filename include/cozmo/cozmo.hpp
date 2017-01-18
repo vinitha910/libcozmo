@@ -2,6 +2,7 @@
 #define COZMO_COZMO_HPP_
 
 #include "dart/dart.hpp"
+#include <Python.h>
 
 namespace libcozmo {
 using BodyNodePtr = dart::dynamics::BodyNodePtr;
@@ -15,6 +16,9 @@ public:
 
   /// \param mesh_dir path to the libcozmo/meshes folder
   Cozmo(const std::string& mesh_dir);
+
+  /// Frees all memory allocated by the Python Interpreter 
+  ~Cozmo();
 
   /// The PyObject of the robot object returned after the connection to 
   /// Cozmo has been established 
@@ -77,9 +81,6 @@ private:
 
   /// Creates IK Module on ghost strut
   void createIKModule();
-
-  /// Frees all memory allocated by the Python Interpreter 
-  ~Cozmo();
 };
 }
 #endif  // COZMO_COZMO_HPP_

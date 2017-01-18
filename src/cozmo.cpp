@@ -18,14 +18,12 @@ Cozmo::Cozmo(const std::string& mesh_dir){
 
   Py_Initialize();
 
-  PyRun_SimpleString("import sys; 
-                      import os;
-                      sys.path.insert(0, os.getcwd)");
+  PyRun_SimpleString("import sys; import os; sys.path.insert(0, os.getcwd)");
 
-  PYGILState_STATE gs;
+  PyGILState_STATE gs;
   gs = PyGILState_Ensure();
 
-  std:stringstream buf;
+  std::stringstream buf;
   buf << "import cozmo" << std::endl
       << "robot = None" << std::endl
       << "def run(sdk_conn):" << std::endl
