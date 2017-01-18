@@ -30,6 +30,8 @@ Cozmo::Cozmo(const std::string& mesh_dir){
       << "    print(\"[PYTHON] CONNECTING TO COZMO\")" << std::endl
       << "    global robot" << std::endl
       << "    robot = sdk_conn.wait_for_robot()" << std::endl
+      << "    import IPython" << std::endl
+      << "    IPython.embed()" << std::endl
       << "def connect_to_coz():" << std::endl
       << "    cozmo.setup_basic_logging()" << std::endl
       << "    try:" << std::endl
@@ -44,6 +46,10 @@ Cozmo::Cozmo(const std::string& mesh_dir){
   PyObject *pModule;
   pModule = PyImport_ExecCodeModule("cozmo_conn", pCompiledFn);
   std::cout << "[cozmo.cpp] Created Module" << std::endl;
+
+  PyObject *pConn;
+  pConn = PyObject_GetAttrString(pModule, "connect_to_coz()");
+  std::cout << "[cozmo.cpp] Connecting to Cozmo" << std::endl;
 
   pRobot = PyObject_GetAttrString(pModule, "robot");
   std::cout << "[cozmo.cpp] Obtained robot Py_Object" << std::endl;
