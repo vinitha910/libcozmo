@@ -7,6 +7,7 @@ option(COZMO_BUILD_RVIZ_EXAMPLE "Build the RViz viewer integration example" ON)
 
 find_package(Eigen3 REQUIRED)
 find_package(DART REQUIRED gui collision-bullet)
+set(Python_ADDITIONAL_VERSIONS 3.5)
 find_package(PythonLibs 3.5 REQUIRED)
 
 add_library(cozmo SHARED
