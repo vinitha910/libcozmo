@@ -20,9 +20,8 @@ public:
   /// Frees all memory allocated by the Python Interpreter 
   ~Cozmo();
 
-  /// The PyObject of the robot object returned after the connection to 
-  /// Cozmo has been established 
-  PyObject *pRobot;
+  /// The PyObject of the instance of the CozmoConnection class 
+  PyObject *pConn;
 
   /// Returns SkeletonPtr to cozmo
   /// Though Cozmo only has a 1 DOF forklift, it is modelled as 6 DOF due

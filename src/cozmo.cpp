@@ -26,18 +26,16 @@ Cozmo::Cozmo(const std::string& mesh_dir){
   std::stringstream buf;
   buf << "import cozmo" << std::endl
       << "import sys" << std::endl
-      << "robot = None" << std::endl
-      << "def run(sdk_conn):" << std::endl
-      << "    print(\"[PYTHON] CONNECTING TO COZMO\")" << std::endl
-      << "    global robot" << std::endl
+      << "import asyncio" << std::endl
+      << "coz_conn = None" << std::endl
+      << "def drive_straight(sdk_conn):" << std::endl
       << "    robot = sdk_conn.wait_for_robot()" << std::endl
-      //<< "    print(robot)" << std::endl
-      //<< "    import IPython" << std::endl
-      //<< "    IPython.embed()" << std::endl
-      //<< "def connect_to_coz():" << std::endl
+      << "    robot.drive_straight(distance=cozmo.util.Distance(100.0),speed=cozmo.util.Speed(50.0), should_play_anim=False)" << std::endl
       << "cozmo.setup_basic_logging()" << std::endl
+      << "loop = asyncio.get_event_loop()" << std::endl
       << "try:" << std::endl
-      << "    cozmo.connect(run)" << std::endl
+      << "    global coz_conn" << std::endl
+      << "    coz_conn = cozmo.connect_on_loop(loop)" << std::endl
       << "except cozmo.ConnectionError as e:" << std::endl
       << "    sys.exit(\"[PYTHON] A connection error occurred: %s\" % e)" << std::endl;
 
@@ -49,13 +47,13 @@ Cozmo::Cozmo(const std::string& mesh_dir){
   pModule = PyImport_ExecCodeModule("cozmo_conn", pCompiledFn);
   std::cout << "[cozmo.cpp] Created Module" << std::endl;
 
-  //PyObject *pConn;
-  //pConn = PyObject_GetAttrString(pModule, "connect_to_coz");
-  //std::cout << "[cozmo.cpp] Connecting to Cozmo" << std::endl;
+  pConn = PyObject_GetAttrString(pModule, "coz_conn");
+  std::cout << "[cozmo.cpp] CozmoConnection Object obtained" << std::endl;
+  //if(pConn == NULL) { std::cout << "CONNECTION IS NULL" << std::endl; }
 
-  pRobot = PyObject_GetAttrString(pModule, "robot");
-  std::cout << "[cozmo.cpp] Obtained robot Py_Object" << std::endl;
-
+  PyObject *pDriveStraightFn = PyObject_GetAttrString(pModule, "drive_straight");
+  PyObject *pResult = PyObject_CallObject(pDriveStraightFn, pConn);
+ 
   PyGILState_Release(gs);
 }
 

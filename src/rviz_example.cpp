@@ -17,6 +17,9 @@ int main(int argc, char* argv[])
   const std::string mesh_dir = argv[1];
   libcozmo::Cozmo cozmo(mesh_dir);
   
+  //visualizer::Viz viz(cozmo, mesh_dir, argc, argv);
+  static const std::string topicName("dart_markers");
+
   // Start the RViz viewer.
   std::cout << "Starting ROS node." << std::endl;
   ros::init(argc, argv, "load_cozmo");
