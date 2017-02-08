@@ -217,6 +217,64 @@ void Cozmo::turnInPlace(double angle, double angleInRad) {
   PyGILState_Release(gs);
 }
 
+  // TODO: Fix weird segfault issue....
+void Cozmo::driveWheels(double l_wheel_speed, double r_wheel_speed,
+			double l_wheel_acc, double r_wheel_acc,
+			double duration) {
+  PyGILState_STATE gs;
+  gs = PyGILState_Ensure();
+
+  std::stringstream buf;
+  buf << "import cozmo" << std::endl
+      << "import time" << std::endl
+      << "vals = None" << std::endl
+      << "def driveWheels(robot: cozmo.robot.Robot):" << std::endl
+      << "    robot.drive_wheels(vals[0],vals[1],vals[2],vals[3],vals[4])" << std::endl
+      << "def createGlobals(args):" << std::endl
+      << "    global vals" << std::endl
+      << "    vals = args" << std::endl
+      << "    cozmo.run_program(driveWheels)" << std::endl;
+
+  PyObject *pCompiledFn;
+  pCompiledFn = Py_CompileString(buf.str().c_str(), "", Py_file_input);
+  std::cout << "[cozmo.cpp] Compiled Python Function" << std::endl;
+
+  PyObject *pModule;
+  pModule = PyImport_ExecCodeModule("driveWheels", pCompiledFn);
+  std::cout << "[cozmo.cpp] Create driveWheels Module" << std::endl;
+
+  PyObject *pDriveWheelsFn = PyObject_GetAttrString(pModule, "createGlobals");
+  std::cout << "[cozmo.cpp] Retrieved driveWheels Function" << std::endl;
+
+  PyObject *pyList = PyList_New(5);
+  int setItem;
+
+  PyObject *lws = Py_BuildValue("f", l_wheel_speed);
+  PyObject *rws = Py_BuildValue("f", r_wheel_speed);
+  PyObject *lwa = Py_BuildValue("f", l_wheel_acc);
+  PyObject *rwa = Py_BuildValue("f", r_wheel_acc);
+  PyObject *dur = Py_BuildValue("f", duration);
+
+  setItem = PyList_SetItem(pyList, 0, lws);
+  setItem = PyList_SetItem(pyList, 1, rws);
+  setItem = PyList_SetItem(pyList, 2, lwa);
+  setItem = PyList_SetItem(pyList, 3, rwa);
+  setItem = PyList_SetItem(pyList, 4, dur);
+
+  PyObject *args = PyTuple_Pack(1, pyList);
+
+  std::cout << "[cozmo.cpp] Created PyList args" << std::endl;
+  std::cout << "[cozmo.cpp] Driving Wheels [l_wheel_speed: " << l_wheel_speed
+	    << ", r_wheel_speed: " << r_wheel_speed 
+            << ", l_wheel_acc: " << l_wheel_acc
+            << ", r_wheel_acc: " << r_wheel_acc 
+	    << ", duration: " << duration << "]" << std::endl;
+
+  PyObject *myResult = PyObject_CallObject(pDriveWheelsFn, args);
+ 
+  PyGILState_Release(gs);
+}
+
 void Cozmo::createIKModule() {
   ik = dart::dynamics::InverseKinematics::create(ghost_strut);
   ik->useChain();

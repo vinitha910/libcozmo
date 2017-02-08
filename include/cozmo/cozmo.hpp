@@ -53,6 +53,20 @@ public:
   /// \param angle The angle to turn (>0 to turn left, <0 to turn right)
   /// \param radians The angle is in radians by default, if 0.0 it is in degrees
   void turnInPlace(double angle, double angleInRad=1.0);
+
+  /// Moves Cozmo's treads at the specified speeds and accelerations
+
+  /// \param l_wheel_speed Speed of the left tread (mm/s)
+  /// \param r_wheel_speed Speed of the right tread (mm/s)
+  /// \param l_wheel_acc Acceleration of the left tread (not required; mm/s^2)
+  /// \param r_wheel_acc Acceleration of the right tread (not required; mm/s^2)
+  /// \param duration The duration to move wheels (seconds?); if no duration is 
+  ///                 provided, stop_all_motors() must be called manually
+  void driveWheels(double l_wheel_speed, 
+		   double r_wheel_speed, 
+		   double l_wheel_acc=0.0, 
+		   double r_wheel_acc=0.0,
+		   double duration=0.0);
 private:
   /// SkeletonPtr to Cozmo
   SkeletonPtr cozmo;
