@@ -36,6 +36,11 @@ After all the commands are run, subscribe to the InteractiveMarker 'dart_markers
 
 This script allows you to enter angles (in radians) for the forklift position; the movement will be reflected by the robot in the viewer.
 
+Similarily, to run the script that moves Cozmo to the specified pose, run the following command: 
+```shell
+$ `catkin locate -b libcozmo`/go_to_pose_example `catkin locate -s libcozmo`/meshes
+```
+
 To load Cozmo in the DART viewer in a non-catkin/ros environment, run the following commands:
 ```shell
 $ cd libcozmo
@@ -45,8 +50,6 @@ $ cmake .. -DCOZMO_BUILD_RVIZ_EXAMPLE=OFF # e.g. if ros/aikido not available
 $ make
 $ ./dart_example `pwd`/../meshes
 ```
-
-Similarily, to run the script that moves Cozmo to the specified pose, run the following command: `catkin locate -b libcozmo`/go_to_pose_example `catkin locate -s libcozmo`/meshes
 
 ## License
 libcozmo is licensed under a BSD license. See [LICENSE](https://github.com/personalrobotics/libcozmo/blob/master/LICENSE) for more information.
