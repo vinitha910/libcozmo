@@ -184,7 +184,7 @@ void Cozmo::turnInPlace(double angle, double angleInRad) {
       << "    if args[1] == 1.0:" << std::endl
       << "        angle = cozmo.util.radians(args[0])" << std::endl
       << "    else:" << std::endl
-      << "        dist = cozmo.util.degrees(args[0])" << std::endl
+      << "        angle = cozmo.util.degrees(args[0])" << std::endl
       << "    cozmo.run_program(turnInPlace)" << std::endl;
 
   PyObject *pCompiledFn;
