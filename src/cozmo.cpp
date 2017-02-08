@@ -116,7 +116,7 @@ void Cozmo::goToPose(std::vector<double> pos, double angle_z) {
   PyGILState_Release(gs);
 }
 
-void Cozmo::driveStraight(double dist, double speed, double distInInches=1.0) {
+void Cozmo::driveStraight(double dist, double speed, double distInInches) {
   PyGILState_STATE gs;
   gs = PyGILState_Ensure();
 
@@ -129,9 +129,9 @@ void Cozmo::driveStraight(double dist, double speed, double distInInches=1.0) {
       << "    action.wait_for_completed()" << std::endl
       << "def setCozObj(args):" << std::endl
       << "    global dist" << std::endl
-      << "    if args[2] == 1.0:" << std::endl;
+      << "    if args[2] == 1.0:" << std::endl
       << "        dist = cozmo.util.distance_inches(args[0])" << std::endl
-      << "    else:" << std::endl;
+      << "    else:" << std::endl
       << "        dist = cozmo.util.distance_mm(args[0])" << std::endl
       << "    global speed" << std::endl
       << "    speed = cozmo.util.Speed(args[1])" << std::endl
@@ -151,12 +151,12 @@ void Cozmo::driveStraight(double dist, double speed, double distInInches=1.0) {
   PyObject *pyList = PyList_New(3);
   int setItem;
 
-  PyObject *x = Py_BuildValue("f", dist);
-  PyObject *y = Py_BuildValue("f", speed);
+  PyObject *d = Py_BuildValue("f", dist);
+  PyObject *s = Py_BuildValue("f", speed);
   PyObject *dist_type = Py_BuildValue("f", distInInches);
    
-  setItem = PyList_SetItem(pyList, 0, dist);
-  setItem = PyList_SetItem(pyList, 1, speed);
+  setItem = PyList_SetItem(pyList, 0, d);
+  setItem = PyList_SetItem(pyList, 1, s);
   setItem = PyList_SetItem(pyList, 2, dist_type);
   PyObject *args = PyTuple_Pack(1, pyList);
 
@@ -164,12 +164,12 @@ void Cozmo::driveStraight(double dist, double speed, double distInInches=1.0) {
   std::cout << "[cozmo.cpp] Driving Stright [distance: " << dist 
 	    << ", speed: " << speed << "]" << std::endl;
 
-  PyObject *myResult = PyObject_CallObject(DriveStraightFn, args);
+  PyObject *myResult = PyObject_CallObject(pDriveStraightFn, args);
  
   PyGILState_Release(gs);
 }
 
-void Cozmo::turnInPlace(double angle, double angleInRad=1.0) {
+void Cozmo::turnInPlace(double angle, double angleInRad) {
   PyGILState_STATE gs;
   gs = PyGILState_Ensure();
 
@@ -181,9 +181,9 @@ void Cozmo::turnInPlace(double angle, double angleInRad=1.0) {
       << "    action.wait_for_completed()" << std::endl
       << "def setCozObj(args):" << std::endl
       << "    global angle" << std::endl
-      << "    if args[1] == 1.0:" << std::endl;
+      << "    if args[1] == 1.0:" << std::endl
       << "        angle = cozmo.util.radians(args[0])" << std::endl
-      << "    else:" << std::endl;
+      << "    else:" << std::endl
       << "        dist = cozmo.util.degrees(args[0])" << std::endl
       << "    cozmo.run_program(turnInPlace)" << std::endl;
 
@@ -192,29 +192,27 @@ void Cozmo::turnInPlace(double angle, double angleInRad=1.0) {
   std::cout << "[cozmo.cpp] Compiled Python Function" << std::endl;
 
   PyObject *pModule;
-  pModule = PyImport_ExecCodeModule("driveStraight", pCompiledFn);
-  std::cout << "[cozmo.cpp] Create driveStraight Module" << std::endl;
+  pModule = PyImport_ExecCodeModule("turnInPlace", pCompiledFn);
+  std::cout << "[cozmo.cpp] Created turnInPlace Module" << std::endl;
 
-  PyObject *pDriveStraightFn = PyObject_GetAttrString(pModule, "setCozObj");
-  std::cout << "[cozmo.cpp] Retrieved driveStraight Function" << std::endl;
+  PyObject *pTurnInPlaceFn = PyObject_GetAttrString(pModule, "setCozObj");
+  std::cout << "[cozmo.cpp] Retrieved turnInPlace Function" << std::endl;
 
-  PyObject *pyList = PyList_New(3);
+  PyObject *pyList = PyList_New(2);
   int setItem;
 
-  PyObject *x = Py_BuildValue("f", dist);
-  PyObject *y = Py_BuildValue("f", speed);
-  PyObject *dist_type = Py_BuildValue("f", distInInches);
-   
-  setItem = PyList_SetItem(pyList, 0, dist);
-  setItem = PyList_SetItem(pyList, 1, speed);
-  setItem = PyList_SetItem(pyList, 2, dist_type);
+  PyObject *a = Py_BuildValue("f", angle);
+  PyObject *angle_type = Py_BuildValue("f", angleInRad);
+     
+  setItem = PyList_SetItem(pyList, 0, a);
+  setItem = PyList_SetItem(pyList, 1, angle_type);
   PyObject *args = PyTuple_Pack(1, pyList);
 
   std::cout << "[cozmo.cpp] Created PyList args" << std::endl;
-  std::cout << "[cozmo.cpp] Driving Stright [distance: " << dist 
-	    << ", speed: " << speed << "]" << std::endl;
+  std::cout << "[cozmo.cpp] Turning In Place [angle: " << angle 
+	    << "]" << std::endl;
 
-  PyObject *myResult = PyObject_CallObject(DriveStraightFn, args);
+  PyObject *myResult = PyObject_CallObject(pTurnInPlaceFn, args);
  
   PyGILState_Release(gs);
 }

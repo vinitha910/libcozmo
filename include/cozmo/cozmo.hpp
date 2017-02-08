@@ -52,7 +52,7 @@ public:
   
   /// \param angle The angle to turn (>0 to turn left, <0 to turn right)
   /// \param radians The angle is in radians by default, if 0.0 it is in degrees
-  void turnInPlace(double angle, double angleInRad=1.0)
+  void turnInPlace(double angle, double angleInRad=1.0);
 private:
   /// SkeletonPtr to Cozmo
   SkeletonPtr cozmo;
