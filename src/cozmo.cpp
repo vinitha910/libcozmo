@@ -16,56 +16,15 @@ using InverseKinematicsPtr = dart::dynamics::InverseKinematicsPtr;
 Cozmo::Cozmo(const std::string& mesh_dir){
   createCozmo(mesh_dir);
 
-  //Py_Initialize();
-
-  //PyRun_SimpleString("import sys; import os; sys.path.insert(0, os.getcwd)");
-
-  // PyGILState_STATE gs;
-  // gs = PyGILState_Ensure();
-
-  // std::stringstream buf;
-  // buf << "import cozmo" << std::endl
-  //     << "import sys" << std::endl
-  //     << "import asyncio" << std::endl
-  //     << "coz_conn = None" << std::endl
-  //     << "def drive_straight(sdk_conn):" << std::endl
-  //     << "    robot = sdk_conn.wait_for_robot()" << std::endl
-  //     << "    robot.drive_straight(distance=cozmo.util.Distance(100.0),speed=cozmo.util.Speed(50.0), should_play_anim=False)" << std::endl
-  //     << "cozmo.setup_basic_logging()" << std::endl
-  //     << "loop = asyncio.get_event_loop()" << std::endl
-  //     << "try:" << std::endl
-  //     << "    global coz_conn" << std::endl
-  //     << "    coz_conn = cozmo.connect_on_loop(loop)" << std::endl
-  //     << "except cozmo.ConnectionError as e:" << std::endl
-  //     << "    sys.exit(\"[PYTHON] A connection error occurred: %s\" % e)" << std::endl;
-
-  // PyObject *pCompiledFn;
-  // pCompiledFn = Py_CompileString(buf.str().c_str(), "", Py_file_input);
-  // std::cout << "[cozmo.cpp] Compiled Python Function" << std::endl;
-
-  // PyObject *pModule;
-  // pModule = PyImport_ExecCodeModule("cozmo_conn", pCompiledFn);
-  // std::cout << "[cozmo.cpp] Created Module" << std::endl;
-
-  // pConn = PyObject_GetAttrString(pModule, "coz_conn");
-  // std::cout << "[cozmo.cpp] CozmoConnection Object obtained" << std::endl;
-  // //if(pConn == NULL) { std::cout << "CONNECTION IS NULL" << std::endl; }
-
-  // PyObject *pDriveStraightFn = PyObject_GetAttrString(pModule, "drive_straight");
-  // PyObject *pResult = PyObject_CallObject(pDriveStraightFn, pConn);
- 
-  // PyGILState_Release(gs);
+  Py_Initialize();
+  PyRun_SimpleString("import sys; import os; sys.path.insert(0, os.getcwd)");
 }
 
 Cozmo::~Cozmo() {
-  //Py_Finalize();
+  Py_Finalize();
 }
 
 std::vector<double> Cozmo::getPose() {
-  Py_Initialize();
-
-  PyRun_SimpleString("import sys; import os; sys.path.insert(0, os.getcwd)");
-
   PyGILState_STATE gs;
   gs = PyGILState_Ensure();
 
@@ -96,8 +55,6 @@ std::vector<double> Cozmo::getPose() {
 
   PyGILState_Release(gs);
 
-  Py_Finalize();
-
   std::vector<double> pose;
   pose.push_back(x);
   pose.push_back(y);
@@ -108,10 +65,6 @@ std::vector<double> Cozmo::getPose() {
 }
 
 void Cozmo::goToPose(std::vector<double> pos, double angle_z) {
-  Py_Initialize();
-
-  PyRun_SimpleString("import sys; import os; sys.path.insert(0, os.getcwd)");
-
   PyGILState_STATE gs;
   gs = PyGILState_Ensure();
 
@@ -138,7 +91,6 @@ void Cozmo::goToPose(std::vector<double> pos, double angle_z) {
   PyObject *pGoToPoseFn = PyObject_GetAttrString(pModule, "setCozPose");
   std::cout << "[cozmo.cpp] Retrieved goToPose Function" << std::endl;
 
-  //PyObject *pyListComplete = PyList_New(1);
   PyObject *pyList = PyList_New(4);
   int setItem;
 
@@ -155,12 +107,11 @@ void Cozmo::goToPose(std::vector<double> pos, double angle_z) {
   PyObject *args = PyTuple_Pack(1, pyList);
 
   std::cout << "[cozmo.cpp] Created PyList args" << std::endl;
-  //std::cout << "[cozmo.cpp] Going to Pose(" << pos << " " << angle_z << ")" << std::endl;
+  std::cout << "[cozmo.cpp] Going to Pose [x: " << pos[0] << ", y: " << pos[1] 
+	    << ", z: " << pos[2] << ", angle_z: " << angle_z << "]" << std::endl;
   PyObject *myResult = PyObject_CallObject(pGoToPoseFn, args);
  
   PyGILState_Release(gs);
-
-  Py_Finalize();
 }
 
 void Cozmo::createIKModule() {
