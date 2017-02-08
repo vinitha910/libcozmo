@@ -86,6 +86,23 @@ if(COZMO_BUILD_RVIZ_EXAMPLE)
     ${PYTHON_LIBRARIES}  
   )
 
+  add_executable(go_to_pose_example
+    src/go_to_pose_example.cpp
+  )
+
+  target_include_directories(go_to_pose_example PRIVATE
+    ${aikido_INCLUDE_DIRS}
+    ${roscpp_INCLUDE_DIRS}
+    ${PYTHON_INCLUDE_DIRS} 
+  )
+
+  target_link_libraries(go_to_pose_example
+    cozmo
+    ${aikido_LIBRARIES}
+    ${roscpp_LIBRARIES}
+    ${PYTHON_LIBRARIES}  
+  )
+
 message(STATUS "PYTHON_LIBRARIES = ${PYTHON_LIBRARIES}")
 endif()
 

@@ -32,6 +32,12 @@ public:
   /// Takes in pos (angle in radians) and sets forklift position
   void setForkliftPosition(double pos);
 
+  /// Returns True is robot successfully moves to specified pose; False otherwise
+
+  /// \param pos vector that contains the x, y, z position in mm
+  /// \param angle_z z Euler component of the obkect's rotation
+  void goToPose(std::vector<double> pos, double angle_z);
+
 private:
   /// SkeletonPtr to Cozmo
   SkeletonPtr cozmo;
@@ -45,6 +51,9 @@ private:
   BodyNodePtr lower_forklift_strut_right;
   BodyNodePtr upper_forklift_strut_left;
   BodyNodePtr upper_forklift_strut_right;
+
+  /// Returns pose (x, y, z, angle_z) of robot
+  std::vector<double> getPose();
 
   /// InverseKinematicsPtr to Inverse Kinematics Module
   InverseKinematicsPtr ik;
