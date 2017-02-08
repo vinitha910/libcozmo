@@ -35,12 +35,24 @@ public:
   /// Returns pose (x, y, z, angle_z) of robot
   std::vector<double> getPose();
 
-  /// Returns True is robot successfully moves to specified pose; False otherwise
+  /// Drives Cozmo to specified pose
 
   /// \param pos vector that contains the x, y, z position in mm
   /// \param angle_z z Euler component of the obkect's rotation
   void goToPose(std::vector<double> pos, double angle_z);
 
+  /// Drives Cozmo in a straight line for the specified distance 
+
+  /// \param dist The distance to drive (>0 for forwards, <0 for backwards) 
+  /// \param speed The speed (mmps) to drive at (should always be >0) 
+  /// \param distInInches The distance is in inches by default, if 0.0 it is in mm
+  void driveStraight(double dist, double speed, double distInInches=1.0);
+
+  /// Turn Cozmo around its current position
+  
+  /// \param angle The angle to turn (>0 to turn left, <0 to turn right)
+  /// \param radians The angle is in radians by default, if 0.0 it is in degrees
+  void turnInPlace(double angle, double angleInRad=1.0)
 private:
   /// SkeletonPtr to Cozmo
   SkeletonPtr cozmo;
