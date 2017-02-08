@@ -1,6 +1,6 @@
 # libcozmo
 libcozmo is a C++ library for simulating and running [Cozmo](https://anki.com/en-us/cozmo) based on DART and AIKIDO.
-Current tools allow you simulate the forklift movement.
+Current tools allow you simulate the forklift movement and move Cozmo to a specified pose.
 
 ## Installation
 Checkout and build this package, [aikido](https://github.com/personalrobotics/aikido.git) from source, and install [DART](http://dartsim.github.io/) (version 6.0 or above). You
@@ -45,6 +45,8 @@ $ cmake .. -DCOZMO_BUILD_RVIZ_EXAMPLE=OFF # e.g. if ros/aikido not available
 $ make
 $ ./dart_example `pwd`/../meshes
 ```
+
+Similarily, to run the script that moves Cozmo to the specified pose, run the following command: `catkin locate -b libcozmo`/go_to_pose_example `catkin locate -s libcozmo`/meshes
 
 ## License
 libcozmo is licensed under a BSD license. See [LICENSE](https://github.com/personalrobotics/libcozmo/blob/master/LICENSE) for more information.
