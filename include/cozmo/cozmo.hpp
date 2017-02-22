@@ -20,6 +20,9 @@ public:
   /// Frees all memory allocated by the Python Interpreter 
   ~Cozmo();
 
+  /// The length of Cozmo's wheel base
+  double wheel_base = 56;
+  
   /// The PyObject of the instance of the CozmoConnection class 
   PyObject *pConn;
 
@@ -67,6 +70,20 @@ public:
 		   double l_wheel_acc=0.0, 
 		   double r_wheel_acc=0.0,
 		   double duration=0.0);
+  
+  /// Converts the linear and angular velocity into velocities for individual wheels
+  /// and drives the robot to the specified waypoint
+
+  /// \param V Linear Velocity of robot
+  /// \param w Angular Velocity of robot
+  void executeTwist(double V, double w);
+
+  /// Takes in a list of waypoints representing the trajectory to be executed 
+
+  /// \param x The x position of the waypoint
+  /// \param y The y position of the waypoint
+  /// \param th The theta of the waypoint 
+  void executeTrajectory(double x, double y, double th);
 private:
   /// SkeletonPtr to Cozmo
   SkeletonPtr cozmo;

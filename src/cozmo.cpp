@@ -34,9 +34,8 @@ std::vector<double> Cozmo::getPose() {
       << "def getPose(robot: cozmo.robot.Robot):" << std::endl
       << "    x = robot.pose.position.x" << std::endl
       << "    y = robot.pose.position.y" << std::endl
-      << "    z = robot.pose.position.z" << std::endl
       << "    angle_z = robot.pose.rotation.angle_z.radians" << std::endl
-      << "    return [x, y, z, angle_z]" << std::endl
+      << "    return [x, y, angle_z]" << std::endl
       << "cozmo.run_program(getPose)" << std::endl;
 
   PyObject *pCompiledFn;
@@ -51,15 +50,13 @@ std::vector<double> Cozmo::getPose() {
 
   double x = PyFloat_AsDouble(PyList_GetItem(pCozPose, 0));
   double y = PyFloat_AsDouble(PyList_GetItem(pCozPose, 1));
-  double z = PyFloat_AsDouble(PyList_GetItem(pCozPose, 2));
-  double angle_z = PyFloat_AsDouble(PyList_GetItem(pCozPose, 3));
+  double angle_z = PyFloat_AsDouble(PyList_GetItem(pCozPose, 2));
 
   PyGILState_Release(gs);
 
   std::vector<double> pose;
   pose.push_back(x);
   pose.push_back(y);
-  pose.push_back(z);
   pose.push_back(angle_z);
 
   return pose;
@@ -217,7 +214,6 @@ void Cozmo::turnInPlace(double angle, double angleInRad) {
   PyGILState_Release(gs);
 }
 
-  // TODO: Fix weird segfault issue....
 void Cozmo::driveWheels(double l_wheel_speed, double r_wheel_speed,
 			double l_wheel_acc, double r_wheel_acc,
 			double duration) {
@@ -273,6 +269,33 @@ void Cozmo::driveWheels(double l_wheel_speed, double r_wheel_speed,
   PyObject *myResult = PyObject_CallObject(pDriveWheelsFn, args);
  
   PyGILState_Release(gs);
+}
+
+void Cozmo::executeTwist(double V, double w) {
+  double vdiff = (w * wheel_base)/2;
+  double vl = V - vdiff;
+  double vr = V + vdiff;
+
+  driveWheels(vl,vr);
+}
+
+// Change to take a list of waypoints representing a path
+void Cozmo::executeTrajectory(double x, double y, double th) {
+  std::vector<double> pose = getPose();
+  double x_init = pose[0];
+  double y_init = pose[1];
+  double th_init = pose[2];
+
+  double dx = abs(x-x_init);
+  double dy = abs(y-y_init);
+  double dth = abs(th-th_init);
+  double ds = sqrt(x*x + y*y);
+  double dt = 0.5;
+
+  double V = ds/dt;
+  double w = dth/dt;
+  
+  executeTwist(V,w);
 }
 
 void Cozmo::createIKModule() {
