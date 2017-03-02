@@ -9,6 +9,12 @@ using BodyNodePtr = dart::dynamics::BodyNodePtr;
 using SkeletonPtr = dart::dynamics::SkeletonPtr;
 using InverseKinematicsPtr = dart::dynamics::InverseKinematicsPtr;
 
+struct cozmoPose {
+    double x;
+    double y;
+    double th;
+};
+
 class Cozmo
 {
 public:
@@ -36,7 +42,7 @@ public:
   void setForkliftPosition(double pos);
 
   /// Returns pose (x, y, z, angle_z) of robot
-  std::vector<double> getPose();
+  cozmoPose getPose();
 
   /// Drives Cozmo to specified pose
 
@@ -76,7 +82,7 @@ public:
 
   /// \param V Linear Velocity of robot
   /// \param w Angular Velocity of robot
-  void executeTwist(double V, double w);
+  void executeTwist(double V, double w, double dt);
 
   /// Takes in a list of waypoints representing the trajectory to be executed 
 
@@ -84,6 +90,7 @@ public:
   /// \param y The y position of the waypoint
   /// \param th The theta of the waypoint 
   void executeTrajectory(double x, double y, double th);
+
 private:
   /// SkeletonPtr to Cozmo
   SkeletonPtr cozmo;

@@ -24,40 +24,42 @@ Cozmo::~Cozmo() {
   Py_Finalize();
 }
 
-  // TODO: Test this function lol...
-std::vector<double> Cozmo::getPose() {
+cozmoPose Cozmo::getPose() {
   PyGILState_STATE gs;
   gs = PyGILState_Ensure();
 
   std::stringstream buf;
   buf << "import cozmo" << std::endl
+      << "pose = None" << std::endl
       << "def getPose(robot: cozmo.robot.Robot):" << std::endl
       << "    x = robot.pose.position.x" << std::endl
       << "    y = robot.pose.position.y" << std::endl
       << "    angle_z = robot.pose.rotation.angle_z.radians" << std::endl
-      << "    return [x, y, angle_z]" << std::endl
+      << "    global pose" << std::endl
+      << "    pose = [x, y, angle_z]" << std::endl
       << "cozmo.run_program(getPose)" << std::endl;
 
   PyObject *pCompiledFn;
   pCompiledFn = Py_CompileString(buf.str().c_str(), "", Py_file_input);
   std::cout << "[cozmo.cpp] Compiled Python Function" << std::endl;
 
-  PyObject *pCozPose;
-  pCozPose = PyImport_ExecCodeModule("getPose", pCompiledFn);
+  PyObject *pModule;
+  pModule = PyImport_ExecCodeModule("getPose", pCompiledFn);
   std::cout << "[cozmo.cpp] Getting Pose" << std::endl;
 
-  std::cout << "[cozmo.cpp] Received Pose List: " << PyList_Check(pCozPose) << std::endl;
+  PyObject *pCozPose = PyObject_GetAttrString(pModule, "pose");
 
   double x = PyFloat_AsDouble(PyList_GetItem(pCozPose, 0));
   double y = PyFloat_AsDouble(PyList_GetItem(pCozPose, 1));
   double angle_z = PyFloat_AsDouble(PyList_GetItem(pCozPose, 2));
 
+  std::cout << "Pose: [" << x << ", " << y << ", " << angle_z << "]" << std::endl;
   PyGILState_Release(gs);
 
-  std::vector<double> pose;
-  pose.push_back(x);
-  pose.push_back(y);
-  pose.push_back(angle_z);
+  cozmoPose pose;
+  pose.x = x;
+  pose.y = y;
+  pose.th = angle_z;
 
   return pose;
 }
@@ -271,31 +273,30 @@ void Cozmo::driveWheels(double l_wheel_speed, double r_wheel_speed,
   PyGILState_Release(gs);
 }
 
-void Cozmo::executeTwist(double V, double w) {
+void Cozmo::executeTwist(double V, double w, double dt) {
   double vdiff = (w * wheel_base)/2;
   double vl = V - vdiff;
   double vr = V + vdiff;
 
-  driveWheels(vl,vr);
+  driveWheels(vl,vr,0.0,0.0,dt);
 }
 
 // Change to take a list of waypoints representing a path
 void Cozmo::executeTrajectory(double x, double y, double th) {
-  std::vector<double> pose = getPose();
-  double x_init = pose[0];
-  double y_init = pose[1];
-  double th_init = pose[2];
-
+  cozmoPose pose = getPose();
+  double x_init = pose.x;
+  double y_init = pose.y;
+  double th_init = pose.th;
   double dx = abs(x-x_init);
   double dy = abs(y-y_init);
   double dth = abs(th-th_init);
-  double ds = sqrt(x*x + y*y);
+  double ds = sqrt(dx*dx + dy*dy);
   double dt = 0.5;
 
   double V = ds/dt;
   double w = dth/dt;
   
-  executeTwist(V,w);
+  executeTwist(V,w,dt);
 }
 
 void Cozmo::createIKModule() {
