@@ -9,6 +9,7 @@ find_package(Eigen3 REQUIRED)
 find_package(DART REQUIRED gui collision-bullet)
 set(Python_ADDITIONAL_VERSIONS 3.5)
 find_package(PythonLibs 3.5 REQUIRED)
+find_package(aikido REQUIRED COMPONENTS statespace)
 
 add_library(cozmo SHARED
   src/cozmo.cpp
@@ -26,11 +27,13 @@ target_include_directories(cozmo PRIVATE
 
 target_include_directories(cozmo PUBLIC
   ${EIGEN3_INCLUDE_DIR}
+  ${aikido_INCLUDE_DIRS}
 )
 
 target_link_libraries(cozmo PUBLIC
   ${DART_LIBRARIES} 
   ${PYTHON_LIBRARIES}
+  ${aikido_LIBRARIES}
 )
 
 

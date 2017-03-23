@@ -2,6 +2,8 @@
 #include "Eigen/Dense"
 #include <cmath>
 #include <Python.h>
+#include <chrono>
+#include "aikido/trajectory/Trajectory.hpp"
 
 namespace libcozmo{
 using BoxShape = dart::dynamics::BoxShape;
@@ -281,22 +283,10 @@ void Cozmo::executeTwist(double V, double w, double dt) {
   driveWheels(vl,vr,0.0,0.0,dt);
 }
 
-// Change to take a list of waypoints representing a path
-void Cozmo::executeTrajectory(double x, double y, double th) {
-  cozmoPose pose = getPose();
-  double x_init = pose.x;
-  double y_init = pose.y;
-  double th_init = pose.th;
-  double dx = abs(x-x_init);
-  double dy = abs(y-y_init);
-  double dth = abs(th-th_init);
-  double ds = sqrt(dx*dx + dy*dy);
-  double dt = 0.5;
-
-  double V = ds/dt;
-  double w = dth/dt;
+void Cozmo::executeTrajectory(SkeletonPtr _cozmo, 
+                              std::chrono::milliseconds _period,
+			      TrajectoryPtr _traj) {
   
-  executeTwist(V,w,dt);
 }
 
 void Cozmo::createIKModule() {

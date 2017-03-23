@@ -3,11 +3,14 @@
 
 #include "dart/dart.hpp"
 #include <Python.h>
+#include <chrono>
+#include "aikido/trajectory/Trajectory.hpp"
 
 namespace libcozmo {
 using BodyNodePtr = dart::dynamics::BodyNodePtr;
 using SkeletonPtr = dart::dynamics::SkeletonPtr;
 using InverseKinematicsPtr = dart::dynamics::InverseKinematicsPtr;
+using TrajectoryPtr = aikido::trajectory::TrajectoryPtr;
 
 struct cozmoPose {
     double x;
@@ -89,7 +92,9 @@ public:
   /// \param x The x position of the waypoint
   /// \param y The y position of the waypoint
   /// \param th The theta of the waypoint 
-  void executeTrajectory(double x, double y, double th);
+  void executeTrajectory(SkeletonPtr _cozmo,
+			 std::chrono::milliseconds _period,
+			 TrajectoryPtr _traj);
 
 private:
   /// SkeletonPtr to Cozmo
