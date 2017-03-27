@@ -5,12 +5,14 @@
 #include <Python.h>
 #include <chrono>
 #include "aikido/trajectory/Trajectory.hpp"
+#include "aikido/trajectory/Interpolated.hpp"
 
 namespace libcozmo {
 using BodyNodePtr = dart::dynamics::BodyNodePtr;
 using SkeletonPtr = dart::dynamics::SkeletonPtr;
 using InverseKinematicsPtr = dart::dynamics::InverseKinematicsPtr;
 using TrajectoryPtr = aikido::trajectory::TrajectoryPtr;
+using Interpolated = aikido::trajectory::Interpolated;
 
 struct cozmoPose {
     double x;
@@ -96,6 +98,8 @@ public:
 			 std::chrono::milliseconds _period,
 			 TrajectoryPtr _traj);
 
+  std::shared_ptr<Interpolated> createInterpolatedTraj(std::vector<double> waypoints);
+ 
 private:
   /// SkeletonPtr to Cozmo
   SkeletonPtr cozmo;

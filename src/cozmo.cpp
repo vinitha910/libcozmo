@@ -4,6 +4,7 @@
 #include <Python.h>
 #include <chrono>
 #include "aikido/trajectory/Trajectory.hpp"
+#include "aikido/trajectory/Interpolated.hpp"
 
 namespace libcozmo{
 using BoxShape = dart::dynamics::BoxShape;
@@ -288,6 +289,8 @@ void Cozmo::executeTrajectory(SkeletonPtr _cozmo,
 			      TrajectoryPtr _traj) {
   
 }
+
+std::shared_ptr<Interpolated> createInterpolatedTraj(std::vector<double> waypoints){}
 
 void Cozmo::createIKModule() {
   ik = dart::dynamics::InverseKinematics::create(ghost_strut);
