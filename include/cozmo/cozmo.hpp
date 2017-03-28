@@ -98,7 +98,7 @@ public:
 			 std::chrono::milliseconds _period,
 			 TrajectoryPtr _traj);
 
-  std::shared_ptr<Interpolated> createInterpolatedTraj(std::vector<double> waypoints);
+std::shared_ptr<Interpolated> createInterpolatedTraj(std::vector<std::vector<double>> waypoints);
  
 private:
   /// SkeletonPtr to Cozmo
