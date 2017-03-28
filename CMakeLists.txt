@@ -9,7 +9,7 @@ find_package(Eigen3 REQUIRED)
 find_package(DART REQUIRED gui collision-bullet)
 set(Python_ADDITIONAL_VERSIONS 3.5)
 find_package(PythonLibs 3.5 REQUIRED)
-find_package(aikido REQUIRED COMPONENTS statespace)
+find_package(aikido REQUIRED COMPONENTS statespace control)
 
 add_library(cozmo SHARED
   src/cozmo.cpp

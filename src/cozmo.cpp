@@ -339,7 +339,7 @@ std::shared_ptr<Interpolated> createInterpolatedTraj(std::vector<std::vector<dou
   rvss->setValue(s, twist);
   std::shared_ptr<Interpolated> traj;
   traj = std::make_shared<Interpolated>(rvss, interpolator);
-  //traj->addWaypoint(waypoint.at(3), s);
+  traj->addWaypoint(waypoint.at(3), s);
 
   for (int i=2; i < num_waypoints; i++) {
     ss.copyState(&s2,&s1);
@@ -356,7 +356,7 @@ std::shared_ptr<Interpolated> createInterpolatedTraj(std::vector<std::vector<dou
     ss.compose(&s1inv, &s2, &s3);
     ss.logMap(&s3, twist);
     rvss->setValue(s, twist);
-    //traj->addWaypoint(waypoint.at(3), s);
+    traj->addWaypoint(waypoint.at(3), s);
   }
 
   return traj;
