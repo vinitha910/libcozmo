@@ -84,6 +84,24 @@ if(COZMO_BUILD_RVIZ_EXAMPLE)
     ${PYTHON_LIBRARIES}
   )
 
+  add_executable(execute_traj
+    src/execute_traj.cpp
+  )
+
+  target_include_directories(execute_traj PRIVATE
+    ${aikido_INCLUDE_DIRS}
+    ${roscpp_INCLUDE_DIRS}
+    ${PYTHON_INCLUDE_DIRS}
+  )
+
+  target_link_libraries(execute_traj
+    cozmo
+    ${aikido_LIBRARIES}
+    ${roscpp_LIBRARIES}
+    ${PYTHON_LIBRARIES}
+  )
+
+
 message(STATUS "PYTHON_LIBRARIES = ${PYTHON_LIBRARIES}")
 endif()
 

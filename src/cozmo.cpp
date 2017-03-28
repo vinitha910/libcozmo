@@ -3,12 +3,14 @@
 #include <cmath>
 #include <Python.h>
 #include <chrono>
+#include <thread>
 #include "aikido/trajectory/Trajectory.hpp"
 #include "aikido/trajectory/Interpolated.hpp"
 #include "aikido/statespace/Interpolator.hpp"
 #include "aikido/statespace/GeodesicInterpolator.hpp"
 #include "aikido/statespace/SE2.hpp"
-#include <aikido/statespace/Rn.hpp>
+#include "aikido/statespace/Rn.hpp"
+#include "aikido/statespace/dart/MetaSkeletonStateSpace.hpp"
 
 namespace libcozmo{
 using BoxShape = dart::dynamics::BoxShape;
@@ -23,6 +25,7 @@ using Rn = aikido::statespace::Rn;
 using Interpolator = aikido::statespace::Interpolator;
 using GeodesicInterpolator = aikido::statespace::GeodesicInterpolator;
 using InterpolatorPtr = aikido::statespace::InterpolatorPtr;
+using StateSpace = aikido::statespace::StateSpace;
 using StateSpacePtr = aikido::statespace::StateSpacePtr;
 using aikido::statespace::SE2;
 
@@ -297,36 +300,60 @@ void Cozmo::executeTwist(double V, double w, double dt) {
 void Cozmo::executeTrajectory(SkeletonPtr _cozmo, 
                               std::chrono::milliseconds _period,
 			      TrajectoryPtr _traj) {
+  using std::chrono::system_clock;
+  using std::chrono::duration;
+  using std::chrono::duration_cast;
+  using aikido::statespace::dart::MetaSkeletonStateSpace;
   
+  system_clock::time_point startTime = system_clock::now();
+  bool trajInExecution = true;
+  
+  while (trajInExecution) {
+        
+    auto space = std::dynamic_pointer_cast<MetaSkeletonStateSpace>(_traj->getStateSpace());
+    auto state = space->createState();
+
+    system_clock::time_point const now = system_clock::now();
+    double t = duration_cast<duration<double> >(now - startTime).count();
+
+    _traj->evaluate(t, state);
+
+    std::unique_lock<std::mutex> skeleton_lock(_cozmo->getMutex());
+    space->setState(state);
+    skeleton_lock.unlock();
+
+    bool const is_done = (t >= _traj->getEndTime());
+    if (is_done) trajInExecution = false;
+
+    std::this_thread::sleep_until(now + _period);
+  }
 }
 
-std::shared_ptr<Interpolated> createInterpolatedTraj(std::vector<std::vector<double>> waypoints) {
+SE2::State createState(double x, double y, double th) {
+  SE2::State s;
+  Eigen::Isometry2d t = Eigen::Isometry2d::Identity();
+  Eigen::Rotation2D<double> rot(th);
+  t.linear() = rot.toRotationMatrix();
+  Eigen::Vector2d trans;
+  trans << x, y;
+  t.translation() = trans;
+  s.setIsometry(t);
+  return s;
+}
+  
+std::shared_ptr<Interpolated> createInterpolatedTraj(std::vector<waypoint> waypoints) {
   std::shared_ptr<Rn> rvss = std::make_shared<Rn>(3);
   std::shared_ptr<Interpolator> interpolator = std::make_shared<GeodesicInterpolator>(rvss);
  
   int num_waypoints = waypoints.size();
-  std::vector<double> waypoint;
+  waypoint w;
  
-  SE2::State s1;
-  Eigen::Isometry2d t1 = Eigen::Isometry2d::Identity();
-  waypoint = waypoints.at(0);
-  Eigen::Rotation2D<double> rot1(waypoint.at(2));
-  t1.linear() = rot1.toRotationMatrix();
-  Eigen::Vector2d trans1;
-  trans1 << waypoint.at(0), waypoint.at(1);
-  t1.translation() = trans1;
-  s1.setIsometry(t1);
-
-  SE2::State s2;
-  Eigen::Isometry2d t2 = Eigen::Isometry2d::Identity();
-  waypoint = waypoints.at(1);
-  Eigen::Rotation2D<double> rot2(waypoint.at(2));
-  t2.linear() = rot2.toRotationMatrix();
-  Eigen::Vector2d trans2;
-  trans2 << waypoint.at(0), waypoint.at(1);
-  t2.translation() = trans2;
-  s2.setIsometry(t2);
-
+  w = waypoints.at(0);
+  SE2::State s1 = createState(w.x, w.y, w.th);
+  
+  w = waypoints.at(1);
+  SE2::State s2 = createState(w.x, w.y, w.th);
+  
   SE2::State s1inv;
   SE2::State s3;
   SE2 ss;
@@ -339,24 +366,19 @@ std::shared_ptr<Interpolated> createInterpolatedTraj(std::vector<std::vector<dou
   rvss->setValue(s, twist);
   std::shared_ptr<Interpolated> traj;
   traj = std::make_shared<Interpolated>(rvss, interpolator);
-  traj->addWaypoint(waypoint.at(3), s);
+  traj->addWaypoint(w.t, s);
 
   for (int i=2; i < num_waypoints; i++) {
     ss.copyState(&s2,&s1);
     
-    waypoint = waypoints.at(i);
-    Eigen::Rotation2D<double> rot2(waypoint.at(2));
-    t2.linear() = rot2.toRotationMatrix();
-    Eigen::Vector2d trans2;
-    trans2 << waypoint.at(0), waypoint.at(1);
-    t2.translation() = trans2;
-    s2.setIsometry(t2);
-
+    w = waypoints.at(i);
+    s2 = createState(w.x, w.y, w.th);
+    
     ss.getInverse(&s1, &s1inv);
     ss.compose(&s1inv, &s2, &s3);
     ss.logMap(&s3, twist);
     rvss->setValue(s, twist);
-    traj->addWaypoint(waypoint.at(3), s);
+    traj->addWaypoint(w.t, s);
   }
 
   return traj;

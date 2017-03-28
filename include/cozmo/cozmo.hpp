@@ -6,6 +6,7 @@
 #include <chrono>
 #include "aikido/trajectory/Trajectory.hpp"
 #include "aikido/trajectory/Interpolated.hpp"
+#include "aikido/statespace/SE2.hpp"
 
 namespace libcozmo {
 using BodyNodePtr = dart::dynamics::BodyNodePtr;
@@ -13,11 +14,19 @@ using SkeletonPtr = dart::dynamics::SkeletonPtr;
 using InverseKinematicsPtr = dart::dynamics::InverseKinematicsPtr;
 using TrajectoryPtr = aikido::trajectory::TrajectoryPtr;
 using Interpolated = aikido::trajectory::Interpolated;
+using aikido::statespace::SE2;
 
 struct cozmoPose {
     double x;
     double y;
+    double th;  
+};
+  
+struct waypoint {
+    double x;
+    double y;
     double th;
+    double t;
 };
 
 class Cozmo
@@ -98,7 +107,9 @@ public:
 			 std::chrono::milliseconds _period,
 			 TrajectoryPtr _traj);
 
-std::shared_ptr<Interpolated> createInterpolatedTraj(std::vector<std::vector<double>> waypoints);
+SE2::State createState(double x, double y, double th);
+  
+std::shared_ptr<Interpolated> createInterpolatedTraj(std::vector<waypoint> waypoints);
  
 private:
   /// SkeletonPtr to Cozmo
