@@ -22,7 +22,9 @@ struct cozmoPose {
     double th;  
 };
   
-struct waypoint {
+class Waypoint 
+{
+public:
     double x;
     double y;
     double th;
@@ -39,6 +41,8 @@ public:
 
   /// Frees all memory allocated by the Python Interpreter 
   ~Cozmo();
+
+  int add() { return 3; };
 
   /// The length of Cozmo's wheel base
   double wheel_base = 56;
@@ -107,9 +111,9 @@ public:
 			 std::chrono::milliseconds _period,
 			 TrajectoryPtr _traj);
 
-SE2::State createState(double x, double y, double th);
+  SE2::State createState(double x, double y, double th);
   
-std::shared_ptr<Interpolated> createInterpolatedTraj(std::vector<waypoint> waypoints);
+  std::shared_ptr<Interpolated> createInterpolatedTraj(std::vector<Waypoint> waypoints);
  
 private:
   /// SkeletonPtr to Cozmo

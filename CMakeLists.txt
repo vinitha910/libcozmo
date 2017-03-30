@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 2.8.12)
 project(libcozmo)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_CXX_COMPILER "clang++-3.5")
+set(CMAKE_C_COMPILER "clang-3.5")
 
 option(COZMO_BUILD_RVIZ_EXAMPLE "Build the RViz viewer integration example" ON)
 
@@ -9,7 +11,7 @@ find_package(Eigen3 REQUIRED)
 find_package(DART REQUIRED gui collision-bullet)
 set(Python_ADDITIONAL_VERSIONS 3.5)
 find_package(PythonLibs 3.5 REQUIRED)
-find_package(aikido REQUIRED COMPONENTS statespace control)
+find_package(aikido REQUIRED COMPONENTS statespace control rviz)
 
 add_library(cozmo SHARED
   src/cozmo.cpp
@@ -63,6 +65,23 @@ target_link_libraries(go_to_pose_example
   ${PYTHON_LIBRARIES}  
 )
 
+add_executable(execute_traj
+  src/execute_traj.cpp
+)
+
+target_include_directories(execute_traj PRIVATE
+  ${aikido_INCLUDE_DIRS}
+  #${roscpp_INCLUDE_DIRS}
+  ${PYTHON_INCLUDE_DIRS}
+)
+
+target_link_libraries(execute_traj
+  cozmo
+  ${aikido_LIBRARIES}
+  #${roscpp_LIBRARIES}
+  ${PYTHON_LIBRARIES}
+)
+
 if(COZMO_BUILD_RVIZ_EXAMPLE)
   find_package(roscpp)
   find_package(aikido REQUIRED COMPONENTS rviz)
@@ -83,24 +102,6 @@ if(COZMO_BUILD_RVIZ_EXAMPLE)
     ${roscpp_LIBRARIES}
     ${PYTHON_LIBRARIES}
   )
-
-  add_executable(execute_traj
-    src/execute_traj.cpp
-  )
-
-  target_include_directories(execute_traj PRIVATE
-    ${aikido_INCLUDE_DIRS}
-    ${roscpp_INCLUDE_DIRS}
-    ${PYTHON_INCLUDE_DIRS}
-  )
-
-  target_link_libraries(execute_traj
-    cozmo
-    ${aikido_LIBRARIES}
-    ${roscpp_LIBRARIES}
-    ${PYTHON_LIBRARIES}
-  )
-
 
 message(STATUS "PYTHON_LIBRARIES = ${PYTHON_LIBRARIES}")
 endif()

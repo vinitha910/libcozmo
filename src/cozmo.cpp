@@ -27,6 +27,7 @@ using GeodesicInterpolator = aikido::statespace::GeodesicInterpolator;
 using InterpolatorPtr = aikido::statespace::InterpolatorPtr;
 using StateSpace = aikido::statespace::StateSpace;
 using StateSpacePtr = aikido::statespace::StateSpacePtr;
+using Interpolated = aikido::trajectory::Interpolated;
 using aikido::statespace::SE2;
 
 Cozmo::Cozmo(const std::string& mesh_dir){
@@ -310,26 +311,36 @@ void Cozmo::executeTrajectory(SkeletonPtr _cozmo,
   
   while (trajInExecution) {
         
-    auto space = std::dynamic_pointer_cast<MetaSkeletonStateSpace>(_traj->getStateSpace());
+    std::cout << "getting state space" << std::endl;
+    auto space = _traj->getStateSpace();
+    if (space == NULL) { std::cout << "State space is NULL" << std::endl; }
+    std::cout << "creating state" << std::endl;
     auto state = space->createState();
+    std::cout << "created state" << std::endl;
 
     system_clock::time_point const now = system_clock::now();
     double t = duration_cast<duration<double> >(now - startTime).count();
 
+    std::cout << "evaluating state" << std::endl;
     _traj->evaluate(t, state);
 
+    std::cout << "locking skeleton" << std::endl;
     std::unique_lock<std::mutex> skeleton_lock(_cozmo->getMutex());
-    space->setState(state);
+
+    //SET STATE
+
     skeleton_lock.unlock();
+    std::cout << "unlocking skeleton" << std::endl;
 
     bool const is_done = (t >= _traj->getEndTime());
     if (is_done) trajInExecution = false;
 
+    std::cout << "sleeping" << std::endl;
     std::this_thread::sleep_until(now + _period);
   }
 }
 
-SE2::State createState(double x, double y, double th) {
+SE2::State Cozmo::createState(double x, double y, double th) {
   SE2::State s;
   Eigen::Isometry2d t = Eigen::Isometry2d::Identity();
   Eigen::Rotation2D<double> rot(th);
@@ -341,18 +352,18 @@ SE2::State createState(double x, double y, double th) {
   return s;
 }
   
-std::shared_ptr<Interpolated> createInterpolatedTraj(std::vector<waypoint> waypoints) {
+std::shared_ptr<Interpolated> Cozmo::createInterpolatedTraj(std::vector<Waypoint> waypoints) {
   std::shared_ptr<Rn> rvss = std::make_shared<Rn>(3);
   std::shared_ptr<Interpolator> interpolator = std::make_shared<GeodesicInterpolator>(rvss);
  
   int num_waypoints = waypoints.size();
-  waypoint w;
+  Waypoint *w = new Waypoint;
  
-  w = waypoints.at(0);
-  SE2::State s1 = createState(w.x, w.y, w.th);
+  w = &waypoints.at(0);
+  SE2::State s1 = createState(w->x, w->y, w->th);
   
-  w = waypoints.at(1);
-  SE2::State s2 = createState(w.x, w.y, w.th);
+  w = &waypoints.at(1);
+  SE2::State s2 = createState(w->x, w->y, w->th);
   
   SE2::State s1inv;
   SE2::State s3;
@@ -366,19 +377,19 @@ std::shared_ptr<Interpolated> createInterpolatedTraj(std::vector<waypoint> waypo
   rvss->setValue(s, twist);
   std::shared_ptr<Interpolated> traj;
   traj = std::make_shared<Interpolated>(rvss, interpolator);
-  traj->addWaypoint(w.t, s);
+  traj->addWaypoint(w->t, s);
 
   for (int i=2; i < num_waypoints; i++) {
     ss.copyState(&s2,&s1);
     
-    w = waypoints.at(i);
-    s2 = createState(w.x, w.y, w.th);
+    w = &waypoints.at(i);
+    s2 = createState(w->x, w->y, w->th);
     
     ss.getInverse(&s1, &s1inv);
     ss.compose(&s1inv, &s2, &s3);
     ss.logMap(&s3, twist);
     rvss->setValue(s, twist);
-    traj->addWaypoint(w.t, s);
+    traj->addWaypoint(w->t, s);
   }
 
   return traj;
@@ -535,4 +546,4 @@ SkeletonPtr Cozmo::createCozmo(const std::string& mesh_dir)
     
     return cozmo;
   }
-}  
+}
