@@ -107,8 +107,7 @@ public:
   /// \param x The x position of the waypoint
   /// \param y The y position of the waypoint
   /// \param th The theta of the waypoint 
-  void executeTrajectory(SkeletonPtr _cozmo,
-			 std::chrono::milliseconds _period,
+  void executeTrajectory(std::chrono::milliseconds _period,
 			 TrajectoryPtr _traj);
 
   SE2::State createState(double x, double y, double th);

@@ -298,8 +298,7 @@ void Cozmo::executeTwist(double V, double w, double dt) {
   driveWheels(vl,vr,0.0,0.0,dt);
 }
 
-void Cozmo::executeTrajectory(SkeletonPtr _cozmo, 
-                              std::chrono::milliseconds _period,
+void Cozmo::executeTrajectory(std::chrono::milliseconds _period,
 			      TrajectoryPtr _traj) {
   using std::chrono::system_clock;
   using std::chrono::duration;
@@ -315,19 +314,27 @@ void Cozmo::executeTrajectory(SkeletonPtr _cozmo,
     auto space = _traj->getStateSpace();
     if (space == NULL) { std::cout << "State space is NULL" << std::endl; }
     std::cout << "creating state" << std::endl;
-    auto state = space->createState();
+    //auto state = static_cast<SE2::State>(space->createState());
+    auto scopedState = space->createState();
     std::cout << "created state" << std::endl;
 
     system_clock::time_point const now = system_clock::now();
     double t = duration_cast<duration<double> >(now - startTime).count();
 
     std::cout << "evaluating state" << std::endl;
-    _traj->evaluate(t, state);
+    _traj->evaluate(t, scopedState);
 
     std::cout << "locking skeleton" << std::endl;
-    std::unique_lock<std::mutex> skeleton_lock(_cozmo->getMutex());
+    std::unique_lock<std::mutex> skeleton_lock(cozmo->getMutex());
 
-    //SET STATE
+    auto state = static_cast<SE2::State*>(scopedState.getState());
+    Eigen::Isometry2d trans = state->getIsometry();
+    
+    Eigen::Isometry3d trans_3d = Eigen::Isometry3d::Identity();
+    trans_3d.translation() << trans.translation()[0], trans.translation()[1], 0.;
+    //trans_3d.linear().block<2,2>(0,0) = trans.linear();
+    dart::dynamics::FreeJoint::setTransform(base.get(), trans_3d);
+    //static_cast<dart::dynamics::FreeJoint>(base->getParentJoint())->setRelativeTransform(trans_3d);
 
     skeleton_lock.unlock();
     std::cout << "unlocking skeleton" << std::endl;
@@ -353,43 +360,44 @@ SE2::State Cozmo::createState(double x, double y, double th) {
 }
   
 std::shared_ptr<Interpolated> Cozmo::createInterpolatedTraj(std::vector<Waypoint> waypoints) {
-  std::shared_ptr<Rn> rvss = std::make_shared<Rn>(3);
-  std::shared_ptr<Interpolator> interpolator = std::make_shared<GeodesicInterpolator>(rvss);
+  //std::shared_ptr<Rn> rvss = std::make_shared<Rn>(3);
+  std::shared_ptr<SE2> statespace = std::make_shared<SE2>();
+  std::shared_ptr<Interpolator> interpolator = std::make_shared<GeodesicInterpolator>(statespace);
  
   int num_waypoints = waypoints.size();
   Waypoint *w = new Waypoint;
  
-  w = &waypoints.at(0);
-  SE2::State s1 = createState(w->x, w->y, w->th);
+  //w = &waypoints.at(0);
+  //SE2::State s1 = createState(w->x, w->y, w->th);
   
-  w = &waypoints.at(1);
-  SE2::State s2 = createState(w->x, w->y, w->th);
+  //w = &waypoints.at(1);
+  //SE2::State s2 = createState(w->x, w->y, w->th);
   
-  SE2::State s1inv;
-  SE2::State s3;
-  SE2 ss;
-  Eigen::VectorXd twist;
-  ss.getInverse(&s1, &s1inv);
-  ss.compose(&s1inv, &s2, &s3);
-  ss.logMap(&s3, twist);
+  //SE2::State s1inv;
+  //SE2::State s3;
+  //SE2 ss;
+  //Eigen::VectorXd twist;
+  //ss.getInverse(&s1, &s1inv);
+  //ss.compose(&s1inv, &s2, &s3);
+  //ss.logMap(&s3, twist);
 
-  auto s = rvss->createState();
-  rvss->setValue(s, twist);
+  SE2::State s;
+  //statespace.setIsometry(s2, twist);
   std::shared_ptr<Interpolated> traj;
-  traj = std::make_shared<Interpolated>(rvss, interpolator);
-  traj->addWaypoint(w->t, s);
+  traj = std::make_shared<Interpolated>(statespace, interpolator);
+  //traj->addWaypoint(w->t, s);
 
-  for (int i=2; i < num_waypoints; i++) {
-    ss.copyState(&s2,&s1);
+  for (int i=0; i < num_waypoints; i++) {
+    //ss.copyState(&s2,&s1);
     
     w = &waypoints.at(i);
-    s2 = createState(w->x, w->y, w->th);
+    s = createState(w->x, w->y, w->th);
     
-    ss.getInverse(&s1, &s1inv);
-    ss.compose(&s1inv, &s2, &s3);
-    ss.logMap(&s3, twist);
-    rvss->setValue(s, twist);
-    traj->addWaypoint(w->t, s);
+    //ss.getInverse(&s1, &s1inv);
+    //ss.compose(&s1inv, &s2, &s3);
+    //ss.logMap(&s3, twist);
+    //statespace.setIsometry(s, twist);
+    traj->addWaypoint(w->t, &s);
   }
 
   return traj;

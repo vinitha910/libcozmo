@@ -38,31 +38,31 @@ int main(int argc, char* argv[])
   viewer.setAutoUpdate(true);
 
   std::cout << "creating waypoints" << std::endl;
-  libcozmo::Waypoint *w1 = new libcozmo::Waypoint;
-  w1->x = 30;
-  w1->y = 0;
-  w1->th = 0;
-  w1->t = 1;
+  libcozmo::Waypoint w1;
+  w1.x = .3;
+  w1.y = 0;
+  w1.th = 0;
+  w1.t = 1;
 
-  libcozmo::Waypoint *w2 = new libcozmo::Waypoint;
-  w2->x = 30;
-  w2->y = 30;
-  w2->th = M_PI/2;
-  w2->t = 3;
+  libcozmo::Waypoint w2;
+  w2.x = .3;
+  w2.y = .3;
+  w2.th = M_PI/2;
+  w2.t = 3;
 
-  libcozmo::Waypoint *w3 = new libcozmo::Waypoint;
-  w3->x = 60;
-  w3->y = 60;
-  w3->th = M_PI;
-  w3->t = 5;
+  libcozmo::Waypoint w3;
+  w3.x = .6;
+  w3.y = .6;
+  w3.th = M_PI;
+  w3.t = 5;
 
   std::cout << "created waypoints" << std::endl;
 
   std::cout << "adding waypoints to list" << std::endl;
   std::vector<libcozmo::Waypoint> waypoints;
-  waypoints.push_back(*w1);
-  waypoints.push_back(*w2);
-  waypoints.push_back(*w3);
+  waypoints.push_back(w1);
+  waypoints.push_back(w2);
+  waypoints.push_back(w3);
   std::cout << "added waypoints to list" << std::endl;
 
   std::cout << "creating traj" << std::endl;
@@ -71,8 +71,8 @@ int main(int argc, char* argv[])
   std::cout << "created traj" << std::endl;
 
   std::cout << "executing traj" << std::endl;
-  std::chrono::milliseconds period(200);
-  cozmo.executeTrajectory(skeleton, period, traj);
+  std::chrono::milliseconds period(2);
+  cozmo.executeTrajectory(period, traj);
   std::cout << "executed traj" << std::endl;
 
   return 0;
