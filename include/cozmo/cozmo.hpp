@@ -2,11 +2,34 @@
 #define COZMO_COZMO_HPP_
 
 #include "dart/dart.hpp"
+#include <Python.h>
+#include <chrono>
+#include "aikido/trajectory/Trajectory.hpp"
+#include "aikido/trajectory/Interpolated.hpp"
+#include "aikido/statespace/SE2.hpp"
 
 namespace libcozmo {
 using BodyNodePtr = dart::dynamics::BodyNodePtr;
 using SkeletonPtr = dart::dynamics::SkeletonPtr;
 using InverseKinematicsPtr = dart::dynamics::InverseKinematicsPtr;
+using TrajectoryPtr = aikido::trajectory::TrajectoryPtr;
+using Interpolated = aikido::trajectory::Interpolated;
+using aikido::statespace::SE2;
+
+struct cozmoPose {
+    double x;
+    double y;
+    double th;  
+};
+  
+class Waypoint 
+{
+public:
+    double x;
+    double y;
+    double th;
+    double t;
+};
 
 class Cozmo
 {
@@ -15,6 +38,12 @@ public:
 
   /// \param mesh_dir path to the libcozmo/meshes folder
   Cozmo(const std::string& mesh_dir);
+
+  /// Frees all memory allocated by the Python Interpreter 
+  ~Cozmo();
+ 
+  /// The PyObject of the instance of the CozmoConnection class 
+  PyObject *pConn;
 
   /// Returns SkeletonPtr to cozmo
   /// Though Cozmo only has a 1 DOF forklift, it is modelled as 6 DOF due
@@ -25,6 +54,61 @@ public:
   /// Takes in pos (angle in radians) and sets forklift position
   void setForkliftPosition(double pos);
 
+  /// Returns pose (x, y, z, angle_z) of robot
+  cozmoPose getPose();
+
+  /// Drives Cozmo to specified pose
+
+  /// \param pos vector that contains the x, y, z position in mm
+  /// \param angle_z z Euler component of the obkect's rotation
+  void goToPose(std::vector<double> pos, double angle_z);
+
+  /// Drives Cozmo in a straight line for the specified distance 
+
+  /// \param dist The distance to drive (>0 for forwards, <0 for backwards) 
+  /// \param speed The speed (mmps) to drive at (should always be >0) 
+  /// \param distInInches The distance is in inches by default, if 0.0 it is in mm
+  void driveStraight(double dist, double speed, double distInInches=1.0);
+
+  /// Turn Cozmo around its current position
+  
+  /// \param angle The angle to turn (>0 to turn left, <0 to turn right)
+  /// \param radians The angle is in radians by default, if 0.0 it is in degrees
+  void turnInPlace(double angle, double angleInRad=1.0);
+
+  /// Moves Cozmo's treads at the specified speeds and accelerations
+
+  /// \param l_wheel_speed Speed of the left tread (mm/s)
+  /// \param r_wheel_speed Speed of the right tread (mm/s)
+  /// \param l_wheel_acc Acceleration of the left tread (not required; mm/s^2)
+  /// \param r_wheel_acc Acceleration of the right tread (not required; mm/s^2)
+  /// \param duration The duration to move wheels (seconds?); if no duration is 
+  ///                 provided, stop_all_motors() must be called manually
+  void driveWheels(double l_wheel_speed, 
+		   double r_wheel_speed, 
+		   double l_wheel_acc=0.0, 
+		   double r_wheel_acc=0.0,
+		   double duration=0.0);
+  
+  /// Executes a trajectory defined by a set of waypoints 
+
+  /// \param period The period of the trajectory 
+  /// \param traj The Trajectory Pointer to the trajectory that needs to be executed
+  void executeTrajectory(std::chrono::milliseconds period,
+			 TrajectoryPtr traj);
+
+  /// Return and SE2 State defined by the inputted x, y and theta
+
+  /// \param x The x coordinate of the state
+  /// \param y The y coordinate of the state
+  /// \param th The rotation theta of the state
+  SE2::State createState(double x, double y, double th);
+
+  /// Creates an interpolated trajectory given a set of waypoints
+
+  /// \param waypoints A vector of waypoints
+  std::shared_ptr<Interpolated> createInterpolatedTraj(std::vector<Waypoint> waypoints);
+ 
 private:
   /// SkeletonPtr to Cozmo
   SkeletonPtr cozmo;

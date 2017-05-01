@@ -2,11 +2,16 @@ cmake_minimum_required(VERSION 2.8.12)
 project(libcozmo)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_CXX_COMPILER "clang++-3.5")
+set(CMAKE_C_COMPILER "clang-3.5")
 
 option(COZMO_BUILD_RVIZ_EXAMPLE "Build the RViz viewer integration example" ON)
 
 find_package(Eigen3 REQUIRED)
 find_package(DART REQUIRED gui collision-bullet)
+set(Python_ADDITIONAL_VERSIONS 3.5)
+find_package(PythonLibs 3.5 REQUIRED)
+find_package(aikido REQUIRED COMPONENTS statespace control rviz)
 
 add_library(cozmo SHARED
   src/cozmo.cpp
@@ -19,14 +24,18 @@ target_include_directories(cozmo PUBLIC
 
 target_include_directories(cozmo PRIVATE
   ${DART_INCLUDE_DIRS}
+  ${PYTHON_INCLUDE_DIRS}
 )
 
 target_include_directories(cozmo PUBLIC
   ${EIGEN3_INCLUDE_DIR}
+  ${aikido_INCLUDE_DIRS}
 )
 
 target_link_libraries(cozmo PUBLIC
-  ${DART_LIBRARIES}
+  ${DART_LIBRARIES} 
+  ${PYTHON_LIBRARIES}
+  ${aikido_LIBRARIES}
 )
 
 
@@ -34,15 +43,49 @@ add_executable(dart_example
   src/dart_example.cpp
 )
 
+target_include_directories(dart_example PRIVATE
+  ${PYTHON_INCLUDE_DIRS}  
+)
+  
 target_link_libraries(dart_example
   cozmo
+  ${PYTHON_LIBRARIES}
 )
 
+add_executable(go_to_pose_example
+  src/go_to_pose_example.cpp
+)
+
+target_include_directories(go_to_pose_example PRIVATE
+  ${PYTHON_INCLUDE_DIRS} 
+)
+
+target_link_libraries(go_to_pose_example
+  cozmo
+  ${PYTHON_LIBRARIES}  
+)
+
+add_executable(execute_traj
+  src/execute_traj.cpp
+)
+
+target_include_directories(execute_traj PRIVATE
+  ${aikido_INCLUDE_DIRS}
+  #${roscpp_INCLUDE_DIRS}
+  ${PYTHON_INCLUDE_DIRS}
+)
+
+target_link_libraries(execute_traj
+  cozmo
+  ${aikido_LIBRARIES}
+  #${roscpp_LIBRARIES}
+  ${PYTHON_LIBRARIES}
+)
 
 if(COZMO_BUILD_RVIZ_EXAMPLE)
   find_package(roscpp)
   find_package(aikido REQUIRED COMPONENTS rviz)
-
+  
   add_executable(rviz_example
     src/rviz_example.cpp
   )
@@ -50,13 +93,17 @@ if(COZMO_BUILD_RVIZ_EXAMPLE)
   target_include_directories(rviz_example PRIVATE
     ${aikido_INCLUDE_DIRS}
     ${roscpp_INCLUDE_DIRS}
+    ${PYTHON_INCLUDE_DIRS}
   )
 
   target_link_libraries(rviz_example
     cozmo
     ${aikido_LIBRARIES}
     ${roscpp_LIBRARIES}
+    ${PYTHON_LIBRARIES}
   )
+
+message(STATUS "PYTHON_LIBRARIES = ${PYTHON_LIBRARIES}")
 endif()
 
 

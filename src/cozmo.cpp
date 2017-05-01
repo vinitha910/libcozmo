@@ -1,6 +1,14 @@
 #include "cozmo/cozmo.hpp"
 #include "Eigen/Dense"
 #include <cmath>
+#include <Python.h>
+#include <chrono>
+#include <thread>
+#include "aikido/trajectory/Trajectory.hpp"
+#include "aikido/trajectory/Interpolated.hpp"
+#include "aikido/statespace/Interpolator.hpp"
+#include "aikido/statespace/GeodesicInterpolator.hpp"
+#include "aikido/statespace/SE2.hpp"
 
 namespace libcozmo{
 using BoxShape = dart::dynamics::BoxShape;
@@ -11,9 +19,340 @@ using VisualAspect = dart::dynamics::VisualAspect;
 using Skeleton = dart::dynamics::Skeleton; 
 using WeldJointConstraint = dart::constraint::WeldJointConstraint;
 using InverseKinematicsPtr = dart::dynamics::InverseKinematicsPtr;
+using Interpolator = aikido::statespace::Interpolator;
+using GeodesicInterpolator = aikido::statespace::GeodesicInterpolator;
+using Interpolated = aikido::trajectory::Interpolated;
+using aikido::statespace::SE2;
 
 Cozmo::Cozmo(const std::string& mesh_dir){
   createCozmo(mesh_dir);
+
+  Py_Initialize();
+  PyRun_SimpleString("import sys; import os; sys.path.insert(0, os.getcwd)");
+}
+
+Cozmo::~Cozmo() {
+  Py_Finalize();
+}
+
+cozmoPose Cozmo::getPose() {
+  PyGILState_STATE gs;
+  gs = PyGILState_Ensure();
+
+  std::stringstream buf;
+  buf << "import cozmo" << std::endl
+      << "pose = None" << std::endl
+      << "def getPose(robot: cozmo.robot.Robot):" << std::endl
+      << "    x = robot.pose.position.x" << std::endl
+      << "    y = robot.pose.position.y" << std::endl
+      << "    angle_z = robot.pose.rotation.angle_z.radians" << std::endl
+      << "    global pose" << std::endl
+      << "    pose = [x, y, angle_z]" << std::endl
+      << "cozmo.run_program(getPose)" << std::endl;
+
+  PyObject *pCompiledFn;
+  pCompiledFn = Py_CompileString(buf.str().c_str(), "", Py_file_input);
+  std::cout << "[cozmo.cpp] Compiled Python Function" << std::endl;
+
+  PyObject *pModule;
+  pModule = PyImport_ExecCodeModule("getPose", pCompiledFn);
+  std::cout << "[cozmo.cpp] Getting Pose" << std::endl;
+
+  PyObject *pCozPose = PyObject_GetAttrString(pModule, "pose");
+
+  double x = PyFloat_AsDouble(PyList_GetItem(pCozPose, 0));
+  double y = PyFloat_AsDouble(PyList_GetItem(pCozPose, 1));
+  double angle_z = PyFloat_AsDouble(PyList_GetItem(pCozPose, 2));
+
+  std::cout << "Pose: [" << x << ", " << y << ", " << angle_z << "]" << std::endl;
+  PyGILState_Release(gs);
+
+  cozmoPose pose;
+  pose.x = x;
+  pose.y = y;
+  pose.th = angle_z;
+
+  return pose;
+}
+
+void Cozmo::goToPose(std::vector<double> pos, double angle_z) {
+  PyGILState_STATE gs;
+  gs = PyGILState_Ensure();
+
+  std::stringstream buf;
+  buf << "import cozmo" << std::endl
+      << "pose = None" << std::endl
+      << "def goToPose(robot: cozmo.robot.Robot):" << std::endl
+      << "    action = robot.go_to_pose(pose)" << std::endl
+      << "    action.wait_for_completed()" << std::endl
+      << "def setCozPose(p):" << std::endl
+      << "    r = cozmo.util.Angle(radians=p[3])" << std::endl
+      << "    global pose" << std::endl
+      << "    pose = cozmo.util.pose_z_angle(p[0], p[1], p[2], r)" << std::endl
+      << "    cozmo.run_program(goToPose)" << std::endl;
+
+  PyObject *pCompiledFn;
+  pCompiledFn = Py_CompileString(buf.str().c_str(), "", Py_file_input);
+  std::cout << "[cozmo.cpp] Compiled Python Function" << std::endl;
+
+  PyObject *pModule;
+  pModule = PyImport_ExecCodeModule("goToPose", pCompiledFn);
+  std::cout << "[cozmo.cpp] Create goToPose Module" << std::endl;
+
+  PyObject *pGoToPoseFn = PyObject_GetAttrString(pModule, "setCozPose");
+  std::cout << "[cozmo.cpp] Retrieved goToPose Function" << std::endl;
+
+  PyObject *pyList = PyList_New(4);
+  int setItem;
+
+  PyObject *x = Py_BuildValue("f", pos[0]);
+  PyObject *y = Py_BuildValue("f", pos[1]);
+  PyObject *z = Py_BuildValue("f", pos[2]);
+  PyObject *rot = Py_BuildValue("f", angle_z);
+
+  setItem = PyList_SetItem(pyList, 0, x);
+  setItem = PyList_SetItem(pyList, 1, y);
+  setItem = PyList_SetItem(pyList, 2, z);
+  setItem = PyList_SetItem(pyList, 3, rot);
+
+  PyObject *args = PyTuple_Pack(1, pyList);
+
+  std::cout << "[cozmo.cpp] Created PyList args" << std::endl;
+  std::cout << "[cozmo.cpp] Going to Pose [x: " << pos[0] << ", y: " << pos[1] 
+	    << ", z: " << pos[2] << ", angle_z: " << angle_z << "]" << std::endl;
+  PyObject *myResult = PyObject_CallObject(pGoToPoseFn, args);
+ 
+  PyGILState_Release(gs);
+}
+
+void Cozmo::driveStraight(double dist, double speed, double distInInches) {
+  PyGILState_STATE gs;
+  gs = PyGILState_Ensure();
+
+  std::stringstream buf;
+  buf << "import cozmo" << std::endl
+      << "dist = 0" << std::endl
+      << "speed = 0" << std::endl
+      << "def driveStraight(robot: cozmo.robot.Robot):" << std::endl
+      << "    action = robot.drive_straight(dist, speed, should_play_anim=False)" << std::endl
+      << "    action.wait_for_completed()" << std::endl
+      << "def setCozObj(args):" << std::endl
+      << "    global dist" << std::endl
+      << "    if args[2] == 1.0:" << std::endl
+      << "        dist = cozmo.util.distance_inches(args[0])" << std::endl
+      << "    else:" << std::endl
+      << "        dist = cozmo.util.distance_mm(args[0])" << std::endl
+      << "    global speed" << std::endl
+      << "    speed = cozmo.util.Speed(args[1])" << std::endl
+      << "    cozmo.run_program(driveStraight)" << std::endl;
+
+  PyObject *pCompiledFn;
+  pCompiledFn = Py_CompileString(buf.str().c_str(), "", Py_file_input);
+  std::cout << "[cozmo.cpp] Compiled Python Function" << std::endl;
+
+  PyObject *pModule;
+  pModule = PyImport_ExecCodeModule("driveStraight", pCompiledFn);
+  std::cout << "[cozmo.cpp] Create driveStraight Module" << std::endl;
+
+  PyObject *pDriveStraightFn = PyObject_GetAttrString(pModule, "setCozObj");
+  std::cout << "[cozmo.cpp] Retrieved driveStraight Function" << std::endl;
+
+  PyObject *pyList = PyList_New(3);
+  int setItem;
+
+  PyObject *d = Py_BuildValue("f", dist);
+  PyObject *s = Py_BuildValue("f", speed);
+  PyObject *dist_type = Py_BuildValue("f", distInInches);
+   
+  setItem = PyList_SetItem(pyList, 0, d);
+  setItem = PyList_SetItem(pyList, 1, s);
+  setItem = PyList_SetItem(pyList, 2, dist_type);
+  PyObject *args = PyTuple_Pack(1, pyList);
+
+  std::cout << "[cozmo.cpp] Created PyList args" << std::endl;
+  std::cout << "[cozmo.cpp] Driving Stright [distance: " << dist 
+	    << ", speed: " << speed << "]" << std::endl;
+
+  PyObject *myResult = PyObject_CallObject(pDriveStraightFn, args);
+ 
+  PyGILState_Release(gs);
+}
+
+void Cozmo::turnInPlace(double angle, double angleInRad) {
+  PyGILState_STATE gs;
+  gs = PyGILState_Ensure();
+
+  std::stringstream buf;
+  buf << "import cozmo" << std::endl
+      << "angle = 0" << std::endl
+      << "def turnInPlace(robot: cozmo.robot.Robot):" << std::endl
+      << "    action = robot.turn_in_place(angle)" << std::endl
+      << "    action.wait_for_completed()" << std::endl
+      << "def setCozObj(args):" << std::endl
+      << "    global angle" << std::endl
+      << "    if args[1] == 1.0:" << std::endl
+      << "        angle = cozmo.util.radians(args[0])" << std::endl
+      << "    else:" << std::endl
+      << "        angle = cozmo.util.degrees(args[0])" << std::endl
+      << "    cozmo.run_program(turnInPlace)" << std::endl;
+
+  PyObject *pCompiledFn;
+  pCompiledFn = Py_CompileString(buf.str().c_str(), "", Py_file_input);
+  std::cout << "[cozmo.cpp] Compiled Python Function" << std::endl;
+
+  PyObject *pModule;
+  pModule = PyImport_ExecCodeModule("turnInPlace", pCompiledFn);
+  std::cout << "[cozmo.cpp] Created turnInPlace Module" << std::endl;
+
+  PyObject *pTurnInPlaceFn = PyObject_GetAttrString(pModule, "setCozObj");
+  std::cout << "[cozmo.cpp] Retrieved turnInPlace Function" << std::endl;
+
+  PyObject *pyList = PyList_New(2);
+  int setItem;
+
+  PyObject *a = Py_BuildValue("f", angle);
+  PyObject *angle_type = Py_BuildValue("f", angleInRad);
+     
+  setItem = PyList_SetItem(pyList, 0, a);
+  setItem = PyList_SetItem(pyList, 1, angle_type);
+  PyObject *args = PyTuple_Pack(1, pyList);
+
+  std::cout << "[cozmo.cpp] Created PyList args" << std::endl;
+  std::cout << "[cozmo.cpp] Turning In Place [angle: " << angle 
+	    << "]" << std::endl;
+
+  PyObject *myResult = PyObject_CallObject(pTurnInPlaceFn, args);
+ 
+  PyGILState_Release(gs);
+}
+
+void Cozmo::driveWheels(double l_wheel_speed, double r_wheel_speed,
+			double l_wheel_acc, double r_wheel_acc,
+			double duration) {
+  PyGILState_STATE gs;
+  gs = PyGILState_Ensure();
+
+  std::stringstream buf;
+  buf << "import cozmo" << std::endl
+      << "import time" << std::endl
+      << "vals = None" << std::endl
+      << "def driveWheels(robot: cozmo.robot.Robot):" << std::endl
+      << "    robot.drive_wheels(vals[0],vals[1],vals[2],vals[3],vals[4])" << std::endl
+      << "def createGlobals(args):" << std::endl
+      << "    global vals" << std::endl
+      << "    vals = args" << std::endl
+      << "    cozmo.run_program(driveWheels)" << std::endl;
+
+  PyObject *pCompiledFn;
+  pCompiledFn = Py_CompileString(buf.str().c_str(), "", Py_file_input);
+  std::cout << "[cozmo.cpp] Compiled Python Function" << std::endl;
+
+  PyObject *pModule;
+  pModule = PyImport_ExecCodeModule("driveWheels", pCompiledFn);
+  std::cout << "[cozmo.cpp] Create driveWheels Module" << std::endl;
+
+  PyObject *pDriveWheelsFn = PyObject_GetAttrString(pModule, "createGlobals");
+  std::cout << "[cozmo.cpp] Retrieved driveWheels Function" << std::endl;
+
+  PyObject *pyList = PyList_New(5);
+  int setItem;
+
+  PyObject *lws = Py_BuildValue("f", l_wheel_speed);
+  PyObject *rws = Py_BuildValue("f", r_wheel_speed);
+  PyObject *lwa = Py_BuildValue("f", l_wheel_acc);
+  PyObject *rwa = Py_BuildValue("f", r_wheel_acc);
+  PyObject *dur = Py_BuildValue("f", duration);
+
+  setItem = PyList_SetItem(pyList, 0, lws);
+  setItem = PyList_SetItem(pyList, 1, rws);
+  setItem = PyList_SetItem(pyList, 2, lwa);
+  setItem = PyList_SetItem(pyList, 3, rwa);
+  setItem = PyList_SetItem(pyList, 4, dur);
+
+  PyObject *args = PyTuple_Pack(1, pyList);
+
+  std::cout << "[cozmo.cpp] Created PyList args" << std::endl;
+  std::cout << "[cozmo.cpp] Driving Wheels [l_wheel_speed: " << l_wheel_speed
+	    << ", r_wheel_speed: " << r_wheel_speed 
+            << ", l_wheel_acc: " << l_wheel_acc
+            << ", r_wheel_acc: " << r_wheel_acc 
+	    << ", duration: " << duration << "]" << std::endl;
+
+  PyObject *myResult = PyObject_CallObject(pDriveWheelsFn, args);
+ 
+  PyGILState_Release(gs);
+}
+
+void Cozmo::executeTrajectory(std::chrono::milliseconds period,
+			      TrajectoryPtr traj) {
+  using std::chrono::system_clock;
+  using std::chrono::duration;
+  using std::chrono::duration_cast;
+  
+  system_clock::time_point startTime = system_clock::now();
+  bool trajInExecution = true;
+  
+  while (trajInExecution) {
+        
+    auto space = traj->getStateSpace();
+    if (space == NULL) { std::cout << "State space is NULL" << std::endl; }    
+    auto scopedState = space->createState();
+    
+    system_clock::time_point const now = system_clock::now();
+    double t = duration_cast<duration<double> >(now - startTime).count();
+
+    traj->evaluate(t, scopedState);
+
+    std::unique_lock<std::mutex> skeleton_lock(cozmo->getMutex());
+
+    auto state = static_cast<SE2::State*>(scopedState.getState());
+    Eigen::Isometry2d trans = state->getIsometry();
+    
+    Eigen::Isometry3d trans_3d = Eigen::Isometry3d::Identity();
+    trans_3d.translation() << trans.translation()[0], trans.translation()[1], 0.;
+    trans_3d.linear().block<2,2>(0,0) = trans.linear();
+
+    base->getParentJoint()->setPositions(dart::dynamics::FreeJoint::convertToPositions(trans_3d));
+
+    skeleton_lock.unlock();
+
+    bool const is_done = (t >= traj->getEndTime());
+    if (is_done) trajInExecution = false;
+
+    std::this_thread::sleep_until(now + period);
+  }
+}
+
+SE2::State Cozmo::createState(double x, double y, double th) {
+  SE2::State s;
+  Eigen::Isometry2d t = Eigen::Isometry2d::Identity();
+  Eigen::Rotation2D<double> rot(th);
+  t.linear() = rot.toRotationMatrix();
+  Eigen::Vector2d trans;
+  trans << x, y;
+  t.translation() = trans;
+  s.setIsometry(t);
+  return s;
+}
+  
+std::shared_ptr<Interpolated> Cozmo::createInterpolatedTraj(std::vector<Waypoint> waypoints) {
+  std::shared_ptr<SE2> statespace = std::make_shared<SE2>();
+  std::shared_ptr<Interpolator> interpolator = std::make_shared<GeodesicInterpolator>(statespace);
+ 
+  int num_waypoints = waypoints.size();
+  Waypoint *w = new Waypoint;
+
+  SE2::State s;
+  std::shared_ptr<Interpolated> traj;
+  traj = std::make_shared<Interpolated>(statespace, interpolator);
+
+  for (int i=0; i < num_waypoints; i++) {    
+    w = &waypoints.at(i);
+    s = createState(w->x, w->y, w->th);
+    traj->addWaypoint(w->t, &s);
+  }
+
+  return traj;
 }
 
 void Cozmo::createIKModule() {
@@ -167,4 +506,4 @@ SkeletonPtr Cozmo::createCozmo(const std::string& mesh_dir)
     
     return cozmo;
   }
-}  
+}

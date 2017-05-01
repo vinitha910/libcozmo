@@ -2,10 +2,13 @@
 #include "dart/dart.hpp"
 #include "dart/gui/gui.hpp"
 #include "ros/ros.h"
+#include <chrono>
 #include <cstdlib>
+#include <math.h>
+#include "aikido/trajectory/Interpolated.hpp"
 #include <aikido/rviz/InteractiveMarkerViewer.hpp>
 
-static const std::string topicName("dart_markers");
+using Interpolated = aikido::trajectory::Interpolated;
 
 int main(int argc, char* argv[])
 {
@@ -17,7 +20,9 @@ int main(int argc, char* argv[])
   const std::string mesh_dir = argv[1];
   libcozmo::Cozmo cozmo(mesh_dir);
 
-  //visualizer::Viz viz(cozmo, mesh_dir, argc, argv);
+  dart::dynamics::SkeletonPtr skeleton;
+  skeleton = cozmo.getCozmoSkeleton();
+
   static const std::string topicName("dart_markers");
 
   // Start the RViz viewer.
@@ -28,26 +33,37 @@ int main(int argc, char* argv[])
 	    << "' InteractiveMarker topic in RViz." << std::endl;
 
   aikido::rviz::InteractiveMarkerViewer viewer(topicName);
-  viewer.addSkeleton(cozmo.getCozmoSkeleton());
+  viewer.addSkeleton(skeleton);
   viewer.setAutoUpdate(true);
 
-  std::string input;
-  double i = 0;
-  do {
-    std::cout << "\nEnter forklift position (0-0.86 radians, -1 to quit): ";
-    std::cin >> input;
-    char* end;
-    i = std::strtod(input.c_str(), &end);
-    if (end == input.c_str()) {
-      std::cout << "\nPlease enter a valid double." << std::endl;
-      continue;
-    }
-    if (i > 0.86 || i < 0) {
-      std::cout << "\nThis value exceeds the joint limits, please enter a valid position." << std::endl;
-      continue;
-    }
-    cozmo.setForkliftPosition(i);
-  } while (i != -1.0);
+  libcozmo::Waypoint w1;
+  w1.x = .3;
+  w1.y = .2;
+  w1.th = M_PI/2;
+  w1.t = 1;
+
+  libcozmo::Waypoint w2;
+  w2.x = .3;
+  w2.y = .3;
+  w2.th = M_PI/2;
+  w2.t = 3;
+
+  libcozmo::Waypoint w3;
+  w3.x = .3;
+  w3.y = .4;
+  w3.th = M_PI;
+  w3.t = 5;
+
+  std::vector<libcozmo::Waypoint> waypoints;
+  waypoints.push_back(w1);
+  waypoints.push_back(w2);
+  waypoints.push_back(w3);
+
+  std::shared_ptr<Interpolated> traj;
+  traj = cozmo.createInterpolatedTraj(waypoints);
+
+  std::chrono::milliseconds period(6);
+  cozmo.executeTrajectory(period, traj);
 
   return 0;
 }
