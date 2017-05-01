@@ -9,8 +9,6 @@
 #include "aikido/statespace/Interpolator.hpp"
 #include "aikido/statespace/GeodesicInterpolator.hpp"
 #include "aikido/statespace/SE2.hpp"
-#include "aikido/statespace/Rn.hpp"
-#include "aikido/statespace/dart/MetaSkeletonStateSpace.hpp"
 
 namespace libcozmo{
 using BoxShape = dart::dynamics::BoxShape;
@@ -21,12 +19,8 @@ using VisualAspect = dart::dynamics::VisualAspect;
 using Skeleton = dart::dynamics::Skeleton; 
 using WeldJointConstraint = dart::constraint::WeldJointConstraint;
 using InverseKinematicsPtr = dart::dynamics::InverseKinematicsPtr;
-using Rn = aikido::statespace::Rn;
 using Interpolator = aikido::statespace::Interpolator;
 using GeodesicInterpolator = aikido::statespace::GeodesicInterpolator;
-using InterpolatorPtr = aikido::statespace::InterpolatorPtr;
-using StateSpace = aikido::statespace::StateSpace;
-using StateSpacePtr = aikido::statespace::StateSpacePtr;
 using Interpolated = aikido::trajectory::Interpolated;
 using aikido::statespace::SE2;
 
@@ -290,41 +284,26 @@ void Cozmo::driveWheels(double l_wheel_speed, double r_wheel_speed,
   PyGILState_Release(gs);
 }
 
-void Cozmo::executeTwist(double V, double w, double dt) {
-  double vdiff = (w * wheel_base)/2;
-  double vl = V - vdiff;
-  double vr = V + vdiff;
-
-  driveWheels(vl,vr,0.0,0.0,dt);
-}
-
-void Cozmo::executeTrajectory(std::chrono::milliseconds _period,
-			      TrajectoryPtr _traj) {
+void Cozmo::executeTrajectory(std::chrono::milliseconds period,
+			      TrajectoryPtr traj) {
   using std::chrono::system_clock;
   using std::chrono::duration;
   using std::chrono::duration_cast;
-  using aikido::statespace::dart::MetaSkeletonStateSpace;
   
   system_clock::time_point startTime = system_clock::now();
   bool trajInExecution = true;
   
   while (trajInExecution) {
         
-    std::cout << "getting state space" << std::endl;
-    auto space = _traj->getStateSpace();
-    if (space == NULL) { std::cout << "State space is NULL" << std::endl; }
-    std::cout << "creating state" << std::endl;
-    //auto state = static_cast<SE2::State>(space->createState());
+    auto space = traj->getStateSpace();
+    if (space == NULL) { std::cout << "State space is NULL" << std::endl; }    
     auto scopedState = space->createState();
-    std::cout << "created state" << std::endl;
-
+    
     system_clock::time_point const now = system_clock::now();
     double t = duration_cast<duration<double> >(now - startTime).count();
 
-    std::cout << "evaluating state" << std::endl;
-    _traj->evaluate(t, scopedState);
+    traj->evaluate(t, scopedState);
 
-    std::cout << "locking skeleton" << std::endl;
     std::unique_lock<std::mutex> skeleton_lock(cozmo->getMutex());
 
     auto state = static_cast<SE2::State*>(scopedState.getState());
@@ -337,13 +316,11 @@ void Cozmo::executeTrajectory(std::chrono::milliseconds _period,
     //static_cast<dart::dynamics::FreeJoint>(base->getParentJoint())->setRelativeTransform(trans_3d);
 
     skeleton_lock.unlock();
-    std::cout << "unlocking skeleton" << std::endl;
 
-    bool const is_done = (t >= _traj->getEndTime());
+    bool const is_done = (t >= traj->getEndTime());
     if (is_done) trajInExecution = false;
 
-    std::cout << "sleeping" << std::endl;
-    std::this_thread::sleep_until(now + _period);
+    std::this_thread::sleep_until(now + period);
   }
 }
 
@@ -360,43 +337,19 @@ SE2::State Cozmo::createState(double x, double y, double th) {
 }
   
 std::shared_ptr<Interpolated> Cozmo::createInterpolatedTraj(std::vector<Waypoint> waypoints) {
-  //std::shared_ptr<Rn> rvss = std::make_shared<Rn>(3);
   std::shared_ptr<SE2> statespace = std::make_shared<SE2>();
   std::shared_ptr<Interpolator> interpolator = std::make_shared<GeodesicInterpolator>(statespace);
  
   int num_waypoints = waypoints.size();
   Waypoint *w = new Waypoint;
- 
-  //w = &waypoints.at(0);
-  //SE2::State s1 = createState(w->x, w->y, w->th);
-  
-  //w = &waypoints.at(1);
-  //SE2::State s2 = createState(w->x, w->y, w->th);
-  
-  //SE2::State s1inv;
-  //SE2::State s3;
-  //SE2 ss;
-  //Eigen::VectorXd twist;
-  //ss.getInverse(&s1, &s1inv);
-  //ss.compose(&s1inv, &s2, &s3);
-  //ss.logMap(&s3, twist);
 
   SE2::State s;
-  //statespace.setIsometry(s2, twist);
   std::shared_ptr<Interpolated> traj;
   traj = std::make_shared<Interpolated>(statespace, interpolator);
-  //traj->addWaypoint(w->t, s);
 
-  for (int i=0; i < num_waypoints; i++) {
-    //ss.copyState(&s2,&s1);
-    
+  for (int i=0; i < num_waypoints; i++) {    
     w = &waypoints.at(i);
     s = createState(w->x, w->y, w->th);
-    
-    //ss.getInverse(&s1, &s1inv);
-    //ss.compose(&s1inv, &s2, &s3);
-    //ss.logMap(&s3, twist);
-    //statespace.setIsometry(s, twist);
     traj->addWaypoint(w->t, &s);
   }
 

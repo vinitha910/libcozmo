@@ -41,12 +41,7 @@ public:
 
   /// Frees all memory allocated by the Python Interpreter 
   ~Cozmo();
-
-  int add() { return 3; };
-
-  /// The length of Cozmo's wheel base
-  double wheel_base = 56;
-  
+ 
   /// The PyObject of the instance of the CozmoConnection class 
   PyObject *pConn;
 
@@ -95,23 +90,23 @@ public:
 		   double r_wheel_acc=0.0,
 		   double duration=0.0);
   
-  /// Converts the linear and angular velocity into velocities for individual wheels
-  /// and drives the robot to the specified waypoint
+  /// Executes a trajectory defined by a set of waypoints 
 
-  /// \param V Linear Velocity of robot
-  /// \param w Angular Velocity of robot
-  void executeTwist(double V, double w, double dt);
+  /// \param period The period of the trajectory 
+  /// \param traj The Trajectory Pointer to the trajectory that needs to be executed
+  void executeTrajectory(std::chrono::milliseconds period,
+			 TrajectoryPtr traj);
 
-  /// Takes in a list of waypoints representing the trajectory to be executed 
+  /// Return and SE2 State defined by the inputted x, y and theta
 
-  /// \param x The x position of the waypoint
-  /// \param y The y position of the waypoint
-  /// \param th The theta of the waypoint 
-  void executeTrajectory(std::chrono::milliseconds _period,
-			 TrajectoryPtr _traj);
-
+  /// \param x The x coordinate of the state
+  /// \param y The y coordinate of the state
+  /// \param th The rotation theta of the state
   SE2::State createState(double x, double y, double th);
-  
+
+  /// Creates an interpolated trajectory given a set of waypoints
+
+  /// \param waypoints A vector of waypoints
   std::shared_ptr<Interpolated> createInterpolatedTraj(std::vector<Waypoint> waypoints);
  
 private:
