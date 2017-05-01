@@ -23,7 +23,6 @@ int main(int argc, char* argv[])
   dart::dynamics::SkeletonPtr skeleton;
   skeleton = cozmo.getCozmoSkeleton();
 
-  //visualizer::Viz viz(cozmo, mesh_dir, argc, argv);
   static const std::string topicName("dart_markers");
 
   // Start the RViz viewer.
@@ -37,11 +36,10 @@ int main(int argc, char* argv[])
   viewer.addSkeleton(skeleton);
   viewer.setAutoUpdate(true);
 
-  std::cout << "creating waypoints" << std::endl;
   libcozmo::Waypoint w1;
   w1.x = .3;
-  w1.y = 0;
-  w1.th = 0;
+  w1.y = .2;
+  w1.th = M_PI/2;
   w1.t = 1;
 
   libcozmo::Waypoint w2;
@@ -51,29 +49,21 @@ int main(int argc, char* argv[])
   w2.t = 3;
 
   libcozmo::Waypoint w3;
-  w3.x = .6;
-  w3.y = .6;
+  w3.x = .3;
+  w3.y = .4;
   w3.th = M_PI;
   w3.t = 5;
 
-  std::cout << "created waypoints" << std::endl;
-
-  std::cout << "adding waypoints to list" << std::endl;
   std::vector<libcozmo::Waypoint> waypoints;
   waypoints.push_back(w1);
   waypoints.push_back(w2);
   waypoints.push_back(w3);
-  std::cout << "added waypoints to list" << std::endl;
 
-  std::cout << "creating traj" << std::endl;
   std::shared_ptr<Interpolated> traj;
   traj = cozmo.createInterpolatedTraj(waypoints);
-  std::cout << "created traj" << std::endl;
 
-  std::cout << "executing traj" << std::endl;
-  std::chrono::milliseconds period(2);
+  std::chrono::milliseconds period(6);
   cozmo.executeTrajectory(period, traj);
-  std::cout << "executed traj" << std::endl;
 
   return 0;
 }

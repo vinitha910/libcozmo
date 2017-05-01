@@ -311,9 +311,9 @@ void Cozmo::executeTrajectory(std::chrono::milliseconds period,
     
     Eigen::Isometry3d trans_3d = Eigen::Isometry3d::Identity();
     trans_3d.translation() << trans.translation()[0], trans.translation()[1], 0.;
-    //trans_3d.linear().block<2,2>(0,0) = trans.linear();
-    dart::dynamics::FreeJoint::setTransform(base.get(), trans_3d);
-    //static_cast<dart::dynamics::FreeJoint>(base->getParentJoint())->setRelativeTransform(trans_3d);
+    trans_3d.linear().block<2,2>(0,0) = trans.linear();
+
+    base->getParentJoint()->setPositions(dart::dynamics::FreeJoint::convertToPositions(trans_3d));
 
     skeleton_lock.unlock();
 
