@@ -81,11 +81,11 @@ $ `catkin locate -b libcozmo`/execute_traj `catkin locate -s libcozmo`/meshes
 
 A trajectory is defined by a set of waypoints. First, define waypoints at specific times:
 ```shell
-$ libcozmo::Waypoint w1;
-$ w1.x = X_POSITION;
-$ w1.y = Y_POSITION;
-$ w1.th = ROTATION_THETA;
-$ w1.t = TIME;
+libcozmo::Waypoint w1;
+w1.x = X_POSITION;
+w1.y = Y_POSITION;
+w1.th = ROTATION_THETA;
+w1.t = TIME;
 ```
 
 Pass in an `std::vector` of waypoints to the `createInterpolatedTraj` function to create an interpolated trajectory. Pass this trajectory and a period into the `executeTrajectory` function to execute the trajectory.
