@@ -75,7 +75,6 @@ cozmoPose Cozmo::getPose() {
   return pose;
 }
 
-  // TODO: Remove z position because Cozmo can't fly 
 void Cozmo::goToPose(std::vector<double> pos, double angle_z) {
   PyGILState_STATE gs;
   gs = PyGILState_Ensure();

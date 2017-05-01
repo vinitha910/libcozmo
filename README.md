@@ -1,6 +1,6 @@
 # libcozmo
 libcozmo is a C++ library for simulating and running [Cozmo](https://anki.com/en-us/cozmo) based on DART and AIKIDO.
-Current tools allow you simulate the forklift movement and execute few functions from the Cozmo SDK.
+Current tools allow you simulate the forklift movement, execute few functions from the Cozmo SDK and execute an interpolated trajectory in simulation.
 
 ## Installation
 Checkout and build this package, [aikido](https://github.com/personalrobotics/aikido.git) from source, and install [DART](http://dartsim.github.io/) (version 6.0 or above). You
@@ -64,6 +64,31 @@ $ cmake .. -DCOZMO_BUILD_RVIZ_EXAMPLE=OFF # e.g. if ros/aikido not available
 $ make
 $ ./dart_example `pwd`/../meshes
 ```
+
+## Trajectory Execution in Simulation
+
+A sample script has been provided to show how to simulate trajectory execution in the Rviz viewer. To run this script, run the following commands:
+```shell
+$ screen -S roscore
+$ roscore
+$ <CTRL><A>+<D>
+$ screen -S rviz
+$ . devel/setup.bash
+$ rviz
+$ <CTRL><A>+<D>
+$ `catkin locate -b libcozmo`/execute_traj `catkin locate -s libcozmo`/meshes
+```
+
+A trajectory is defined by a set of waypoints. First, define waypoints at specific times:
+```shell
+$ libcozmo::Waypoint w1;
+$ w1.x = X_POSITION;
+$ w1.y = Y_POSITION;
+$ w1.th = ROTATION_THETA;
+$ w1.t = TIME;
+```
+
+Pass in an `std::vector` of waypoints to the `createInterpolatedTraj` function to create an interpolated trajectory. Pass this trajectory and a period into the `executeTrajectory` function to execute the trajectory.
 
 ## License
 libcozmo is licensed under a BSD license. See [LICENSE](https://github.com/personalrobotics/libcozmo/blob/master/LICENSE) for more information.
