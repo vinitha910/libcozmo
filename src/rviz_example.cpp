@@ -24,7 +24,7 @@ int main(int argc, char* argv[])
   std::cout << "Starting viewer. Please subscribe to the '" << topicName
 	    << "' InteractiveMarker topic in RViz." << std::endl;
 
-  aikido::rviz::InteractiveMarkerViewer viewer(topicName);
+  aikido::rviz::InteractiveMarkerViewer viewer(topicName, "world");
   viewer.addSkeleton(cozmo.getCozmoSkeleton());
   viewer.setAutoUpdate(true);
 

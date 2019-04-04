@@ -18,7 +18,7 @@ int main(int argc, char* argv[])
   WorldPtr world(new dart::simulation::World);
   world->addSkeleton(coz);
   
-  dart::gui::SimWindow win;
+  dart::gui::glut::SimWindow win;
   win.setWorld(world);
 
   glutInit(&argc, argv);
