@@ -1,0 +1,7 @@
+setup.py
+src/cozmopy/__init__.py
+src/cozmopy.egg-info/PKG-INFO
+src/cozmopy.egg-info/SOURCES.txt
+src/cozmopy.egg-info/dependency_links.txt
+src/cozmopy.egg-info/not-zip-safe
+src/cozmopy.egg-info/top_level.txt

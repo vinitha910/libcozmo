@@ -1,0 +1,1 @@
+/usr/bin/c++  -fPIC  -DVERSION_INFO=\"0.1\"  -O3 -DNDEBUG  -shared  -o ../../src/libcozmo/cozmopy.so CMakeFiles/cozmopy.dir/src/cozmopy/cozmo_py.cpp.o CMakeFiles/cozmopy.dir/src/cozmopy/cozmopy.cpp.o -flto -lcozmo -lpython2.7 

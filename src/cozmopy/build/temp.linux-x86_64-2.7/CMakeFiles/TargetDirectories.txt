@@ -1,0 +1,7 @@
+/home/vinitha/workspaces/cozmo_ws/src/libcozmo/src/cozmopy/build/temp.linux-x86_64-2.7/CMakeFiles/install.dir
+/home/vinitha/workspaces/cozmo_ws/src/libcozmo/src/cozmopy/build/temp.linux-x86_64-2.7/CMakeFiles/list_install_components.dir
+/home/vinitha/workspaces/cozmo_ws/src/libcozmo/src/cozmopy/build/temp.linux-x86_64-2.7/CMakeFiles/rebuild_cache.dir
+/home/vinitha/workspaces/cozmo_ws/src/libcozmo/src/cozmopy/build/temp.linux-x86_64-2.7/CMakeFiles/cozmopy.dir
+/home/vinitha/workspaces/cozmo_ws/src/libcozmo/src/cozmopy/build/temp.linux-x86_64-2.7/CMakeFiles/install/strip.dir
+/home/vinitha/workspaces/cozmo_ws/src/libcozmo/src/cozmopy/build/temp.linux-x86_64-2.7/CMakeFiles/install/local.dir
+/home/vinitha/workspaces/cozmo_ws/src/libcozmo/src/cozmopy/build/temp.linux-x86_64-2.7/CMakeFiles/edit_cache.dir

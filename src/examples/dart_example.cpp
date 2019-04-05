@@ -1,4 +1,4 @@
-#include "cozmo/cozmo.hpp"
+#include "cozmo_description/cozmo.hpp"
 #include "dart/dart.hpp"
 #include "dart/gui/gui.hpp"
 
