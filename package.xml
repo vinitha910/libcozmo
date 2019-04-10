@@ -8,4 +8,8 @@
     <author email="vrangane@andrew.cmu.edu">Vinitha Ranganeni</author>
     <license>BSD</license>
     <buildtool_depend>catkin</buildtool_depend>
+
+  	<build_depend>pybind11_catkin</build_depend>
+
+  	<run_depend>pybind11_catkin</run_depend>
 </package>

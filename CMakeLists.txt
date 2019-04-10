@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.8.12)
 project(libcozmo)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_BUILD_TYPE Release)
 set(INCLUDE_INSTALL_DIR "include")
 set(LIBRARY_INSTALL_DIR "lib")
 set(CONFIG_INSTALL_DIR "${LIBRARY_INSTALL_DIR}/${PROJECT_NAME}/cmake")
@@ -11,13 +12,11 @@ find_package(aikido REQUIRED COMPONENTS rviz)
 find_package(Eigen3 REQUIRED)
 find_package(DART REQUIRED gui collision-bullet)
 
-catkin_package()
+#install(DIRECTORY "meshes"
+#    DESTINATION "${CATKIN_PACKAGE_SHARE_DESTINATION}"
+#)
 
-install(DIRECTORY "meshes"
-    DESTINATION "${CATKIN_PACKAGE_SHARE_DESTINATION}"
-)
-
-add_library(cozmo
+add_library(cozmo SHARED
   src/cozmo_description/cozmo.cpp
 )
 
@@ -61,9 +60,6 @@ target_link_libraries(dart_example
   cozmo
 )
 
-#==============================================================================
-# Installation.
-#
 install(DIRECTORY "include/"
   DESTINATION "${INCLUDE_INSTALL_DIR}")
 
@@ -71,8 +67,8 @@ install(DIRECTORY "include/"
 install(FILES "package.xml"
   DESTINATION "share/${PROJECT_NAME}")
 
-install(
-  FILES
-    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
-    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
-  DESTINATION "${CONFIG_INSTALL_DIR}")
+install(DIRECTORY src/include/cozmo_description DESTINATION include
+  FILES_MATCHING PATTERN "*.h")
+install(TARGETS cozmo
+  LIBRARY DESTINATION lib)
+

@@ -1,13 +1,13 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.0)
 project(cozmopy)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(PYTHON_INCLUDE_DIRS "/usr/include/python2.7")
+
 find_package(pybind11 REQUIRED)
-if(NOT pybind11_FOUND)
-  message(STATUS "BUILD_PYTHON is ON, but failed to find pybind11 >= "
-    "2.2.0. Disabling cozmopy."
-  )
-  return()
-endif()
+find_package(PythonInterp 2.7 REQUIRED )
+find_package(PythonLibs 2.7 REQUIRED )
+find_package(Eigen3 REQUIRED)
 
 execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
   "from distutils.sysconfig import get_python_lib;\
@@ -16,10 +16,8 @@ execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
-pybind11_add_module(cozmopy
-  MODULE
-  src/cozmopy/cozmo_py.cpp
-  src/cozmopy/cozmopy.cpp
+pybind11_add_module(cozmopy MODULE
+    cozmopy.cpp
 )
 
 target_include_directories(cozmopy 
