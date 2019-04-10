@@ -45,7 +45,7 @@ $ rviz
 $ <CTRL><A>+<D>
 $ rosrun libcozmo rviz_example MESH_DIR
 ```
-where `MESH_DIR` is the **full path** to the `libcozmo/meshes` folder. After all the commands are run, subscribe to the InteractiveMarker topic in Rviz. Cozmo should now appear in the viewer.
+where `MESH_DIR` is the **full path** to the `libcozmo/cozmo_description/meshes` folder. After all the commands are run, subscribe to the InteractiveMarker topic in Rviz. Cozmo should now appear in the viewer.
 
 This script allows you to enter angles (in radians) for the forklift position; the movement will be reflected by the robot in the viewer.
 
