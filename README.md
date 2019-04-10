@@ -5,8 +5,7 @@ Current tools allow you simulate the forklift movement.
 ## Installation
 Checkout and build this package, [DART](https://github.com/dartsim/dart.git) (version 6.0 or above)
 and [aikido](https://github.com/personalrobotics/aikido.git) from source. You
-can automate the checkout and build by following [development environment]
-(https://www.personalrobotics.ri.cmu.edu/software/development-environment)
+can automate the checkout and build by following [development environment](https://www.personalrobotics.ri.cmu.edu/software/development-environment)
 instructions with this `.rosinstall` file:
 ```yaml
 - git:
