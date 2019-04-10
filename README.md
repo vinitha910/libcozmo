@@ -12,16 +12,26 @@ instructions with this `.rosinstall` file:
 - git:
     local-name: aikido
     uri: https://github.com/personalrobotics/aikido.git
-    version: xenial_fixes
+    version: master
 - git:
     local-name: dart
     uri: https://github.com/dartsim/dart.git
-    version: release-6.0
+    version: v6.7.0
 - git:
-    local-name: cozmo_description
-    uri: https://github.com/personalrobotics/cozmo_description.git
-    version: master
+    local-name: libcozmo
+    uri: https://github.com/vinitha910/libcozmo
+    version: cozmopy
 ```
+
+Once the dependencies are install, you can build libcozmo using CMake:
+```bash
+$ mkdir build
+$ cd build
+$ cmake ..
+$ make 
+$ sudo make install
+```
+
 ## Usage
 To load Cozmo into the Rviz viewer, run the following commands:
 ```shell
@@ -35,7 +45,7 @@ $ rviz
 $ <CTRL><A>+<D>
 $ rosrun libcozmo rviz_example MESH_DIR
 ```
-where `MESH_DIR` is the path to the `libcozmo/meshes` folder. After all the commands are run, subscribe to the InteractiveMarker topic in Rviz. Cozmo should now appear in the viewer.
+where `MESH_DIR` is the **full path** to the `libcozmo/meshes` folder. After all the commands are run, subscribe to the InteractiveMarker topic in Rviz. Cozmo should now appear in the viewer.
 
 This script allows you to enter angles (in radians) for the forklift position; the movement will be reflected by the robot in the viewer.
 
