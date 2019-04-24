@@ -4,7 +4,8 @@ project(cozmopy)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 set(PYTHON_INCLUDE_DIRS "/usr/include/python2.7")
 
-find_package(pybind11 REQUIRED)
+add_subdirectory(pybind11)
+#find_package(pybind11 REQUIRED)
 find_package(PythonInterp 2.7 REQUIRED )
 find_package(PythonLibs 2.7 REQUIRED )
 find_package(Eigen3 REQUIRED)
@@ -20,7 +21,7 @@ pybind11_add_module(cozmopy MODULE
     cozmopy.cpp
 )
 
-target_include_directories(cozmopy 
+target_include_directories(cozmopy
   PUBLIC
     ${EIGEN3_INCLUDE_DIR}
     ${PYTHON_INCLUDE_DIRS}
@@ -39,7 +40,7 @@ target_link_libraries(cozmopy PUBLIC
 set_target_properties(cozmopy
   PROPERTIES
     PREFIX ""
-    SUFFIX ".so" 
+    SUFFIX ".so"
     DEBUG_POSTFIX ""
 )
 

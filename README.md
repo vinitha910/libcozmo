@@ -3,6 +3,19 @@ libcozmo is a C++ library for simulating and running [Cozmo](https://anki.com/en
 Current tools allow you simulate the forklift movement.
 
 ## Installation
+
+Install the following dependencies:
+```
+$ sudo add-apt-repository ppa:libccd-debs/ppa
+$ sudo add-apt-repository ppa:fcl-debs/ppa
+$ sudo add-apt-repository ppa:dartsim/ppa
+$ sudo add-apt-repository ppa:personalrobotics/ppa
+$ sudo apt-get update
+$ sudo apt-get install cmake build-essential libboost-filesystem-dev libmicrohttpd-dev libompl-dev libtinyxml2-dev libyaml-cpp-dev pr-control-msgs
+$ sudo apt-get install libdart6-all-dev # If using ubuntu 14.04, skip this line and install DART from source
+$ sudo pip install pybind11
+```
+
 Checkout and build this package, [DART](https://github.com/dartsim/dart.git) (version 6.0 or above)
 and [aikido](https://github.com/personalrobotics/aikido.git) from source. You
 can automate the checkout and build by following [development environment](https://www.personalrobotics.ri.cmu.edu/software/development-environment)
@@ -13,22 +26,9 @@ instructions with this `.rosinstall` file:
     uri: https://github.com/personalrobotics/aikido.git
     version: master
 - git:
-    local-name: dart
-    uri: https://github.com/dartsim/dart.git
-    version: v6.7.0
-- git:
     local-name: libcozmo
     uri: https://github.com/vinitha910/libcozmo
     version: cozmopy
-```
-
-Once the dependencies are install, you can build libcozmo using CMake:
-```bash
-$ mkdir build
-$ cd build
-$ cmake ..
-$ make 
-$ sudo make install
 ```
 
 ## Usage
@@ -57,4 +57,4 @@ $ rosrun libcozmo dart_example MESH_DIR
 libcozmo is licensed under a BSD license. See [LICENSE](https://github.com/personalrobotics/libcozmo/blob/master/LICENSE) for more information.
 
 ## Author/Acknowledgements
-libcozmo is developed by Vinitha Ranganeni ([**@vinitha910**](https://github.com/vinitha910)) at the [Personal Robotics Lab](https://personalrobotics.ri.cmu.edu/) in the [Robotics Institute](http://ri.cmu.edu/) at [Carnegie Mellon University](http://www.cmu.edu/). I would like to thank Clint Liddick ([**@ClintLiddick**](https://github.com/ClintLiddick)) and J.S. Lee ([**@jslee02**](https://github.com/jslee02)) for their assistance in developing libcozmo and Ariana Keeling for her assistance in developing the SolidWorks model of Cozmo. . 
+libcozmo is developed by Vinitha Ranganeni ([**@vinitha910**](https://github.com/vinitha910)) at the [Personal Robotics Lab](https://personalrobotics.ri.cmu.edu/) in the [Robotics Institute](http://ri.cmu.edu/) at [Carnegie Mellon University](http://www.cmu.edu/). I would like to thank Clint Liddick ([**@ClintLiddick**](https://github.com/ClintLiddick)) and J.S. Lee ([**@jslee02**](https://github.com/jslee02)) for their assistance in developing libcozmo and Ariana Keeling for her assistance in developing the SolidWorks model of Cozmo. .

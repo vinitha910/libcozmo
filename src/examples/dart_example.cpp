@@ -17,8 +17,8 @@ int main(int argc, char* argv[])
   dart::dynamics::SkeletonPtr coz = cozmo.getCozmoSkeleton();
   WorldPtr world(new dart::simulation::World);
   world->addSkeleton(coz);
-  
-  dart::gui::glut::SimWindow win;
+
+  dart::gui::SimWindow win;
   win.setWorld(world);
 
   glutInit(&argc, argv);
