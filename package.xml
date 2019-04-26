@@ -9,9 +9,9 @@
     <license>BSD</license>
     <buildtool_depend>catkin</buildtool_depend>
 
-    <build_depend>aikido</build_depend>
-    <build_depend>dartsim</build_depend>
-
+    <depend>aikido</depend>
+    <depend>dartsim</depend>
+    
   	<build_depend>pybind11_catkin</build_depend>
   	<run_depend>pybind11_catkin</run_depend>
 </package>
