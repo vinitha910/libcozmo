@@ -1,4 +1,4 @@
-# libcozmo
+# libcozmo [![Build Status](https://travis-ci.org/vinitha910/libcozmo.svg?branch=cozmopy)](https://travis-ci.org/vinitha910/libcozmo)
 libcozmo is a C++ library for simulating and running [Cozmo](https://anki.com/en-us/cozmo) based on DART and AIKIDO.
 Current tools allow you simulate the forklift movement.
 
