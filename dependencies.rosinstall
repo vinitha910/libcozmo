@@ -2,7 +2,3 @@
     local-name: aikido
     uri: https://github.com/personalrobotics/aikido.git
     version: master
-- git:
-    local-name: libcozmo
-    uri: https://github.com/vinitha910/libcozmo
-    version: cozmopy
