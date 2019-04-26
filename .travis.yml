@@ -102,10 +102,10 @@ install:
 # wstool looks for a ROSINSTALL_FILE defined in the environment variables.
 before_script:
   # Install Other dependencies
-  - sudo add-apt-repository ppa:libccd-debs/ppa
-  - sudo add-apt-repository ppa:fcl-debs/ppa
-  - sudo add-apt-repository ppa:dartsim/ppa
-  - sudo add-apt-repository ppa:personalrobotics/ppa
+  - sudo add-apt-repository -y ppa:libccd-debs/ppa
+  - sudo add-apt-repository -y ppa:fcl-debs/ppa
+  - sudo add-apt-repository -y ppa:dartsim/ppa
+  - sudo add-apt-repository -y ppa:personalrobotics/ppa
   - sudo apt-get update
   - sudo apt-get install cmake build-essential libboost-filesystem-dev libmicrohttpd-dev libompl-dev libtinyxml2-dev libyaml-cpp-dev pr-control-msgs
   - sudo apt-get install libdart6-all-dev
