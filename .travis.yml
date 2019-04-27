@@ -101,6 +101,7 @@ before_script:
   - sudo add-apt-repository -y ppa:fcl-debs/ppa
   - sudo add-apt-repository -y ppa:dartsim/ppa
   - sudo add-apt-repository -y ppa:personalrobotics/ppa
+  - sudo rm -vf /etc/apt/sources.list.d/*riak*
   - sudo apt-get update
   - sudo apt-get install cmake build-essential libboost-filesystem-dev libmicrohttpd-dev libompl-dev libtinyxml2-dev libyaml-cpp-dev pr-control-msgs
   - sudo apt-get install libdart6-all-dev
