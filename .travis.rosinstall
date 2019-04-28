@@ -3,6 +3,10 @@
     uri: https://github.com/personalrobotics/pr_control_msgs.git
     version: master
 - git:
+    local-name: dart
+    uri: https://github.com/dartsim/dart.git
+    version: v6.7.0
+- git:
     local-name: aikido
     uri: https://github.com/personalrobotics/aikido.git
     version: master
