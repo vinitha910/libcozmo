@@ -18,6 +18,9 @@ before_script:
   - sudo rm -vf /etc/apt/sources.list.d/*riak*
   - sudo apt-get update
   - sudo apt-get install cmake cmake-data build-essential libboost-filesystem-dev libmicrohttpd-dev libompl-dev libtinyxml2-dev libyaml-cpp-dev
+  - sudo apt-get install libeigen3-dev libassimp-dev libccd-dev libfcl-dev libboost-regex-dev libboost-system-dev
+  - sudo apt-get install libopenscenegraph-dev
+  - sudo apt-get install libnlopt-dev
   - sudo pip install pybind11
 
 script:
