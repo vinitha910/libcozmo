@@ -17,6 +17,7 @@ before_script:
   - sudo add-apt-repository -y ppa:personalrobotics/ppa
   # - sudo add-apt-repository -y ppa:libccd-debs/ppa
   # - sudo add-apt-repository -y ppa:fcl-debs/ppa
+  - sudo apt-get purge -y ros-kinetic-dartsim
   - sudo apt-get update
   - sudo apt-get install cmake build-essential libboost-filesystem-dev libdart6-optimizer-nlopt-dev libdart6-utils-dev libdart6-utils-urdf-dev libmicrohttpd-dev libompl-dev libtinyxml2-dev libyaml-cpp-dev
   - sudo pip install pybind11
