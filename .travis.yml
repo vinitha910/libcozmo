@@ -2,6 +2,8 @@ language: generic
 services:
   - docker
 
+dist: xenial
+
 env:
   matrix:
     - ROS_DISTRO="kinetic" UPSTREAM_WORKSPACE=file
