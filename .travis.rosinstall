@@ -1,7 +1,7 @@
--git:
-	local-name:pr_control_msgs
-	uri: https://github.com/personalrobotics/pr_control_msgs.git
-	version: master
+- git:
+    local-name: pr_control_msgs
+    uri: https://github.com/personalrobotics/pr_control_msgs.git
+    version: master
 - git:
     local-name: aikido
     uri: https://github.com/personalrobotics/aikido.git
