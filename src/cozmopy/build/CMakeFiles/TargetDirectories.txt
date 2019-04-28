@@ -1,6 +1,0 @@
-/home/vinitha/workspaces/cozmo_ws/src/libcozmo/src/cozmopy/build/CMakeFiles/install.dir
-/home/vinitha/workspaces/cozmo_ws/src/libcozmo/src/cozmopy/build/CMakeFiles/list_install_components.dir
-/home/vinitha/workspaces/cozmo_ws/src/libcozmo/src/cozmopy/build/CMakeFiles/cozmopy.dir
-/home/vinitha/workspaces/cozmo_ws/src/libcozmo/src/cozmopy/build/CMakeFiles/install/local.dir
-/home/vinitha/workspaces/cozmo_ws/src/libcozmo/src/cozmopy/build/CMakeFiles/rebuild_cache.dir
-/home/vinitha/workspaces/cozmo_ws/src/libcozmo/src/cozmopy/build/CMakeFiles/edit_cache.dir

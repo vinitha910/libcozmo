@@ -1,1 +1,0 @@
-/usr/bin/c++  -fPIC  -std=c++11  -shared  -o cozmopy.so CMakeFiles/cozmopy.dir/cozmopy.cpp.o -flto -lcozmo -lpython3.6m 
