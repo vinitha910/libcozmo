@@ -41,20 +41,15 @@ $ screen -S rviz
 $ . devel/setup.bash
 $ rviz
 $ <CTRL><A>+<D>
-$ `rosrun libcozmo rviz_example `catkin locate -s libcozmo`/src/cozmo_description/meshes
+$ rosrun libcozmo rviz_example `catkin locate -s libcozmo`/src/cozmo_description/meshes
 ```
 where `MESH_DIR` is the **full path** to the `libcozmo/cozmo_description/meshes` folder. After all the commands are run, subscribe to the InteractiveMarker topic in Rviz. Cozmo should now appear in the viewer.
 
 This script allows you to enter angles (in radians) for the forklift position; the movement will be reflected by the robot in the viewer.
 
-To load Cozmo in the DART viewer in a non-catkin/ros environment, run the following commands:
+To load Cozmo in the DART viewer in a non-catkin/ros environment, run:
 ```shell
-$ cd libcozmo
-$ mkdir build
-$ cd build
-$ cmake ..
-$ make
-$ ./dart_example `pwd`/../meshes
+$ rosrun libcozmo dart_example `catkin locate -s libcozmo`/src/cozmo_description/meshes`
 ```
 
 ## Trajectory Execution in Simulation
@@ -68,7 +63,7 @@ $ screen -S rviz
 $ . devel/setup.bash
 $ rviz
 $ <CTRL><A>+<D>
-$ `rosrun libcozmo execute_traj `catkin locate -s libcozmo`/src/cozmo_description/meshes
+$ rosrun libcozmo execute_traj `catkin locate -s libcozmo`/src/cozmo_description/meshes
 ```
 
 A trajectory is defined by a set of waypoints. First, define waypoints at specific times:
