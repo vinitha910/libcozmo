@@ -41,24 +41,18 @@ $ screen -S rviz
 $ . devel/setup.bash
 $ rviz
 $ <CTRL><A>+<D>
-$ `catkin locate -b libcozmo`/rviz_example `catkin locate -s libcozmo`/meshes
+$ `rosrun libcozmo rviz_example `catkin locate -s libcozmo`/src/cozmo_description/meshes
 ```
 where `MESH_DIR` is the **full path** to the `libcozmo/cozmo_description/meshes` folder. After all the commands are run, subscribe to the InteractiveMarker topic in Rviz. Cozmo should now appear in the viewer.
 
 This script allows you to enter angles (in radians) for the forklift position; the movement will be reflected by the robot in the viewer.
-
-Similarily, to run the script that moves Cozmo to the specified pose, run the following command: 
-```shell
-$ `catkin locate -b libcozmo`/go_to_pose_example `catkin locate -s libcozmo`/meshes
-```
-NOTE: You must be connected to Cozmo in SDK Mode to run this script; the script does not simulate the movement in the viewer. For instructions on how to connect to Cozmo in SDK Mode [click here](http://cozmosdk.anki.com/docs/initial.html).
 
 To load Cozmo in the DART viewer in a non-catkin/ros environment, run the following commands:
 ```shell
 $ cd libcozmo
 $ mkdir build
 $ cd build
-$ cmake .. -DCOZMO_BUILD_RVIZ_EXAMPLE=OFF # e.g. if ros/aikido not available 
+$ cmake ..
 $ make
 $ ./dart_example `pwd`/../meshes
 ```
@@ -74,7 +68,7 @@ $ screen -S rviz
 $ . devel/setup.bash
 $ rviz
 $ <CTRL><A>+<D>
-$ `catkin locate -b libcozmo`/execute_traj `catkin locate -s libcozmo`/meshes
+$ `rosrun libcozmo execute_traj `catkin locate -s libcozmo`/src/cozmo_description/meshes
 ```
 
 A trajectory is defined by a set of waypoints. First, define waypoints at specific times:
