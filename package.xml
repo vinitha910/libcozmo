@@ -12,4 +12,8 @@
 
     <depend>aikido</depend>
     <depend>dartsim</depend>
+    
+    <build_depend>pybind11_catkin</build_depend>
+    <exec_depend>pybind11_catkin</exec_depend>
+
 </package>
