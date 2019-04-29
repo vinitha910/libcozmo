@@ -15,7 +15,7 @@ $ sudo apt-get install cmake build-essential libboost-filesystem-dev libdart6-op
 $ sudo apt-get install ros-kinetic-pybind11-catkin
 ```
 
-Checkout and build [aikido](https://github.com/personalrobotics/aikido.git) from source. You can automate the checkout and build by following [development environment](https://www.personalrobotics.ri.cmu.edu/software/development-environment)
+Checkout and build [aikido](https://github.com/personalrobotics/aikido.git) from source. You can automate the checkout and build by following [development environment](https://personalrobotics.cs.washington.edu/software/development-environment)
 instructions with this `.rosinstall` file:
 ```yaml
 - git:
