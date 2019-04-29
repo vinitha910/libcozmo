@@ -1,25 +1,21 @@
 # libcozmo [![Build Status](https://travis-ci.com/vinitha910/libcozmo.svg?branch=cozmopy)](https://travis-ci.com/vinitha910/libcozmo)
 
-libcozmo is a C++ library for simulating and running [Cozmo](https://anki.com/en-us/cozmo) based on DART and AIKIDO.
-Current tools allow you simulate the forklift movement.
+libcozmo is a C++ library for simulating and running [Cozmo](https://anki.com/en-us/cozmo) based on DART and AIKIDO. Additionally, this library has python bindings (cozmopy) for easier use with the [Cozmo SDK](http://cozmosdk.anki.com/docs/). Current tools allow you simulate the forklift movement. libcozmo currently only supports **Ubuntu 16.04** and is under heavy development. 
 
 ## Installation
 
-Install the following dependencies:
+Install [ROS Kinetic](http://wiki.ros.org/kinetic/Installation/Ubuntu) and then install the following dependencies:
 ```
 $ sudo add-apt-repository ppa:libccd-debs/ppa
 $ sudo add-apt-repository ppa:fcl-debs/ppa
 $ sudo add-apt-repository ppa:dartsim/ppa
 $ sudo add-apt-repository ppa:personalrobotics/ppa
 $ sudo apt-get update
-$ sudo apt-get install cmake build-essential libboost-filesystem-dev libmicrohttpd-dev libompl-dev libtinyxml2-dev libyaml-cpp-dev pr-control-msgs
-$ sudo apt-get install libdart6-all-dev # If using ubuntu 14.04, skip this line and install DART from source
-$ sudo pip install pybind11
+$ sudo apt-get install cmake build-essential libboost-filesystem-dev libdart6-optimizer-nlopt-dev libdart6-utils-dev libdart6-utils-urdf-dev libmicrohttpd-dev libompl-dev libtinyxml2-dev libyaml-cpp-dev pr-control-msgs
+$ sudo apt-get install ros-kinetic-pybind11-catkin
 ```
 
-Checkout and build this package, [DART](https://github.com/dartsim/dart.git) (version 6.0 or above)
-and [aikido](https://github.com/personalrobotics/aikido.git) from source. You
-can automate the checkout and build by following [development environment](https://www.personalrobotics.ri.cmu.edu/software/development-environment)
+Checkout and build [aikido](https://github.com/personalrobotics/aikido.git) from source. You can automate the checkout and build by following [development environment](https://www.personalrobotics.ri.cmu.edu/software/development-environment)
 instructions with this `.rosinstall` file:
 ```yaml
 - git:
@@ -58,4 +54,4 @@ $ rosrun libcozmo dart_example MESH_DIR
 libcozmo is licensed under a BSD license. See [LICENSE](https://github.com/personalrobotics/libcozmo/blob/master/LICENSE) for more information.
 
 ## Author/Acknowledgements
-libcozmo is developed by Vinitha Ranganeni ([**@vinitha910**](https://github.com/vinitha910)) at the [Personal Robotics Lab](https://personalrobotics.ri.cmu.edu/) in the [Robotics Institute](http://ri.cmu.edu/) at [Carnegie Mellon University](http://www.cmu.edu/). I would like to thank Clint Liddick ([**@ClintLiddick**](https://github.com/ClintLiddick)) and J.S. Lee ([**@jslee02**](https://github.com/jslee02)) for their assistance in developing libcozmo and Ariana Keeling for her assistance in developing the SolidWorks model of Cozmo. .
+libcozmo is developed by Vinitha Ranganeni ([**@vinitha910**](https://github.com/vinitha910)) at the [Personal Robotics Lab](https://personalrobotics.ri.cmu.edu/) in the [Robotics Institute](http://ri.cmu.edu/) at [Carnegie Mellon University](http://www.cmu.edu/). I would like to thank Clint Liddick ([**@ClintLiddick**](https://github.com/ClintLiddick)) and J.S. Lee ([**@jslee02**](https://github.com/jslee02)) for their assistance in developing libcozmo and Ariana Keeling for her assistance in developing the SolidWorks model of Cozmo.
