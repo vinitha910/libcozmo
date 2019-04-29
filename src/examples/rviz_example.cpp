@@ -23,21 +23,19 @@ int main(int argc, char* argv[])
     std::cout << "Starting ROS node." << std::endl;
     ros::init(argc, argv, "load_cozmo");
 
+    ros::NodeHandle nh("~");
+
     std::cout << "Starting viewer. Please subscribe to the '" << topicName
         << "' InteractiveMarker topic in RViz." << std::endl;
 
     // Start Visualization Topic
     static const std::string execTopicName = topicName + "/forklift_sim";
 
-    aikido::planner::WorldPtr env(new aikido::planner::World("forklift_sim"));
-    aikido::rviz::WorldInteractiveMarkerViewer viewer(
-        env, execTopicName, baseFrameName);
-
-    // aikido::rviz::InteractiveMarkerViewer viewer(topicName, "world");
+    aikido::rviz::InteractiveMarkerViewer viewer(topicName, baseFrameName);
     viewer.addSkeleton(cozmo.getCozmoSkeleton());
     viewer.setAutoUpdate(true);
 
-    std::string input;
+    std::string input = "";
     double i = 0;
     do {
         std::cout << "\nEnter forklift position (0-0.86 radians, -1 to quit): ";
@@ -55,5 +53,6 @@ int main(int argc, char* argv[])
         cozmo.setForkliftPosition(i);
     } while (i != -1.0);
 
+    ros::shutdown();
     return 0;
 }

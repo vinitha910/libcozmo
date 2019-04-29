@@ -11,7 +11,8 @@ PYBIND11_MODULE(cozmopy, m)
 	py::class_<libcozmo::Cozmo>(m, "Cozmo")
 		.def(py::init<const std::string&>())
 		.def("getCozmoSkeleton", &Cozmo::getCozmoSkeleton)
-		.def("setForkliftPosition", &Cozmo::setForkliftPosition, py::arg("pos"));
+		.def("setForkliftPosition", &Cozmo::setForkliftPosition, py::arg("pos"))
+		.def("createState", &Cozmo::createState, py::arg("x"), py::arg("y"), py::arg("th"));
 }
 
 }  // namespace python
