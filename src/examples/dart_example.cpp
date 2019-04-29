@@ -1,4 +1,4 @@
-#include "cozmo/cozmo.hpp"
+#include "cozmo_description/cozmo.hpp"
 #include "dart/dart.hpp"
 #include "dart/gui/gui.hpp"
 
@@ -17,8 +17,8 @@ int main(int argc, char* argv[])
   dart::dynamics::SkeletonPtr coz = cozmo.getCozmoSkeleton();
   WorldPtr world(new dart::simulation::World);
   world->addSkeleton(coz);
-  
-  dart::gui::SimWindow win;
+
+  dart::gui::glut::SimWindow win;
   win.setWorld(world);
 
   glutInit(&argc, argv);

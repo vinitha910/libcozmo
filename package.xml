@@ -1,19 +1,20 @@
+<?xml version="1.0"?>
 <package format="2">
     <name>libcozmo</name>
-    <version>0.0.1</version>
+    <version>0.0.2</version>
     <description>
         C++ library for simulating and running Cozmo based on DART and AIKIDO.
     </description>
-    <maintainer email="vrangane@andrew.cmu.edu">Vinitha Ranganeni</maintainer>
-    <author email="vrangane@andrew.cmu.edu">Vinitha Ranganeni</author>
+    <maintainer email="vinitha@cs.uw.edu">Vinitha Ranganeni</maintainer>
+    <author email="vinitha@cs.uw.edu">Vinitha Ranganeni</author>
     <license>BSD</license>
+    <buildtool_depend>catkin</buildtool_depend>
 
     <depend>aikido</depend>
-    <depend>dart</depend>
+    <depend>dartsim</depend>
     <depend>eigen</depend>
 
-    <buildtool_depend>cmake</buildtool_depend>
-    <export>
-      <build_type>cmake</build_type>
-    </export>
+    <build_depend>pybind11_catkin</build_depend>
+    <exec_depend>pybind11_catkin</exec_depend>
+
 </package>

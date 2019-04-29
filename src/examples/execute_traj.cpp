@@ -1,4 +1,4 @@
-#include "cozmo/cozmo.hpp"
+#include "cozmo_description/cozmo.hpp"
 #include "dart/dart.hpp"
 #include "dart/gui/gui.hpp"
 #include "ros/ros.h"
@@ -32,7 +32,7 @@ int main(int argc, char* argv[])
   std::cout << "Starting viewer. Please subscribe to the '" << topicName
 	    << "' InteractiveMarker topic in RViz." << std::endl;
 
-  aikido::rviz::InteractiveMarkerViewer viewer(topicName);
+  aikido::rviz::InteractiveMarkerViewer viewer(topicName, "world");
   viewer.addSkeleton(skeleton);
   viewer.setAutoUpdate(true);
 

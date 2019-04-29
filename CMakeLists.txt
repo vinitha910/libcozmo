@@ -2,19 +2,24 @@ cmake_minimum_required(VERSION 2.8.12)
 project(libcozmo)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-set(CMAKE_CXX_COMPILER "clang++-3.5")
-set(CMAKE_C_COMPILER "clang-3.5")
+set(CMAKE_BUILD_TYPE Release)
 
-option(COZMO_BUILD_RVIZ_EXAMPLE "Build the RViz viewer integration example" ON)
-
+find_package(catkin REQUIRED COMPONENTS roscpp pybind11_catkin)
+find_package(aikido REQUIRED COMPONENTS rviz)
 find_package(Eigen3 REQUIRED)
 find_package(DART REQUIRED gui collision-bullet)
-set(Python_ADDITIONAL_VERSIONS 3.5)
-find_package(PythonLibs 3.5 REQUIRED)
+#set(Python_ADDITIONAL_VERSIONS 3.5)
+#find_package(PythonLibs 3.5 REQUIRED)
 find_package(aikido REQUIRED COMPONENTS statespace control rviz)
 
+
+catkin_package(
+    LIBRARIES
+    CATKIN_DEPENDS pybind11_catkin
+)
+
 add_library(cozmo SHARED
-  src/cozmo.cpp
+  src/cozmo_description/cozmo.cpp
 )
 
 target_include_directories(cozmo PUBLIC
@@ -22,113 +27,48 @@ target_include_directories(cozmo PUBLIC
   $<INSTALL_INTERFACE:include>
 )
 
-target_include_directories(cozmo PRIVATE
-  ${DART_INCLUDE_DIRS}
+target_include_directories(cozmo PRIVATE ${DART_INCLUDE_DIRS})
+target_include_directories(cozmo PUBLIC ${EIGEN3_INCLUDE_DIR} ${aikido_INCLUDE_DIRS})
+target_link_libraries(cozmo PUBLIC ${DART_LIBRARIES} ${aikido_LIBRARIES})
+
+add_executable(rviz_example src/examples/rviz_example.cpp)
+target_include_directories(rviz_example PRIVATE
+  ${aikido_INCLUDE_DIRS}
+  ${roscpp_INCLUDE_DIRS}
   ${PYTHON_INCLUDE_DIRS}
 )
-
-target_include_directories(cozmo PUBLIC
-  ${EIGEN3_INCLUDE_DIR}
-  ${aikido_INCLUDE_DIRS}
-)
-
-target_link_libraries(cozmo PUBLIC
-  ${DART_LIBRARIES} 
-  ${PYTHON_LIBRARIES}
+target_link_libraries(rviz_example
+  cozmo
   ${aikido_LIBRARIES}
-)
-
-
-add_executable(dart_example
-  src/dart_example.cpp
-)
-
-target_include_directories(dart_example PRIVATE
-  ${PYTHON_INCLUDE_DIRS}  
-)
-  
-target_link_libraries(dart_example
-  cozmo
+  ${roscpp_LIBRARIES}
   ${PYTHON_LIBRARIES}
 )
 
-add_executable(go_to_pose_example
-  src/go_to_pose_example.cpp
-)
+add_executable(dart_example src/examples/dart_example.cpp)
+target_include_directories(dart_example PRIVATE ${PYTHON_INCLUDE_DIRS})
+target_link_libraries(dart_example cozmo ${PYTHON_LIBRARIES})
 
-target_include_directories(go_to_pose_example PRIVATE
-  ${PYTHON_INCLUDE_DIRS} 
-)
-
-target_link_libraries(go_to_pose_example
-  cozmo
-  ${PYTHON_LIBRARIES}  
-)
-
-add_executable(execute_traj
-  src/execute_traj.cpp
-)
-
+add_executable(execute_traj src/examples/execute_traj.cpp)
 target_include_directories(execute_traj PRIVATE
   ${aikido_INCLUDE_DIRS}
-  #${roscpp_INCLUDE_DIRS}
   ${PYTHON_INCLUDE_DIRS}
 )
-
 target_link_libraries(execute_traj
   cozmo
   ${aikido_LIBRARIES}
-  #${roscpp_LIBRARIES}
   ${PYTHON_LIBRARIES}
 )
 
-if(COZMO_BUILD_RVIZ_EXAMPLE)
-  find_package(roscpp)
-  find_package(aikido REQUIRED COMPONENTS rviz)
-  
-  add_executable(rviz_example
-    src/rviz_example.cpp
-  )
+#################### PYBIND ##############################
 
-  target_include_directories(rviz_example PRIVATE
-    ${aikido_INCLUDE_DIRS}
-    ${roscpp_INCLUDE_DIRS}
-    ${PYTHON_INCLUDE_DIRS}
-  )
+include_directories(${catkin_INCLUDE_DIRS})
 
-  target_link_libraries(rviz_example
-    cozmo
-    ${aikido_LIBRARIES}
-    ${roscpp_LIBRARIES}
-    ${PYTHON_LIBRARIES}
-  )
-
-message(STATUS "PYTHON_LIBRARIES = ${PYTHON_LIBRARIES}")
-endif()
-
-
-#================================================================================
-# Installation
-#
-
-install(TARGETS cozmo EXPORT cozmoConfig
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin
-)
-install(DIRECTORY include/ DESTINATION include)
-
-# This makes the project importable from the install directory
-install(EXPORT cozmoConfig DESTINATION share/libcozmo/cmake)
-
-# This makes the project importable from the build directory
-export(TARGETS cozmo FILE cozmoConfig.cmake)
-
-# Install the package.xml file (to satisfy REP-136).
-install(FILES "package.xml"
-  DESTINATION "share/libcozmo"
+pybind_add_module(cozmopy MODULE
+    src/cozmopy/cozmopy.cpp
 )
 
-install(DIRECTORY meshes
-  DESTINATION "share/libcozmo"
+target_link_libraries(cozmopy PUBLIC
+  cozmo
+  ${DART_LIBRARIES}
+  ${PYTHON_LIBRARIES}
 )
