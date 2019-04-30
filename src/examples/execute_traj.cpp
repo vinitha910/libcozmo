@@ -1,6 +1,4 @@
 #include "cozmo_description/cozmo.hpp"
-#include "dart/dart.hpp"
-#include "dart/gui/gui.hpp"
 #include "ros/ros.h"
 #include <chrono>
 #include <cstdlib>
@@ -9,6 +7,9 @@
 #include <aikido/rviz/InteractiveMarkerViewer.hpp>
 
 using Interpolated = aikido::trajectory::Interpolated;
+
+static const std::string topicName("dart_markers");
+static const std::string baseFrameName("map");
 
 int main(int argc, char* argv[])
 {
@@ -20,44 +21,32 @@ int main(int argc, char* argv[])
   const std::string mesh_dir = argv[1];
   libcozmo::Cozmo cozmo(mesh_dir);
 
-  dart::dynamics::SkeletonPtr skeleton;
-  skeleton = cozmo.getCozmoSkeleton();
-
-  static const std::string topicName("dart_markers");
-
   // Start the RViz viewer.
   std::cout << "Starting ROS node." << std::endl;
   ros::init(argc, argv, "load_cozmo");
+  ros::NodeHandle nh("~");
+
+  dart::dynamics::SkeletonPtr skeleton;
+  skeleton = cozmo.getCozmoSkeleton();
 
   std::cout << "Starting viewer. Please subscribe to the '" << topicName
 	    << "' InteractiveMarker topic in RViz." << std::endl;
 
-  aikido::rviz::InteractiveMarkerViewer viewer(topicName, "world");
+  aikido::rviz::InteractiveMarkerViewer viewer(topicName, baseFrameName);
   viewer.addSkeleton(skeleton);
   viewer.setAutoUpdate(true);
 
-  libcozmo::Waypoint w1;
-  w1.x = .3;
-  w1.y = .2;
-  w1.th = M_PI/2;
-  w1.t = 1;
-
-  libcozmo::Waypoint w2;
-  w2.x = .3;
-  w2.y = .3;
-  w2.th = M_PI/2;
-  w2.t = 3;
-
-  libcozmo::Waypoint w3;
-  w3.x = .3;
-  w3.y = .4;
-  w3.th = M_PI;
-  w3.t = 5;
-
-  std::vector<libcozmo::Waypoint> waypoints;
-  waypoints.push_back(w1);
-  waypoints.push_back(w2);
-  waypoints.push_back(w3);
+  std::vector<libcozmo::Waypoint> waypoints = {
+      {.x = 0.0, .y = 0.0, .th = 0, .t = 0},
+      {.x = 0.3, .y = 0.0, .th = 0, .t = 2},
+      {.x = 0.3, .y = 0.0, .th = M_PI/2, .t = 3},
+      {.x = 0.3, .y = 0.3, .th = M_PI/2, .t = 5},
+      {.x = 0.3, .y = 0.3, .th = M_PI, .t = 6},
+      {.x = 0.0, .y = 0.3, .th = M_PI, .t = 8},
+      {.x = 0.0, .y = 0.3, .th = -M_PI/2, .t = 9},
+      {.x = 0.0, .y = 0.0, .th = -M_PI/2, .t = 11},
+      {.x = 0.0, .y = 0.0, .th = 0, .t = 12}
+  };
 
   std::shared_ptr<Interpolated> traj;
   traj = cozmo.createInterpolatedTraj(waypoints);
