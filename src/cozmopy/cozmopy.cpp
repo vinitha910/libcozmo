@@ -13,6 +13,12 @@ PYBIND11_MODULE(cozmopy, m)
 		.def("getCozmoSkeleton", &Cozmo::getCozmoSkeleton)
 		.def("setForkliftPosition", &Cozmo::setForkliftPosition, py::arg("pos"))
 		.def("createState", &Cozmo::createState, py::arg("x"), py::arg("y"), py::arg("th"));
+
+	py::class_<libcozmo::Waypoint>(m, "Waypoint")
+		.def(py::init([](const double x, const double y, const double th, const double t) {
+			libcozmo::Waypoint w = {.x = x, .y = y, .th = th, .t = t};
+			return w;
+		}));
 }
 
 }  // namespace python

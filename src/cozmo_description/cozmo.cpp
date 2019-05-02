@@ -46,7 +46,7 @@ void Cozmo::setForkliftPosition(double pos)
     // Solve IK
     ik->getTarget()->setTransform(goal_pose, base);
     Eigen::VectorXd ik_solution;
-    if (ik->solveAndApply(ik_solution, true)) {
+    if (ik->solve(ik_solution, true)) {
         std::cout << "IK solution found!\n";
     } else {
         std::cout << "No IK solution found.\n" << std::endl;
@@ -60,9 +60,9 @@ BodyNodePtr Cozmo::makeRootBody(const SkeletonPtr& cozmo,
     FreeJoint::Properties properties;
 
     BodyNodePtr bn = cozmo->createJointAndBodyNodePair<FreeJoint>(
-                  nullptr,
-								  properties, 
-								  dart::dynamics::BodyNode::AspectProperties(mesh_name)).second;
+        nullptr,
+		properties, 
+		dart::dynamics::BodyNode::AspectProperties(mesh_name)).second;
 
     std::shared_ptr<MeshShape> base(new MeshShape(Eigen::Vector3d(1., 1., 1.),
 						  MeshShape::loadMesh(mesh_dir + "/cozmo_base.STL")));
