@@ -14,7 +14,8 @@
     <depend>dartsim</depend>
     <depend>eigen</depend>
     <depend>roscpp_initializer</depend>
-    
+    <depend>aikidopy</depend>
+
     <build_depend>pybind11_catkin</build_depend>
     <exec_depend>pybind11_catkin</exec_depend>
 

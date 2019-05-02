@@ -13,6 +13,7 @@ find_package(DART 6.8.2 REQUIRED COMPONENTS gui collision-bullet)
 #find_package(PythonInterp 2.7 REQUIRED)
 #find_package(PythonLibs 2.7 REQUIRED)
 find_package(aikido REQUIRED COMPONENTS statespace control rviz)
+find_package(aikidopy REQUIRED COMPONENTS libaikidopy)
 
 catkin_package(
     LIBRARIES
@@ -41,7 +42,6 @@ add_executable(rviz_example src/examples/rviz_example.cpp)
 target_include_directories(rviz_example PRIVATE
   ${aikido_INCLUDE_DIRS}
   ${roscpp_INCLUDE_DIRS}
-  #${PYTHON_INCLUDE_DIRS}
 )
 target_link_libraries(rviz_example
   cozmo
@@ -73,5 +73,6 @@ pybind_add_module(cozmopy MODULE
 
 target_link_libraries(cozmopy PUBLIC
   cozmo
+  ${libaikidopy_LIBRARIES}
   ${DART_LIBRARIES}
 )
