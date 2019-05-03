@@ -27,6 +27,10 @@ instructions with this `.rosinstall` file:
     uri: https://github.com/vinitha910/aikidopy.git
     version: master
 - git:
+    local-name: roscpp_initializer
+    uri: https://github.com/vinitha910/roscpp_initializer.git
+    version: master
+- git:
     local-name: libcozmo
     uri: https://github.com/vinitha910/libcozmo
     version: master
@@ -90,7 +94,7 @@ Pass in an `std::vector` of waypoints to the `createInterpolatedTraj` function t
 $ python
 >>> import cozmopy
 ```
-`cozmopy` depends on `aikidopy`; you should make sure you can load `aikidopy` in python as well.
+`cozmopy` depends on `aikidopy` and `roscpp_initializer`; you should make sure you can load both packages in python as well.
 
 A python sample script for trajectory execution in similation has been provided as well. Follow the instructions in the previous section but replace the last command with
 
