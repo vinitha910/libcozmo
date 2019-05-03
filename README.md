@@ -98,7 +98,7 @@ A python sample script for trajectory execution in similation has been provided 
 $ rosrun libcozmo execute_traj.py `catkin locate -s libcozmo`/src/cozmo_description/meshes` 
 ```
 
-Before running this command, make sure the python script is executable. If it is not, running `chmod +x execute_traj.py` in the appropiate directory. 
+Before running this command, make sure the python script is executable. If it is not, run `chmod +x execute_traj.py` in the appropiate directory. 
 
 ## License
 libcozmo is licensed under a BSD license. See [LICENSE](https://github.com/vinitha910/libcozmo/blob/master/LICENSE) for more information.
