@@ -60,9 +60,9 @@ BodyNodePtr Cozmo::makeRootBody(const SkeletonPtr& cozmo,
     FreeJoint::Properties properties;
 
     BodyNodePtr bn = cozmo->createJointAndBodyNodePair<FreeJoint>(
-                  nullptr,
-								  properties, 
-								  dart::dynamics::BodyNode::AspectProperties(mesh_name)).second;
+        nullptr,
+		properties, 
+		dart::dynamics::BodyNode::AspectProperties(mesh_name)).second;
 
     std::shared_ptr<MeshShape> base(new MeshShape(Eigen::Vector3d(1., 1., 1.),
 						  MeshShape::loadMesh(mesh_dir + "/cozmo_base.STL")));

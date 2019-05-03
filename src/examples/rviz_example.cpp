@@ -1,6 +1,4 @@
 #include "cozmo_description/cozmo.hpp"
-#include "dart/dart.hpp"
-#include "dart/gui/gui.hpp"
 #include "ros/ros.h"
 #include <cstdlib>
 #include <aikido/rviz/InteractiveMarkerViewer.hpp>
