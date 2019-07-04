@@ -18,5 +18,6 @@
 
     <build_depend>pybind11_catkin</build_depend>
     <exec_depend>pybind11_catkin</exec_depend>
-
+    <build_depend>message_generation</build_depend>
+    <exec_depend>message_runtime</exec_depend>
 </package>
