@@ -6,7 +6,7 @@ set(CMAKE_BUILD_TYPE Release)
 #SET(PYTHON_INCLUDE_DIRS "/usr/include/python2.7")
 #SET(PYTHON_LIBRARY "/usr/lib/python2.7/config/libpython2.7.so")
 
-find_package(catkin REQUIRED COMPONENTS roscpp pybind11_catkin message_generation)
+find_package(catkin REQUIRED COMPONENTS roscpp pybind11_catkin std_msgs message_generation)
 find_package(aikido REQUIRED COMPONENTS rviz)
 find_package(Eigen3 REQUIRED)
 find_package(DART 6.8.2 REQUIRED COMPONENTS gui collision-bullet)
@@ -18,6 +18,11 @@ find_package(aikidopy REQUIRED COMPONENTS libaikidopy)
 add_message_files(
   FILES
   ForkLift.msg
+)
+
+generate_messages(
+  DEPENDENCIES
+  std_msgs
 )
 
 catkin_package(
