@@ -52,9 +52,9 @@ class CozmoROSNode(object):
         """
 
         fl = ForkLift()
-        fl.height = self.cozmo.lift_height.distance_mm
+        fl.height_mm = self.cozmo.lift_height.distance_mm
         fl.ratio = self.cozmo.lift_ratio
-        fl.angle = self.cozmo.lift_angle.radians
+        fl.angle_rad = self.cozmo.lift_angle.radians
         self.forklift_publisher.publish(fl)
 
     def publish_head_pose(self):
@@ -91,7 +91,6 @@ class CozmoROSNode(object):
 
     def publish_image(self):
         """
-
         Publisher for camera image, sends a message containing
             320 x 240 greyscale image in the form of a bytes object
             as well as other miscellaneous information about the image
@@ -100,7 +99,6 @@ class CozmoROSNode(object):
         self.cozmo.camera.image_stream_enabled = True
         camera_image = self.cozmo.world.latest_image
         if camera_image is not None:
-            # There's also 'RGB' for color, and 'CMYK'
             img = camera_image.raw_image.convert('L')
             ros_img = Image()
             ros_img.header.frame_id = 'cozmo_camera'
