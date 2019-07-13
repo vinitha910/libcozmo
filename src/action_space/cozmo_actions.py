@@ -4,6 +4,8 @@
 This file implements a generic action space for cozmo to use given certain contraints
 """
 import cozmo
+from cozmo.util import distance_mm
+
 import math
 import numpy as np
 
@@ -42,13 +44,19 @@ class ActionSpace(object):
     An action space class that generates possible actions 
     for cozmo to execute given the following constraints:
         minimum, maximum, and number of samples for:
-            linear velocity
-            angular velocity
-            duration
+            linear velocity, in millimeters/s
+            angular velocity, in millimeters/s
+            duration, in seconds
     
-    Note: Linear Velocity > 0 represents forward movement, < 0 represents backward movement
-          Angular Velocity > 0 represents clockwise rotation, < 0 represents counterclockwise
-
+    Note: Linear Velocity > 0 represents forward movement, 
+                          < 0 represents backward movement,
+                          == 0 represents no movement in this direction
+          Angular Velocity > 0 represents clockwise rotation, 
+                           < 0 represents counterclockwise, 
+                           == 0 represents no movement in this direction
+          
+          Linear Velocity is defined as the velocity of cozmo's left and right wheel 
+            moving in the same direction
           Angular Velocity is defined as the velocity of cozmo's left and right wheel
             moving in opposite directions, for example, for an angular velocity of 100 mm/s,
             this will correspond to the left wheel moving forward at 100 mm/s and the right 
@@ -99,24 +107,25 @@ class ActionSpace(object):
         self.dur_samples = dur_samples
         self._generate_actions()
         
-    def apply_action(self, index):
+    def apply_action(self, action_id):
         """
-        Applies an action from the action space based on the index
-
-        If the index is outside the action space, a warning will be issued 
-        and no action will be executed
+        Applies an action from the action space based on the id
 
         Parameters
         ----------
-        index : int
-            the index of the action in the action space
+        action_id : int
+            the id of the action in the action space
+
+        Raises
+        ------
+        IndexError
+            if the id is not a valid id in the action space
         """
 
-        if index >= len(self.actions) or index < 0:
-            print(index, ' is an invalid index\n Enter an index between 0 and ', len(self.actions) - 1)
-            return
+        if action_id >= len(self.actions) or action_id < 0:
+            raise IndexError(action_id, ' is an invalid id\n Enter an id between 0 and ', len(self.actions) - 1)
 
-        action = self.actions[index]
+        action = self.actions[action_id]
         print('Applying action: ', action)
         left_wheel = action.lin_vel + action.ang_vel
         right_wheel = action.lin_vel - action.ang_vel
@@ -166,6 +175,7 @@ class ActionSpace(object):
             number of samples to generate
         include_zero : bool
             True to add zero to choices, False to not
+            This allows for 0 velocity in either the linear or angular direction
 
         Returns a list of choices
         """
@@ -195,7 +205,6 @@ class ActionSpace(object):
 def cozmo_run(robot: cozmo.robot):
     action = ActionSpace(robot, 10, 100, 5, 10, 100, 5, 1, 5, 5)
     action.view_action_space()
-    action.apply_action(170)
     action.apply_action(174)
 
 if __name__ == '__main__':
