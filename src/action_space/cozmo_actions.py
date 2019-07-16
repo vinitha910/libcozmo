@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
 
 """
-This file implements a generic action space for cozmo to use given certain contraints
+This file implements two different action spaces for cozmo to use:
+    Generic Action Space
+    Object Oriented Action Space
 """
 import cozmo
-from cozmo.util import distance_mm
+from cozmo.util import distance_mm, pose_z_angle, radians
 
 import math
 import numpy as np
+
+from action_util import create_choices
 
 class Action(object):
     """
@@ -39,7 +43,7 @@ class Action(object):
     def __repr__(self):
         return "Action(%s, %s, %s)" % (self.lin_vel, self.ang_vel, self.duration)
 
-class ActionSpace(object):
+class GenericActionSpace(object):
     """
     An action space class that generates possible actions 
     for cozmo to execute given the following constraints:
@@ -122,14 +126,14 @@ class ActionSpace(object):
             if the id is not a valid id in the action space
         """
 
-        if action_id >= len(self.actions) or action_id < 0:
-            raise IndexError(action_id, ' is an invalid id\n Enter an id between 0 and ', len(self.actions) - 1)
-
-        action = self.actions[action_id]
-        print('Applying action: ', action)
-        left_wheel = action.lin_vel + action.ang_vel
-        right_wheel = action.lin_vel - action.ang_vel
-        self.cozmo.drive_wheels(left_wheel, right_wheel, duration=action.duration)
+        try:
+            action = self.actions[action_id]
+            print('Applying action: ', action)
+            left_wheel = action.lin_vel + action.ang_vel
+            right_wheel = action.lin_vel - action.ang_vel
+            self.cozmo.drive_wheels(left_wheel, right_wheel, duration=action.duration)
+        except IndexError:
+            print(action_id, ' is an invalid id\n Enter an id between 0 and ', len(self.actions) - 1)
     
     def view_action_space(self):
         """
@@ -149,9 +153,9 @@ class ActionSpace(object):
         """
 
         self.actions = []
-        lin_choices = self._create_choices(self.lin_min, self.lin_max, self.lin_samples, True)
-        ang_choices = self._create_choices(self.ang_min, self.ang_max, self.ang_samples, True)
-        dur_choices = self._create_choices(self.dur_min, self.dur_max, self.dur_samples, False)
+        lin_choices = create_choices(self.lin_min, self.lin_max, self.lin_samples, True)
+        ang_choices = create_choices(self.ang_min, self.ang_max, self.ang_samples, True)
+        dur_choices = create_choices(self.dur_min, self.dur_max, self.dur_samples, False)
 
         for dur_choice in dur_choices:
             for lin_choice in lin_choices:
@@ -160,52 +164,210 @@ class ActionSpace(object):
                         action = Action(lin_choice, ang_choice, dur_choice)
                         self.actions.append(action)
 
-    def _create_choices(self, start, stop, num, include_zero):
+class ObjectOrientedActionSpace(object):
+    """
+    An action space class that generates possible actions 
+    for cozmo to execute relative to an object, in this class
+    we assume it to be a cube
+
+    Given the number of samples to generate, this class will
+    generate that many number of actions representing different
+    horizontal offsets from the center of the edge of a cube
+
+    Methods
+    -------
+    apply_action(index)
+        applies an action from the generated action space
+    view_action_space()
+        output all the actions in the action space with the corresponding indices
+    """
+    def __init__(self, cozmo, cube, samples):
         """
-        Helper function to generate choices, generates [num] number of choices
-        from [start] to [stop]
+        Parameters
+        ----------
+        cozmo : cozmo.robot
+            the cozmo SDK robot handle
+        cube : cozmo.objects.LightCube
+            the object we are moving relative to
+        samples : int
+            the number of samples per side of the cube
+        """
+
+        self.cozmo = cozmo
+        self.cube = cube
+        self.samples = samples
+        self._generate_actions()
+
+    def apply_action(self, action_id):
+        """
+        Applies an action from the action space based on the id
 
         Parameters
         ----------
-        start : float
-           the starting value of the sequence
-        stop : float
-            the end value of the sequence
-        num : int
-            number of samples to generate
-        include_zero : bool
-            True to add zero to choices, False to not
-            This allows for 0 velocity in either the linear or angular direction
+        action_id : int
+            the id of the action in the action space
 
-        Returns a list of choices
+        Raises
+        ------
+        IndexError
+            if the id is not a valid id in the action space
         """
 
-        choices = np.linspace(start, stop, num)
-        if include_zero:
-            choices = np.unique(np.insert(choices, 0, 0, axis=0))
-        return [self._truncate(val, 3) for val in list(choices)]
-
-
-    def _truncate(self, number, digits) -> float:
+        try:
+            print('Moving to: ', self.location_names[action_id])
+            action = self.cozmo.go_to_pose(self.locations[action_id])
+            action.wait_for_completed()
+        except IndexError:
+            print(action_id, 'is an invalid id\nEnter an id between 0 and', len(self.locations) - 1)
+    
+    def view_action_space(self):
         """
-        Helper function to truncate floats to specified number of decimal places
+        Outputs all the actions from the action space with their corresponding indices
+        """
+
+        for idx, action in self.location_names.items():
+            if idx % (len(self.location_names) / 4) == 0:
+                print()
+            print(idx, ': ', action)
+
+    def _cube_offset(self, offset, angle):
+        """
+        Helper function to calculate offset distances from the cube
 
         Parameters
         ----------
-        number : float
-            the number to truncate
-        digits : int
-            the number of decimal places to keep
-
-        Returns the truncated number
+        offset : float
+            the amount to offset by, in millimeters
+        angle : float
+            the angle of the cube, in radians
         """
-        stepper = 10.0 ** digits
-        return math.trunc(stepper * number) / stepper
+        return offset * math.cos(angle), offset * math.sin(angle)
+    
+    def _find_sides(self, angle):
+        """
+        Helper function to find the location of all 4 sides of the cube
+
+        Parameters
+        ----------
+        angle : float
+            the angle of the cube, in radians
+        
+        returns a sorted list of the angle of each of the 4 sides where index
+            0 corresponds to front of cube
+            1 corresponds to left of cube
+            2 corresponds to back of cube
+            3 corresponds to right of cube
+        """
+
+        sides = [angle]
+        for _ in range(3):
+            # Adding in clockwise order
+            angle -= math.pi / 2
+            if angle < -math.pi:
+                angle = 2 * math.pi + angle
+            sides.append(angle)
+
+        front_idx = self._nearest_zero(sides)
+        ordered_sides = [sides[front_idx]]
+        idx = (front_idx + 1) % 4
+        while idx != front_idx:
+            ordered_sides.append(sides[idx])
+            idx = (idx + 1) % 4
+
+        return ordered_sides
+
+    def _nearest_zero(self, values):
+        """
+        Helper function to find the value closest to zero in a list,
+        used in self._find_sides to identify which angle of the cube
+        is the front
+
+        Note: in case the corner of the cube is perfectly in align with cozmo
+        and there is no closest side, we choose the right side to be the front
+
+        Parameters
+        ----------
+        values : list of floats
+            the list to traverse
+
+        returns the index of the value closest to zero
+        """
+
+        nearest = 0
+        for i in range(len(values))[1:]:
+            if abs(values[i]) < abs(values[nearest]):
+                nearest = i
+            if values[i] == math.pi / 2:
+                return i
+        return nearest
+
+    def _generate_actions(self, h_offset=40, v_offset=60):
+        """
+        Helper function to generate the action space
+
+        Parameters
+        ----------
+        h_offset : float
+            the max horizontal offset from the center of the edge of the cube, in millimeters
+        v_offset : float
+            the vertical offset away from the center of the cube, in millimeters
+        """
+
+        self.locations = []
+        self.location_names = {}
+        choices = create_choices(-h_offset, h_offset, self.samples, True)
+    
+        x = self.cube.pose.position.x
+        y = self.cube.pose.position.y
+        z = self.cube.pose.position.z
+        
+        cube_rotation = self.cube.pose.rotation.angle_z.radians
+        cube_sides = self._find_sides(cube_rotation)
+        
+        key_idx = 0
+        num_actions = len(cube_sides) * len(choices)
+
+        for side in cube_sides:
+            if key_idx < num_actions / 4:
+                cube_side = 'front of cube '
+            elif key_idx < num_actions / 2:
+                cube_side = 'left of cube '
+            elif key_idx < num_actions * 3/4:
+                cube_side = 'back of cube '
+            else:
+                cube_side = 'right of cube '
+
+            for choice in choices:
+                offset = 'with offset: ' + str(choice)
+                x_offset, y_offset = self._cube_offset(v_offset, side)
+                if cube_side == 'front of cube ':
+                    location = pose_z_angle(x - x_offset, y - y_offset - choice, z, radians(side))
+                elif cube_side == 'back of cube ':
+                    location = pose_z_angle(x - 1.2 * x_offset, y + y_offset + choice, z, radians(side))
+                elif cube_side == 'left of cube ':
+                    location = pose_z_angle(x - x_offset - choice, y - y_offset, z, radians(side))
+                elif cube_side == 'right of cube ':
+                    location = pose_z_angle(x + x_offset + choice, y - y_offset, z, radians(side))
+                self.locations.append(location)
+                self.location_names[key_idx] = cube_side + offset
+                key_idx += 1
+
 
 def cozmo_run(robot: cozmo.robot):
-    action = ActionSpace(robot, 10, 100, 5, 10, 100, 5, 1, 5, 5)
-    action.view_action_space()
-    action.apply_action(174)
-
+    #action = GenericActionSpace(robot, 10, 100, 5, 10, 100, 5, 1, 5, 5)
+    #action.view_action_space()
+    look_around = robot.start_behavior(cozmo.behavior.BehaviorTypes.LookAroundInPlace)
+    cube = None
+    try:
+        cube = robot.world.wait_for_observed_light_cube(timeout=30)
+    except asyncio.TimeoutError:
+        print('no cube')
+    finally:
+        look_around.stop()
+    
+    oos = ObjectOrientedActionSpace(robot, cube, 3)
+    oos.view_action_space()
+    oos.apply_action(6)
+    
 if __name__ == '__main__':
     cozmo.run_program(cozmo_run)
