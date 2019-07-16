@@ -27,32 +27,35 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef GRAPH_H_
-#define GRAPH_H_
+#ifndef STACESPACE_H_
+#define STACESPACE_H_
 
 #include <vector>
 #include <utility>
 
 namespace libcozmo {
-namespace graphs {
+namespace statespace {
 
 // This class implements a 2D grid-based graph representation
-class Graph {
+class Statespace {
  public:
     // occupancy_grid A 1D vector containing either 1 for an occupied/obstacle
     // cell or 0 for a free cell. The index is a 1D representation for an (x, y)
     // width The width of the occupancy grid
     // height The height of the occupancy grid
-    Graph(const std::vector<int>& occupancy_grid,
+    Statespace(const std::vector<int>& occupancy_grid,
           const int& width,
           const int& height,
-          const int& theta) : \
+          const int& theta,
+          const double& res) : \
           m_occupancy_grid(occupancy_grid),
           m_width(width),
           m_height(height),
-          m_theta(theta) {}
+          m_theta(theta),
+          m_state_map(),
+          m_resolution(res) {}
 
-    ~Graph() {}
+    ~Statespace() {}
 
     // Sets and returns the start state ID (m_start_id)
     // Returns -1 if the state is not valid
@@ -67,15 +70,6 @@ class Graph {
 
     // Creates new state with given width, height, and theta
     void get_or_create_new_state(const int& x, const int& y, const int& theta);
-
-
-    // Finds the valid successors and transition costs for the source state.
-    // The vaild successor IDs and costs are filled into succ_ids and costs
-    // respectively
-    void get_succs(
-        const int& source_state_id,
-        std::vector<int> *succ_ids,
-        std::vector<double> *costs) const;
 
     // Find the coordinates for the path given a vector containing all the
     // state IDs
@@ -95,38 +89,56 @@ class Graph {
     // Return true if the state is valid and false otherwise
     bool is_valid_state(const int& x, const int& y, const int& theta) const;
 
+    // Returns the cost of transitioning from (source_x, source_y) to
+    // (succ_x, succ_y)
+    double get_action_cost(
+        const int& source_x,
+        const int& source_y,
+        const int& succ_x,
+        const int& succ_y) const;
+        
     //get normalized radian angle in [0, 2pi]
     int normalize_angle_rad(const int& theta_rad) const;
 
     // Convert normalized radian into int
     // that corresponds to the bin
-    int discrete_angle_to_continuous(const int& theta) const;
+    double discrete_angle_to_continuous(const int& theta) const;
 
-    // converts continuous position into discrete values
-    int continuous_position_to_discrete() const;
+    int continuous_angle_to_discrete(const double& theta) const;
+
+    //helper function
+    // converts meter value of input position in discretized value
+    // based on the grid width, height, and resolution
+    int continuous_position_to_discrete(const double& x_m, const double& y_m) const;
+
+    //dicrete value of position of input state into continuous values
+    double discrete_position_to_continuous(const int& x, const int& y) const;
 
     // converts disceretized pose into approx continuous values
-    double discrete_pose_to_continuous() const;
+    // pose in (x, y, theta)
+    double discrete_pose_to_continuous(const int& x, const int& y, const int& theta) const;
 
     // converts continuous pose to discrete values
-    int continuous_pose_to_discrete() const;
+    int continuous_pose_to_discrete(const double& x_m, const double& y_m, const double& theta_rad) const;
 
     // computes distance between two states in Aikido SE2
     // takes in two State objects
-    double get_distance(const state_1, state_2) const;
-
+    double get_distance(const SE2::State& state_1, const SE2::State& state_2) const;
+    
+    const std::vector<SE2::State> m_state_map;
     const std::vector<int> m_occupancy_grid;
     const int m_width;
     const int m_height;
     const int m_theta;
     const int m_bins;
+    const double m_resolution;
 
     int m_start_id;
     int m_goal_id;
 
 };
 
-}  // namespace graphs
+}  // namespace statespace
 }  // namespace libcozmo
 
-#endif  // GRAPH_H_
+#endif  // STATESPACE_H_
