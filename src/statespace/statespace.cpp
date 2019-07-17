@@ -27,19 +27,19 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "statespace.h"
+#include "src/statespace/statespace.h"
+#include <Eigen>
 #include <assert.h>
 #include <cmath>
+#include <utility>
 #include "aikido/distance/SE2.hpp"
 #include "aikido/statespace/SE2.hpp"
 #include "cozmo_description/cozmo.hpp"
-
 
 namespace grid_planner {
 namespace statespace {
 using aikido::statespace::SE2;
 
-//newly added axis theta, [0,2pi], discretized by 2^n buckets
 int Statespace::set_start_state(const int& x, const int& y, const int& theta) {
     if (is_valid_state(x, y, theta)) {
         m_start_id = get_state_id(x, y, theta);
@@ -56,7 +56,9 @@ int Statespace::set_goal_state(const int& x, const int& y, const int& theta) {
     return -1;
 }
 
-int Statespace::create_new_state(const double& x, const double& y, const double& theta) {
+SE2::State Statespace::create_new_state(const double& x,
+                                        const double& y,
+                                        const double& theta) {
     SE2::State s;
     Eigen::Isometry2d t = Eigen::Isometry2d::Identity();
     const Eigen::Rotation2D<double> rot(theta);
@@ -65,25 +67,23 @@ int Statespace::create_new_state(const double& x, const double& y, const double&
     trans << x, y;
     t.translation() = trans;
     s.setIsometry(t);
-
-    //get id
-    //insert id, state mapping into the vector
-
+    Eigen::Vector xyth(3);
+    xyth = continuous_pose_to_discrete(x, y, theta);
+    int tmp_id = get_state_id(xyth[0], xyth[1], xyth[2]);
+    m_state_map[tmp_id] = s;
     return s;
 }
 
-int Statespace::get_or_create_new_state(const int& x, const int& y, const int& theta) {
-    //if s exists at given 3 axis, return s
-    //else create one 
-    
+SE2::State Statespace::get_or_create_new_state(const int& x,
+                                               const int& y,
+                                               const int& theta) {
     int input_state_id = get_state_id(x, y, theta);
-
-
-    else {
+    if (m_state_map.find(tmp_id) != map.end()) {
+        return m_state_map[tmp_id];
+    } else {
         return create_new_state(x, y, theta);
     }
 }
-
 
 void Statespace::get_path_coordinates(
     const std::vector<int>& path_state_ids,
@@ -97,15 +97,19 @@ void Statespace::get_path_coordinates(
     }
 }
 
-int Statespace::get_state_id(const int& x, const int& y, const int& theta) const {
+int Statespace::get_state_id(const int& x,
+                             const int& y,
+                             const int& theta) const {
     assert(x < m_width);
     assert(y < m_height);
-    //int theta = normalize_angle_rad(theta_rad);
     assert(theta <= m_bins);
-    return (theta * m_width * m_height) + y * m_width + x; 
+    return (theta * m_width * m_height) + y * m_width + x;
 }
 
-bool Statespace::get_coord_from_state_id(const int& state_id, int* x, int* y, int* theta) const {
+bool Statespace::get_coord_from_state_id(const int& state_id,
+                                         int* x,
+                                         int* y,
+                                         int* theta) const {
     assert(state_id < m_occupancy_grid.size());
     int theta_val = state_id / (m_width * m_height);
     state_id = (state_id - theta * m_width * m_height);
@@ -114,19 +118,18 @@ bool Statespace::get_coord_from_state_id(const int& state_id, int* x, int* y, in
     *x = x_val;
     *y = y_val;
     *theta = theta_val;
-
     return (is_valid_state(*x, *y, *theta));
 }
 
-bool Statespace::is_valid_state(const int& x, const int& y, const int& theta) const {
+bool Statespace::is_valid_state(const int& x,
+                                const int& y,
+                                const int& theta) const {
     if (!(x >= 0 && x < m_width && y >= 0 && y < m_height)) {
         return false;
     }
-
-    if (!(theta >= 0 && theta <= m_bins)) {
+    if (!(theta >= 0 && theta < m_bins)) {
         return false;
     }
-
     int state_id = get_state_id(x, y, theta);
     if (m_occupancy_grid[state_id] == 0) {
         return true;
@@ -134,31 +137,67 @@ bool Statespace::is_valid_state(const int& x, const int& y, const int& theta) co
     return false;
 }
 
-double Statespace::get_action_cost(
-        const SE2::State& source,
-        const SE2::State& succ) {
-    return distance(source, succ);
+double Statespace::get_distance(const SE2::State& source,
+                                const SE2::State& succ) {
+    return SE2::distance(source, succ);
 }
 
-int Statespace::normalize_angle_rad(const int& theta_rad) {
+double Statespace::normalize_angle_rad(const double& theta_rad) {
     assert(m_bins % 2 == 0);
-    
-    // I hope this works
     if !(theta_rad >= 0 && theta_rad <= 2 * math.pi) {
         theta_rad = theta_rad % (2 * math.pi);
     }
     return theta_rad;
 }
 
-int Statespace::discrete_angle_to_continuous(const int& theta) {
+double Statespace::discrete_angle_to_continuous(const int& theta) {
     double rad = 2 * math.pi / m_bins * theta;
     return rad;
 }
 
 int Statespace::continuous_angle_to_discrete(cosnt int& theta_rad) {
-    //placement into a bin
-    int discrete = int(theta_rad / (2 * math.pi / m_bins));
+    int discrete = static_cast<int>(theta_rad / (2 * math.pi / m_bins));
     return discrete;
+}
+
+Eigen::Vector Statespace::continuous_position_to_discrete(const double& x_m,
+                                                          const double& y_m) {
+    int x = static_cast<int>(x_m / (m_width / m_resolution));
+    int y = static_cast<int>(y_m / (m_height / m_resolution));
+    Eigen::Vector xy(2);
+    xy << x, y;
+    return xy;
+}
+
+Eigen::Vector Statespace::discrete_position_to_continuous(const int& x,
+                                                          const int& y) {
+    double x_m = x * (m_width / m_resolution);
+    double y_m = y * (m_height / m_resolution);
+    Eigen::Vector xy(2);
+    xy << x_m, y_m;
+    return xy;
+}
+
+Eigen::vector Statespace::discrete_pose_to_continuous(const int& x,
+                                                      const int& y,
+                                                      const int& theta) {
+    Eigen::Vector xy = discrete_position_to_continuous(x, y);
+    Eigen::Vector th(1);
+    th << discrete_angle_to_continuous(theta);
+    Eigen::Vector ans(xy.size() + th.size());
+    ans << xy, th;
+    return ans;
+}
+
+Eigen::vector Statespace::continuous_pose_to_discrete(const double& x_m,
+                                                      const double& y_m,
+                                                      const double& theta_rad) {
+    Eigen::Vector xy = continuous_position_to_discrete(x_m, y_m);
+    Eigen::Vector th(1);
+    th << continuous_angle_to_discrete(normalize_angle_rad(theta_rad));
+    Eigen::Vector ans(xy.size() + th.size());
+    ans << xy, th;
+    return ans;
 }
 
 }  // namespace statespace

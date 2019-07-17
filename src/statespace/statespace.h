@@ -27,11 +27,15 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef STACESPACE_H_
-#define STACESPACE_H_
+#ifndef SRC_STATESPACE_STATESPACE_H_
+#define SRC_STATESPACE_STATESPACE_H_
 
+#include <Eigen>
 #include <vector>
 #include <utility>
+#include "aikido/distance/SE2.hpp"
+#include "aikido/statespace/SE2.hpp"
+#include "cozmo_description/cozmo.hpp"
 
 namespace libcozmo {
 namespace statespace {
@@ -39,19 +43,17 @@ namespace statespace {
 // This class implements a 2D grid-based graph representation
 class Statespace {
  public:
-    // occupancy_grid A 1D vector containing either 1 for an occupied/obstacle
-    // cell or 0 for a free cell. The index is a 1D representation for an (x, y)
-    // width The width of the occupancy grid
-    // height The height of the occupancy grid
+    // Occupancy_grid A 1D vector containing either 1 for an occupied/obstacle
+    // Cell or 0 for a free cell. The index is a 1D representation for an (x, y)
+    // Width The width of the occupancy grid
+    // Height The height of the occupancy grid
     Statespace(const std::vector<int>& occupancy_grid,
           const int& width,
           const int& height,
-          const int& theta,
           const double& res) : \
           m_occupancy_grid(occupancy_grid),
           m_width(width),
           m_height(height),
-          m_theta(theta),
           m_state_map(),
           m_resolution(res) {}
 
@@ -66,79 +68,85 @@ class Statespace {
     int set_goal_state(const int& x, const int& y, const int& theta);
 
     // Creates new state with given width, height, and theta
-    void create_new_state(const int& x, const int& y, const int& theta);
+    SE2::State create_new_state(const int& x, const int& y, const int& theta);
 
     // Creates new state with given width, height, and theta
-    void get_or_create_new_state(const int& x, const int& y, const int& theta);
+    SE2::State get_or_create_new_state(const int& x,
+                                       const int& y,
+                                       const int& theta);
 
     // Find the coordinates for the path given a vector containing all the
     // state IDs
     // now the path coordinates are (theta, (x,y)) wrapped as nested pair
     void get_path_coordinates(
         const std::vector<int>& path_state_ids,
-        std::vector<std::pair<int, std::pair<int, int>> > *path_coordinates) const;
+        std::vector<std::pair<int,
+                              std::pair<int, int>>> *path_coordinates) const;
 
  private:
     // Returns the state ID (1D representation) for the given (x, y) cell
-    int get_state_id(const int& x, const int& y, const int& theta) const;
+    int get_state_i#include <utility>(const int& x,
+                                      const int& y,
+                                      const int& theta) const;
 
     // Gets the coordinates for the given state ID and stores then in x and y
     // Return true if coordinates are valid and false otherwise
-    bool get_coord_from_state_id(const int& state_id, int* x, int* y, int* theta) const;
+    bool get_coord_from_state_id(const int& state_id,
+                                 int* x,
+                                 int* y,
+                                 int* theta) const;
 
     // Return true if the state is valid and false otherwise
     bool is_valid_state(const int& x, const int& y, const int& theta) const;
 
-    // Returns the cost of transitioning from (source_x, source_y) to
-    // (succ_x, succ_y)
-    double get_action_cost(
-        const int& source_x,
-        const int& source_y,
-        const int& succ_x,
-        const int& succ_y) const;
-        
-    //get normalized radian angle in [0, 2pi]
-    int normalize_angle_rad(const int& theta_rad) const;
+    // Get normalized raadian angle in [0, 2pi]
+    double normalize_angle_rad(const int& theta_rad) const;
 
     // Convert normalized radian into int
     // that corresponds to the bin
     double discrete_angle_to_continuous(const int& theta) const;
 
+    // Converts discrete angle to minimum value of the corresponding bin
     int continuous_angle_to_discrete(const double& theta) const;
 
-    //helper function
-    // converts meter value of input position in discretized value
-    // based on the grid width, height, and resolution
-    int continuous_position_to_discrete(const double& x_m, const double& y_m) const;
+    // Converts meter value of input position in discretized value
+    // Based on the grid width, height, and resolution
+    Eigen::Vector continuous_position_to_discrete(const double& x_m,
+                                                  const double& y_m) const;
 
-    //dicrete value of position of input state into continuous values
-    double discrete_position_to_continuous(const int& x, const int& y) const;
+    // Dicrete value of position of input state into continuous values
+    Eigen::Vector discrete_position_to_continuous(const int& x,
+                                                  const int& y) const;
 
-    // converts disceretized pose into approx continuous values
-    // pose in (x, y, theta)
-    double discrete_pose_to_continuous(const int& x, const int& y, const int& theta) const;
+    // Converts continuous pose(x,y,th) from relative discretized values
+    // To real continuous values
+    Eigen::Vector discrete_pose_to_continuous(const int& x,
+                                              const int& y,
+                                              const int& theta) const;
 
-    // converts continuous pose to discrete values
-    int continuous_pose_to_discrete(const double& x_m, const double& y_m, const double& theta_rad) const;
+    // Converts continuous pose(x,y,th) from real continuous values
+    // To relative discrete values
+    Eigen::Vector continuous_pose_to_discrete(const double& x_m,
+                                              const double& y_m,
+                                              const double& theta_rad) const;
 
-    // computes distance between two states in Aikido SE2
-    // takes in two State objects
-    double get_distance(const SE2::State& state_1, const SE2::State& state_2) const;
-    
+    // Computes distance between two states in SE2
+    // Takes in two State objects
+    double get_distance(const SE2::State& state_1,
+                        const SE2::State& state_2) const;
     const std::vector<SE2::State> m_state_map;
     const std::vector<int> m_occupancy_grid;
     const int m_width;
     const int m_height;
     const int m_theta;
+    const int m_theta_rad;
     const int m_bins;
     const double m_resolution;
-
     int m_start_id;
     int m_goal_id;
-
 };
 
 }  // namespace statespace
 }  // namespace libcozmo
 
-#endif  // STATESPACE_H_
+#endif  // SRC_STATESPACE_STATESPACE_H_
