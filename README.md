@@ -24,6 +24,7 @@ $ mkdir build
 $ cd build
 $ cmake ..
 $ make -j4
+$ sudo make install
 ```
 
 Checkout and build [aikido](https://github.com/personalrobotics/aikido.git) from source. You can automate the checkout and build by following [development environment](https://personalrobotics.cs.washington.edu/software/development-environment)
