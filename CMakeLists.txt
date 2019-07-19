@@ -23,17 +23,13 @@ catkin_package(
 include_directories(
   ${catkin_INCLUDE_DIRS}
   ${PYTHON_INCLUDE_DIRS}
+  src/statespace/statespace.h
 )
 
 add_library(cozmo SHARED
   src/cozmo_description/cozmo.cpp
+  src/statespace/statespace.cpp
 )
-
-include_directories(
-  src/statespace/statespace.h
-)
-
-add_executable(src/statespace/statespace.cpp)
 
 target_include_directories(cozmo PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

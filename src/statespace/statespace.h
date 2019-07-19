@@ -47,15 +47,16 @@ class Statespace {
     // Cell or 0 for a free cell. The index is a 1D representation for an (x, y)
     // Width The width of the occupancy grid
     // Height The height of the occupancy grid
-    Statespace(const std::vector<int>& occupancy_grid,
-          const int& width,
+    Statespace(const int& width,
           const int& height,
-          const double& res) : \
+          const double& res,
+          const int& num_theta_vals) : \
           m_occupancy_grid(occupancy_grid),
           m_width(width),
           m_height(height),
           m_state_map(),
-          m_resolution(res) {}
+          m_resolution(res),
+          m_num_theta_vals(num_theta_vals) {}
 
     ~Statespace() {}
 
@@ -111,22 +112,22 @@ class Statespace {
 
     // Converts meter value of input position in discretized value
     // Based on the grid width, height, and resolution
-    Eigen::Vector continuous_position_to_discrete(const double& x_m,
+    Eigen::Vector2d continuous_position_to_discrete(const double& x_m,
                                                   const double& y_m) const;
 
     // Dicrete value of position of input state into continuous values
-    Eigen::Vector discrete_position_to_continuous(const int& x,
+    Eigen::Vector2d discrete_position_to_continuous(const int& x,
                                                   const int& y) const;
 
     // Converts continuous pose(x,y,th) from relative discretized values
     // To real continuous values
-    Eigen::Vector discrete_pose_to_continuous(const int& x,
+    Eigen::Vector3d discrete_pose_to_continuous(const int& x,
                                               const int& y,
                                               const int& theta) const;
 
     // Converts continuous pose(x,y,th) from real continuous values
     // To relative discrete values
-    Eigen::Vector continuous_pose_to_discrete(const double& x_m,
+    Eigen::Vector3d continuous_pose_to_discrete(const double& x_m,
                                               const double& y_m,
                                               const double& theta_rad) const;
 
@@ -138,12 +139,8 @@ class Statespace {
     const std::vector<int> m_occupancy_grid;
     const int m_width;
     const int m_height;
-    const int m_theta;
-    const int m_theta_rad;
-    const int m_bins;
+    const int m_num_theta_vals;
     const double m_resolution;
-    int m_start_id;
-    int m_goal_id;
 };
 
 }  // namespace statespace
