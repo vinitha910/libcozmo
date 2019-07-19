@@ -29,6 +29,12 @@ add_library(cozmo SHARED
   src/cozmo_description/cozmo.cpp
 )
 
+include_directories(
+  src/statespace/statespace.h
+)
+
+add_executable(src/statespace/statespace.cpp)
+
 target_include_directories(cozmo PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
