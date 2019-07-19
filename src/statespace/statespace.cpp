@@ -96,13 +96,12 @@ SE2::State Statespace::get_or_create_new_state(const int& x,
 
 void Statespace::get_path_coordinates(
     const std::vector<int>& path_state_ids,
-    std::vector<SE2::State > *path_coordinates) const {
+    std::vector<SE2::State> *path_coordinates) const {
     for (int i = 0; i < path_state_ids.size(); ++i) {
         int state_id = path_state_ids[i];
         int x, y, theta;
         if (get_coord_from_state_id(state_id, &x, &y, &theta)) {
-            // need to push back the state, no longer co-ordinates
-            path_coordinates->push_back((x, y, theta));
+            path_coordinates->pushback(create_new_state(x,y, theta));
         }
     }
 }

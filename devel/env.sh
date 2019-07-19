@@ -1,0 +1,1 @@
+/home/hal/libcozmo/devel/.private/catkin_tools_prebuild/env.sh
