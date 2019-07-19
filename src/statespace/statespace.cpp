@@ -201,5 +201,5 @@ Eigen::vector Statespace::continuous_pose_to_discrete(const double& x_m,
 }
 
 }  // namespace statespace
-}  // namespace grid_planner
+}  // namespace libcozmo
 
