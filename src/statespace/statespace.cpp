@@ -31,7 +31,7 @@
 //#include <Eigen/Dense>
 #include <assert.h>
 #include <cmath>
-#include <utility>
+#include<ros/ros.h>
 //#include "aikido/distance/SE2.hpp"
 //#include "aikido/statespace/SE2.hpp"
 //#include "cozmo_description/cozmo.hpp"
@@ -39,30 +39,54 @@
 namespace libcozmo {
 namespace statespace {
 
-// int Statespace::set_start_state(const int& x, const int& y, const int& theta) {
+int Statespace::set_start_state(const int& x, const int& y, const int& theta) {
     
-//     try {
-//         if (is_valid_state(x, y, theta)) {
-//             m_start_id = get_state_id(x, y, theta);
-//             return m_start_id;
-//         }
-//     } catch (ros::Exception &e) {
-//         ROS_ERROR(""Error Message %s ", e.what()")
-//     }
+    try {
+        if (is_valid_state(x, y, theta)) {
+            m_start_id = get_state_id(x, y, theta);
+            return m_start_id;
+        }
+    } catch (ros::Exception &e) {
+        ROS_ERROR("Error Message %s ", e.what());
+    }
 
-// }
+}
 
-// int Statespace::set_goal_state(const int& x, const int& y, const int& theta) {
+int Statespace::set_goal_state(const int& x, const int& y, const int& theta) {
     
-//     try {
-//         if (is_valid_state(x, y, theta)) {
-//             m_goal_id = get_state_id(x, y, theta);
-//             return m_goal_id;
-//         }
-//     } catch (ros::Exception &e) {
-//         ROS_ERROR(""Error Message %s ", e.what()")
-//     }
-// }
+    try {
+        if (is_valid_state(x, y, theta)) {
+            m_goal_id = get_state_id(x, y, theta);
+            return m_goal_id;
+        }
+    } catch (ros::Exception &e) {
+        ROS_ERROR("Error Message %s ", e.what());
+    }
+}
+
+Eigen::Vector3i Statespace::create_new_state(const int& x, const int& y, const int& theta) {
+    Eigen::Vector3i state(x, y, theta);
+    int state_id = get_state_id(x, y, theta);
+    m_state_map[state_id] = state;
+
+    return state;
+}
+
+Eigen::Vector3i Statespace::create_new_state(const aikido::statespace::SE2::State& state_continuous) {
+    
+    auto t = state_continuous.getIsometry(); //Eigen::Transform
+    
+    Eigen::Rotation2D<double> rotation;
+    rotation.fromRotationMatrix(t.linear()); 
+    const double theta_rad = rotation.angle();
+    const Eigen::Vector2d position = t.translation();
+    Eigen::Vector3i state_discrete(position.x(), position.y(), theta_rad);
+    int state_id = get_state_id(position.x(), position.y(), theta_rad);
+    m_state_map[state_id] = state_discrete;
+
+    return state_discrete;
+}
+
 
 // SE2::State Statespace::create_new_state(const double& x,
 //                                         const double& y,
@@ -105,14 +129,14 @@ namespace statespace {
 //     }
 // }
 
-// int Statespace::get_state_id(const int& x,
-//                              const int& y,
-//                              const int& theta) const {
-//     assert(x < m_width);
-//     assert(y < m_height);
-//     assert(theta <= m_num_theta_vals);
-//     return (theta * m_width * m_height) + y * m_width + x;
-// }
+int Statespace::get_state_id(const int& x,
+                             const int& y,
+                             const int& theta) const {
+    assert(x < m_width);
+    assert(y < m_height);
+    assert(theta <= m_num_theta_vals);
+    return (theta * m_width * m_height) + y * m_width + x;
+}
 
 // bool Statespace::get_coord_from_state_id(const int& state_id,
 //                                          int* x,
@@ -129,21 +153,17 @@ namespace statespace {
 //     return (is_valid_state(*x, *y, *theta));
 // }
 
-// bool Statespace::is_valid_state(const int& x,
-//                                 const int& y,
-//                                 const int& theta) const {
-//     if (!(x >= 0 && x < m_width && y >= 0 && y < m_height)) {
-//         return false;
-//     }
-//     if (!(theta >= 0 && theta < m_bins)) {
-//         return false;
-//     }
-//     int state_id = get_state_id(x, y, theta);
-//     if (m_occupancy_grid[state_id] == 0) {
-//         return true;
-//     }
-//     return false;
-// }
+bool Statespace::is_valid_state(const int& x,
+                                const int& y,
+                                const int& theta) const {
+    if (!(x >= 0 && x < m_width && y >= 0 && y < m_height)) {
+        return false;
+    }
+    if (!(theta >= 0 && theta < m_num_theta_vals)) {
+        return false;
+    }
+    return true;
+}
 
 // double Statespace::get_distance(const SE2::State& source,
 //                                 const SE2::State& succ) {

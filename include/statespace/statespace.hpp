@@ -54,7 +54,6 @@ class Statespace {
           const int& num_theta_vals) : \
           m_width(width),
           m_height(height),
-          m_state_map(),
           m_resolution(res),
           m_num_theta_vals(num_theta_vals),
           m_distance(std::make_shared<aikido::statespace::SE2>())
@@ -72,6 +71,7 @@ class Statespace {
 
     // Creates new state with given width, height, and theta
     Eigen::Vector3i create_new_state(const int& x, const int& y, const int& theta);
+    Eigen::Vector3i create_new_state(const aikido::statespace::SE2::State& s);
 
     // Creates new state with given width, height, and theta
     Eigen::Vector3i get_or_create_new_state(const int& x,
@@ -79,7 +79,7 @@ class Statespace {
                                        const int& theta);
 
     //overloading                                  
-    Eigen::Vector3i get_or_create_new_state(aikido::statespace::SE2& s) const;
+    Eigen::Vector3i get_or_create_new_state(const aikido::statespace::SE2::State& s);
 
     // Find the coordinates for the path given a vector containing all the
     // state IDs
@@ -92,8 +92,8 @@ class Statespace {
  private:
     // Returns the state ID (1D representation) for the given (x, y) cell
     int get_state_id(const int& x,
-                                      const int& y,
-                                      const int& theta) const;
+                     const int& y,
+                     const int& theta) const;
 
     // Gets the coordinates for the given state ID and stores then in x and y
     // Return true if coordinates are valid and false otherwise
@@ -117,7 +117,7 @@ class Statespace {
 
     // Converts meter value of input position in discretized value
     // Based on the grid width, height, and resolution
-    Eigen::Vector2d continuous_position_to_discrete(const double& x_m,
+    Eigen::Vector2i continuous_position_to_discrete(const double& x_m,
                                                   const double& y_m) const;
 
     // Dicrete value of position of input state into continuous values
@@ -132,14 +132,20 @@ class Statespace {
 
     // Converts continuous pose(x,y,th) from real continuous values
     // To relative discrete values
-    Eigen::Vector3d continuous_pose_to_discrete(const double& x_m,
+    Eigen::Vector3i continuous_pose_to_discrete(const double& x_m,
                                               const double& y_m,
                                               const double& theta_rad) const;
+    
+    Eigen::Vector3i continuous_pose_to_discrete(const aikido::statespace::SE2::State& s) const;
 
     // Computes distance between two states in SE2
     // Takes in two State objects
     double get_distance(const aikido::statespace::SE2::State& state_1,
                         const aikido::statespace::SE2::State& state_2) const;
+
+    double get_distance(const Eigen::Vector3i& state_1,
+                        const Eigen::Vector3i& state_2) const;
+
     std::unordered_map<int, Eigen::Vector3i> m_state_map;
     const int m_width;
     const int m_height;
@@ -148,7 +154,6 @@ class Statespace {
     int m_start_id;
     int m_goal_id;
     const aikido::distance::SE2 m_distance;
-    const std::shared_ptr<aikido::statespace::SE2> m_ptr;
 };
 
 }  // namespace statespace
