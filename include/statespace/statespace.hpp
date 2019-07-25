@@ -27,15 +27,16 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SRC_STATESPACE_STATESPACE_H_
-#define SRC_STATESPACE_STATESPACE_H_
+#ifndef INCLUDE_STATESPACE_STATESPACE_H_
+#define INCLUDE_STATESPACE_STATESPACE_H_
 
-#include <Eigen>
+#include <Eigen/Dense>
 #include <vector>
 #include <utility>
+#include <unordered_map>
 #include "aikido/distance/SE2.hpp"
-#include "aikido/statespace/SE2.hpp"
-#include "cozmo_description/cozmo.hpp"
+//#include "aikido/statespace/SE2.hpp"
+//#include "cozmo_description/cozmo.hpp"
 
 namespace libcozmo {
 namespace statespace {
@@ -51,12 +52,13 @@ class Statespace {
           const int& height,
           const double& res,
           const int& num_theta_vals) : \
-          m_occupancy_grid(occupancy_grid),
           m_width(width),
           m_height(height),
           m_state_map(),
           m_resolution(res),
-          m_num_theta_vals(num_theta_vals) {}
+          m_num_theta_vals(num_theta_vals),
+          m_distance(std::make_shared<aikido::statespace::SE2>())
+          {}
 
     ~Statespace() {}
 
@@ -69,12 +71,15 @@ class Statespace {
     int set_goal_state(const int& x, const int& y, const int& theta);
 
     // Creates new state with given width, height, and theta
-    SE2::State create_new_state(const int& x, const int& y, const int& theta);
+    Eigen::Vector3i create_new_state(const int& x, const int& y, const int& theta);
 
     // Creates new state with given width, height, and theta
-    SE2::State get_or_create_new_state(const int& x,
+    Eigen::Vector3i get_or_create_new_state(const int& x,
                                        const int& y,
                                        const int& theta);
+
+    //overloading                                  
+    Eigen::Vector3i get_or_create_new_state(aikido::statespace::SE2& s) const;
 
     // Find the coordinates for the path given a vector containing all the
     // state IDs
@@ -86,7 +91,7 @@ class Statespace {
 
  private:
     // Returns the state ID (1D representation) for the given (x, y) cell
-    int get_state_i#include <utility>(const int& x,
+    int get_state_id(const int& x,
                                       const int& y,
                                       const int& theta) const;
 
@@ -133,14 +138,17 @@ class Statespace {
 
     // Computes distance between two states in SE2
     // Takes in two State objects
-    double get_distance(const SE2::State& state_1,
-                        const SE2::State& state_2) const;
-    const std::vector<SE2::State> m_state_map;
-    const std::vector<int> m_occupancy_grid;
+    double get_distance(const aikido::statespace::SE2::State& state_1,
+                        const aikido::statespace::SE2::State& state_2) const;
+    std::unordered_map<int, Eigen::Vector3i> m_state_map;
     const int m_width;
     const int m_height;
     const int m_num_theta_vals;
     const double m_resolution;
+    int m_start_id;
+    int m_goal_id;
+    const aikido::distance::SE2 m_distance;
+    const std::shared_ptr<aikido::statespace::SE2> m_ptr;
 };
 
 }  // namespace statespace

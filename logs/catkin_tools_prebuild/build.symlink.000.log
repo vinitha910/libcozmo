@@ -1,8 +1,0 @@
-Symlinking /home/hal/libcozmo/devel/./setup.sh
-Symlinking /home/hal/libcozmo/devel/./_setup_util.py
-Symlinking /home/hal/libcozmo/devel/./env.sh
-Symlinking /home/hal/libcozmo/devel/./setup.bash
-Symlinking /home/hal/libcozmo/devel/./setup.zsh
-Symlinking /home/hal/libcozmo/devel/share/catkin_tools_prebuild/cmake/catkin_tools_prebuildConfig.cmake
-Symlinking /home/hal/libcozmo/devel/share/catkin_tools_prebuild/cmake/catkin_tools_prebuildConfig-version.cmake
-Symlinking /home/hal/libcozmo/devel/lib/pkgconfig/catkin_tools_prebuild.pc
