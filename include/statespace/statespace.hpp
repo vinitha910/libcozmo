@@ -106,7 +106,7 @@ class Statespace {
     bool is_valid_state(const int& x, const int& y, const int& theta) const;
 
     // Get normalized raadian angle in [0, 2pi]
-    double normalize_angle_rad(const int& theta_rad) const;
+    double normalize_angle_rad(const double& theta_rad) const;
 
     // Convert normalized radian into int
     // that corresponds to the bin

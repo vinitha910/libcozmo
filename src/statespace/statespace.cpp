@@ -80,13 +80,17 @@ Eigen::Vector3i Statespace::create_new_state(const aikido::statespace::SE2::Stat
     rotation.fromRotationMatrix(t.linear()); 
     const double theta_rad = rotation.angle();
     const Eigen::Vector2d position = t.translation();
-    Eigen::Vector3i state_discrete(position.x(), position.y(), theta_rad);
-    int state_id = get_state_id(position.x(), position.y(), theta_rad);
+    int x = position.x();
+    int y = position.y();
+
+    //int theta = 
+
+    Eigen::Vector3i state_discrete(x, y, theta_rad);
+    int state_id = get_state_id(x, y, theta_rad);
     m_state_map[state_id] = state_discrete;
 
     return state_discrete;
 }
-
 
 // SE2::State Statespace::create_new_state(const double& x,
 //                                         const double& y,
@@ -106,16 +110,26 @@ Eigen::Vector3i Statespace::create_new_state(const aikido::statespace::SE2::Stat
 //     return s;
 // }
 
-// SE2::State Statespace::get_or_create_new_state(const int& x,
-//                                                const int& y,
-//                                                const int& theta) {
-//     int state_id = get_state_id(x, y, theta);
-//     if (m_state_map.find(state_id) != m_state_map.end()) {
-//         return m_state_map[state_id];
-//     } else {
-//         return create_new_state(x, y, theta);
-//     }
-// }
+Eigen::Vector3i Statespace::get_or_create_new_state(const int& x,
+                                               const int& y,
+                                               const int& theta) {
+    int state_id = get_state_id(x, y, theta);
+    if (m_state_map.find(state_id) != m_state_map.end()) {
+        return m_state_map[state_id];
+    } else {
+        return create_new_state(x, y, theta);
+    }
+}
+
+Eigen::Vector3i Statespace::get_or_create_new_state(const aikido::statespace::SE2::State& state_continuous) {
+    
+
+    // if (m_state_map.find(state_id) != m_state_map.end()) {
+    //     return m_state_map[state_id];
+    // } else {
+    //     return create_new_state(x, y, theta);
+    // }
+}
 
 // void Statespace::get_path_coordinates(
 //     const std::vector<int>& path_state_ids,
@@ -170,28 +184,27 @@ bool Statespace::is_valid_state(const int& x,
 //     return SE2::distance(source, succ);
 // }
 
-// double Statespace::normalize_angle_rad(const double& theta_rad) {
-//     assert(m_bins % 2 == 0);
-//     double& normalized_theta_rad = theta_rad;
-//     if (abs(normalized_theta_rad) > 2.0 * math.pi) {
-//         normalized_theta_rad = normalized_theta_rad - 
-//         int((normalized_theta_rad / (2.0 * math.pi)) * 2.0 * math.pi;
-//     }
-//     if (theta_rad < 0) {
-//         normalized_theta_rad += 2.0 * math.pi;
-//     }
-//     return normalized_theta_rad;
-// }
+double Statespace::normalize_angle_rad(const double& theta_rad) const {
+    assert(m_bins % 2 == 0);
+    double normalized_theta_rad = theta_rad;
+    if (abs(normalized_theta_rad) > 2.0 * M_PI) {
+        normalized_theta_rad = normalized_theta_rad - static_cast<int>((normalized_theta_rad / (2.0 * M_PI)) * 2.0 * M_PI);
+    }
+    if (theta_rad < 0) {
+        normalized_theta_rad += 2.0 * M_PI;
+    }
+    return normalized_theta_rad;
+}
 
 // double Statespace::discrete_angle_to_continuous(const int& theta) {
-//     double rad = 2 * math.pi / m_bins * theta;
-//     return theta * (2 * math.pi /m_num_theta_vals);
+//     double rad = 2 * M_PI / m_bins * theta;
+//     return theta * (2 * M_PI /m_num_theta_vals);
 // }
 
-// int Statespace::continuous_angle_to_discrete(cosnt int& theta_rad) {
-//     double bin_size = 2.0 * math.pi / m_bum_theta_vals;
+// int Statespace::continuous_angle_to_discrete(const int& theta_rad) {
+//     double bin_size = 2.0 * M_PI / m_bum_theta_vals;
 //     normalized_theta_rad = \
-//         normalize_angle_rad(theta_rad + bin_size / 2.0) / (2.0 * math.pi) \
+//         normalize_angle_rad(theta_rad + bin_size / 2.0) / (2.0 * M_PI) \
 //         * m_num_theta_vals;
 //     return int(normalized_theta_rad);
 // }
