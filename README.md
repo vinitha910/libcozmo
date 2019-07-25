@@ -11,7 +11,8 @@ $ sudo add-apt-repository ppa:fcl-debs/ppa
 $ sudo add-apt-repository ppa:personalrobotics/ppa
 $ sudo apt-get update
 $ sudo apt-get install cmake build-essential libboost-filesystem-dev libmicrohttpd-dev libompl-dev libtinyxml2-dev libyaml-cpp-dev pr-control-msgs
-$ sudo apt-get install ros-kinetic-rospy ros-kinetic-pybind11-catkin libeigen3-dev python-catkin-tools python-catkin-pkg
+$ sudo apt-get install libnlopt-dev coinor-libipopt-dev libbullet-dev libode-dev
+$ sudo apt-get install ros-kinetic-rospy ros-kinetic-pybind11-catkin ros-kinetic-octomap-ros libeigen3-dev python-catkin-tools python-catkin-pkg
 ```
 
 Install [DART](https://dartsim.github.io/install_dart_on_ubuntu.html#build-and-install-dart) from source:
@@ -23,6 +24,7 @@ $ mkdir build
 $ cd build
 $ cmake ..
 $ make -j4
+$ sudo make install
 ```
 
 Checkout and build [aikido](https://github.com/personalrobotics/aikido.git) from source. You can automate the checkout and build by following [development environment](https://personalrobotics.cs.washington.edu/software/development-environment)
