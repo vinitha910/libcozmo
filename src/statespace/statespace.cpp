@@ -160,10 +160,11 @@ bool Statespace::is_valid_state(const int& x,
     return true;
 }
 
-// double Statespace::get_distance(const SE2::State& source,
-//                                 const SE2::State& succ) {
-//     return SE2::distance(source, succ);
-// }
+double Statespace::get_distance(const aikido::statespace::SE2::State& state_1,
+                                const aikido::statespace::SE2::State& state_2) const{
+    return m_distance.distance(&state_1, &state_2);
+}
+
 
 double Statespace::normalize_angle_rad(const double& theta_rad) const {
     assert(m_bins % 2 == 0);
