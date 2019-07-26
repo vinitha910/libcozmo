@@ -35,8 +35,6 @@
 #include <utility>
 #include <unordered_map>
 #include "aikido/distance/SE2.hpp"
-//#include "aikido/statespace/SE2.hpp"
-//#include "cozmo_description/cozmo.hpp"
 
 namespace libcozmo {
 namespace statespace {
@@ -44,10 +42,6 @@ namespace statespace {
 // This class implements a 2D grid-based graph representation
 class Statespace {
  public:
-    // Occupancy_grid A 1D vector containing either 1 for an occupied/obstacle
-    // Cell or 0 for a free cell. The index is a 1D representation for an (x, y)
-    // Width The width of the occupancy grid
-    // Height The height of the occupancy grid
     Statespace(const int& width,
           const int& height,
           const double& res,
@@ -55,38 +49,69 @@ class Statespace {
           m_width(width),
           m_height(height),
           m_resolution(res),
-          m_num_theta_vals(num_theta_vals),
-          m_distance(std::make_shared<aikido::statespace::SE2>())
+          m_num_theta_vals(num_theta_vals)
+          //m_distance(std::make_shared<aikido::statespace::SE2>())
           {}
 
     ~Statespace() {}
 
     // Sets and returns the start state ID (m_start_id)
-    // Returns -1 if the state is not valid
+    // Throws exception if the state is not valid
     int set_start_state(const int& x, const int& y, const int& theta);
 
     // Sets and returns the goal state ID (m_goal_id)
-    // Returns -1 if the state is not valid
+    // Throws exception if the state is not valid
     int set_goal_state(const int& x, const int& y, const int& theta);
 
-    // Creates new state with given width, height, and theta
+    // Creates new state with given width, height, and orientation
     Eigen::Vector3i create_new_state(const int& x, const int& y, const int& theta);
+
+    // Overloading
+    // Creates new state given SE2 
     Eigen::Vector3i create_new_state(const aikido::statespace::SE2::State& s);
 
-    // Creates new state with given width, height, and theta
+    // Checks if state with given pose already exists
+    // If not, creates new state
     Eigen::Vector3i get_or_create_new_state(const int& x,
-                                       const int& y,
-                                       const int& theta);
+                                            const int& y,
+                                            const int& theta);
 
-    //overloading                                  
+    // Overloading   
+    // Checks if state with given pose based on SE2 already exists
+    // If not, creates new state                               
     Eigen::Vector3i get_or_create_new_state(const aikido::statespace::SE2::State& s);
 
-    // Find the coordinates for the path given a vector containing all the
-    // state IDs
-    // now the path coordinates are (theta, (x,y)) wrapped as nested pair
+    // Findss path of states given a vector containing state IDs
     void get_path_coordinates(
         const std::vector<int>& path_state_ids,
         std::vector<Eigen::Vector3i> *path_coordinates);
+
+    // Computes SE2 distance between two objects
+    // double get_distance(const aikido::statespace::SE2::State& state_1,
+    //                     const aikido::statespace::SE2::State& state_2) const;
+    
+    // // Overloading
+    // // Computes distance between two states
+    // double get_distance(const Eigen::Vector3i& state_1,
+    //                     const Eigen::Vector3i& state_2) const;
+
+    // Converts continuous pose(x,y,th) from relative discretized values
+    // To real continuous values
+    Eigen::Vector3d discrete_pose_to_continuous(const int& x,
+                                              const int& y,
+                                              const int& theta) const;
+
+    // Converts continuous pose(x,y,th) from real continuous values
+    // To relative discrete values
+    Eigen::Vector3i continuous_pose_to_discrete(const double& x_m,
+                                                const double& y_m,
+                                                const double& theta_rad) const;
+    
+    // Overloading
+    // Converts SE2 state, which holds continuous values
+    // to discrete state for Statespace use
+    Eigen::Vector3i continuous_pose_to_discrete(
+        const aikido::statespace::SE2::State& state_continuous) ;
 
  private:
     // Returns the state ID (1D representation) for the given (x, y) cell
@@ -120,29 +145,6 @@ class Statespace {
     Eigen::Vector2d discrete_position_to_continuous(const int& x,
                                                   const int& y) const;
 
-    // Converts continuous pose(x,y,th) from relative discretized values
-    // To real continuous values
-    Eigen::Vector3d discrete_pose_to_continuous(const int& x,
-                                              const int& y,
-                                              const int& theta) const;
-
-    // Converts continuous pose(x,y,th) from real continuous values
-    // To relative discrete values
-    Eigen::Vector3i continuous_pose_to_discrete(const double& x_m,
-                                              const double& y_m,
-                                              const double& theta_rad) const;
-    
-    //overloading
-    Eigen::Vector3i continuous_pose_to_discrete(const aikido::statespace::SE2::State& state_continuous) ;
-
-    // Computes distance between two states in SE2
-    // Takes in two State objects
-    double get_distance(const aikido::statespace::SE2::State& state_1,
-                        const aikido::statespace::SE2::State& state_2) const;
-
-    double get_distance(const Eigen::Vector3i& state_1,
-                        const Eigen::Vector3i& state_2) const;
-
     std::unordered_map<int, Eigen::Vector3i> m_state_map;
     const int m_width;
     const int m_height;
@@ -150,10 +152,10 @@ class Statespace {
     const double m_resolution;
     int m_start_id;
     int m_goal_id;
-    const aikido::distance::SE2 m_distance;
+    //const aikido::distance::SE2 m_distance;
 };
 
 }  // namespace statespace
 }  // namespace libcozmo
 
-#endif  // SRC_STATESPACE_STATESPACE_H_
+#endif  // INCLUDE_STATESPACE_STATESPACE_H_

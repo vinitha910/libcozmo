@@ -33,7 +33,6 @@ catkin_package(
 include_directories(
   ${catkin_INCLUDE_DIRS}
   ${PYTHON_INCLUDE_DIRS}
-  src/statespace/statespace.h
 )
 
 add_library(cozmo SHARED
@@ -50,6 +49,13 @@ target_include_directories(cozmo PRIVATE ${DART_INCLUDE_DIRS} ${aikido_INCLUDE_D
 target_include_directories(cozmo PUBLIC ${EIGEN3_INCLUDE_DIR} ${aikido_INCLUDE_DIRS})
 target_link_libraries(cozmo PUBLIC ${DART_LIBRARIES} ${aikido_LIBRARIES})
 
+catkin_add_gtest(test_libcozmo tests/statespace/test_statespace.cpp)
+target_link_libraries(test_libcozmo 
+  cozmo 
+  ${catkin_LIBRARIES}
+  ${aikido_LIBRARIES}
+)
+
 add_executable(rviz_example src/examples/rviz_example.cpp)
 target_include_directories(rviz_example PRIVATE
   ${aikido_INCLUDE_DIRS}
@@ -62,13 +68,14 @@ target_link_libraries(rviz_example
 )
 
 add_executable(dart_example src/examples/dart_example.cpp)
-target_include_directories(dart_example PRIVATE ${PYTHON_INCLUDE_DIRS})
+target_include_directories(dart_example PRIVATE 
+  ${PYTHON_INCLUDE_DIRS}
+)
 target_link_libraries(dart_example cozmo)
 
 add_executable(execute_traj src/examples/execute_traj.cpp)
 target_include_directories(execute_traj PRIVATE
   ${aikido_INCLUDE_DIRS}
-  #${PYTHON_INCLUDE_DIRS}
 )
 target_link_libraries(execute_traj
   cozmo
