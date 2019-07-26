@@ -224,10 +224,11 @@ Eigen::Vector3i Statespace::continuous_pose_to_discrete(const double& x_m,
     return pose;
 }
 
-// Eigen::Vector3i Statespace::continuous_pose_to_discrete(const aikido::statespace::SE2::State state_continuous) const {
+Eigen::Vector3i Statespace::continuous_pose_to_discrete(const aikido::statespace::SE2::State& state_continuous) {
     
+    return create_new_state(state_continuous);
     
-// }
+}
 
 }  // namespace statespace
 }  // namespace libcozmo

@@ -133,7 +133,7 @@ class Statespace {
                                               const double& theta_rad) const;
     
     //overloading
-    Eigen::Vector3i continuous_pose_to_discrete(const aikido::statespace::SE2::State& s) const;
+    Eigen::Vector3i continuous_pose_to_discrete(const aikido::statespace::SE2::State& state_continuous) ;
 
     // Computes distance between two states in SE2
     // Takes in two State objects
