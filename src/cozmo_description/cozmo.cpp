@@ -46,7 +46,7 @@ void Cozmo::setForkliftPosition(double pos)
     // Solve IK
     ik->getTarget()->setTransform(goal_pose, base);
     Eigen::VectorXd ik_solution;
-    if (ik->solve(ik_solution, true)) {
+    if (ik->solveAndApply(ik_solution, true)) {
         std::cout << "IK solution found!\n";
     } else {
         std::cout << "No IK solution found.\n" << std::endl;
