@@ -86,8 +86,7 @@ class Statespace {
     // now the path coordinates are (theta, (x,y)) wrapped as nested pair
     void get_path_coordinates(
         const std::vector<int>& path_state_ids,
-        std::vector<std::pair<int,
-                              std::pair<int, int>>> *path_coordinates) const;
+        std::vector<Eigen::Vector3i> *path_coordinates);
 
  private:
     // Returns the state ID (1D representation) for the given (x, y) cell
@@ -97,10 +96,7 @@ class Statespace {
 
     // Gets the coordinates for the given state ID and stores then in x and y
     // Return true if coordinates are valid and false otherwise
-    bool get_coord_from_state_id(const int& state_id,
-                                 int* x,
-                                 int* y,
-                                 int* theta) const;
+    bool get_coord_from_state_id(const int& state_id, Eigen::Vector3i& state) const;
 
     // Return true if the state is valid and false otherwise
     bool is_valid_state(const int& x, const int& y, const int& theta) const;
@@ -136,6 +132,7 @@ class Statespace {
                                               const double& y_m,
                                               const double& theta_rad) const;
     
+    //overloading
     Eigen::Vector3i continuous_pose_to_discrete(const aikido::statespace::SE2::State& s) const;
 
     // Computes distance between two states in SE2
