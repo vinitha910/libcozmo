@@ -36,7 +36,7 @@ target_include_directories(cozmo PUBLIC
   $<INSTALL_INTERFACE:include>
 )
 
-target_include_directories(cozmo PRIVATE ${DART_INCLUDE_DIRS})
+target_include_directories(cozmo PRIVATE ${DART_INCLUDE_DIRS} ${aikido_INCLUDE_DIRS})
 target_include_directories(cozmo PUBLIC ${EIGEN3_INCLUDE_DIR} ${aikido_INCLUDE_DIRS})
 target_link_libraries(cozmo PUBLIC ${DART_LIBRARIES} ${aikido_LIBRARIES})
 
