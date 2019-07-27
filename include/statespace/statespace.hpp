@@ -112,13 +112,10 @@ class Statespace {
     // to discrete state for Statespace use
     Eigen::Vector3i continuous_pose_to_discrete(
         const aikido::statespace::SE2::State& state_continuous) ;
-
- private:
     // Returns the state ID (1D representation) for the given (x, y) cell
     int get_state_id(const int& x,
                      const int& y,
                      const int& theta) const;
-
     // Gets the coordinates for the given state ID and stores then in x and y
     // Return true if coordinates are valid and false otherwise
     bool get_coord_from_state_id(const int& state_id, Eigen::Vector3i& state) const;
@@ -126,7 +123,9 @@ class Statespace {
     // Return true if the state is valid and false otherwise
     bool is_valid_state(const int& x, const int& y, const int& theta) const;
 
-    // Get normalized raadian angle in [0, 2pi]
+ private:
+
+     // Get normalized raadian angle in [0, 2pi]
     double normalize_angle_rad(const double& theta_rad) const;
 
     // Convert normalized radian into int
