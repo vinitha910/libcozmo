@@ -75,7 +75,7 @@ Eigen::Vector3i Statespace::create_new_state(
     const Eigen::Vector2d position = t.translation();
     int x = position[0];
     int y = position[1];
-    int theta = discrete_angle_to_continuous(theta_rad);
+    int theta = continuous_angle_to_discrete(theta_rad);
     Eigen::Vector3i state_discrete(x, y, theta);
     int state_id = get_state_id(x, y, theta);
     m_state_map[state_id] = state_discrete;
@@ -102,7 +102,7 @@ Eigen::Vector3i Statespace::get_or_create_new_state(
     const Eigen::Vector2d position = t.translation();
     int x = position[0];
     int y = position[1];
-    int theta = discrete_angle_to_continuous(theta_rad);
+    int theta = continuous_angle_to_discrete(theta_rad);
     int state_id = get_state_id(x, y, theta);
     if (m_state_map.find(state_id) != m_state_map.end()) {
         return m_state_map[state_id];
@@ -197,8 +197,8 @@ Eigen::Vector2i Statespace::continuous_position_to_discrete(
 
 Eigen::Vector2d Statespace::discrete_position_to_continuous(const int& x,
                                                           const int& y) const {
-    double x_m = x * (m_width / m_resolution) + 1;
-    double y_m = y * (m_height / m_resolution) + 1;
+    double x_m = x * (m_width / m_resolution);
+    double y_m = y * (m_height / m_resolution);
     Eigen::Vector2d positon(x_m, y_m);
     return positon;
 }
@@ -225,6 +225,17 @@ Eigen::Vector3i Statespace::continuous_pose_to_discrete(
 Eigen::Vector3i Statespace::continuous_pose_to_discrete(
     const aikido::statespace::SE2::State& state_continuous) {
     return create_new_state(state_continuous);
+}
+
+int Statespace::get_map_size() const {
+    return m_state_map.size();
+}
+
+void Statespace::get_state(const int& state_id, std::unordered_map<int,Eigen::Vector3i>::const_iterator& itr ) {
+    
+    auto element = m_state_map.find(state_id);
+    itr =  element;
+    // return Eigen::Vector3i(3,2,1);
 }
 
 }  // namespace statespace

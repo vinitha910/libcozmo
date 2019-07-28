@@ -123,6 +123,10 @@ class Statespace {
     // Return true if the state is valid and false otherwise
     bool is_valid_state(const int& x, const int& y, const int& theta) const;
 
+    int get_map_size() const;
+
+    void get_state(const int& state_id, std::unordered_map<int,Eigen::Vector3i>::const_iterator& itr);
+
  private:
 
      // Get normalized raadian angle in [0, 2pi]
