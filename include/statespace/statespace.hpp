@@ -35,23 +35,39 @@
 #include <utility>
 #include <unordered_map>
 #include "aikido/distance/SE2.hpp"
-
+#include <boost/functional/hash.hpp>
 namespace libcozmo {
 namespace statespace {
 
+struct StateIdHasher
+{
+  std::size_t operator()(const Eigen::Vector3i& state) const
+  {
+      using boost::hash_value;
+      using boost::hash_combine;
+
+      // Start with a hash value of 0    .
+      std::size_t seed = 0;
+
+      // Modify 'seed' by XORing and bit-shifting in
+      // one member of 'Key' after the other:
+      hash_combine(seed,hash_value(state.x()));
+      hash_combine(seed,hash_value(state.y()));
+      hash_combine(seed,hash_value(state.z()));
+
+      // Return the result.
+      return seed;
+  }
+};
 // This class implements a 3D based graph representation, x y theta
 class Statespace {
  public:
-    Statespace(const int& width,
-          const int& height,
-          const double& res,
-          const int& num_theta_vals) : \
-          m_width(width),
-          m_height(height),
-          m_resolution(res),
-          m_num_theta_vals(num_theta_vals)
-          //m_distance(std::make_shared<aikido::statespace::SE2>())
-          {}
+    Statespace(const double& res,
+               const int& num_theta_vals) : \
+               m_resolution(res),
+               m_num_theta_vals(num_theta_vals)
+               //m_distance(std::make_shared<aikido::statespace::SE2>())
+               {}
 
     ~Statespace() {}
 
@@ -155,9 +171,8 @@ class Statespace {
     Eigen::Vector2d discrete_position_to_continuous(const int& x,
                                                   const int& y) const;
 
-    std::unordered_map<int, Eigen::Vector3i> m_state_map;
-    const int m_width;
-    const int m_height;
+    std::unordered_map<Eigen::Vector3i, int, StateIdHasher> m_state_to_id_map;
+    std::vector<Eigen::Vector3i> m_state_map;
     const int m_num_theta_vals;
     const double m_resolution;
     int m_start_id;
@@ -169,3 +184,4 @@ class Statespace {
 }  // namespace libcozmo
 
 #endif  // INCLUDE_STATESPACE_STATESPACE_H_
+
