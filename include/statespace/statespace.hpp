@@ -39,7 +39,7 @@
 namespace libcozmo {
 namespace statespace {
 
-// This class implements a 2D grid-based graph representation
+// This class implements a 3D based graph representation, x y theta
 class Statespace {
  public:
     Statespace(const int& width,
@@ -67,7 +67,7 @@ class Statespace {
     Eigen::Vector3i create_new_state(const int& x, const int& y, const int& theta);
 
     // Overloading
-    // Creates new state given SE2 
+    // Creates new state given SE2 state instead
     Eigen::Vector3i create_new_state(const aikido::statespace::SE2::State& s);
 
     // Checks if state with given pose already exists
@@ -102,7 +102,9 @@ class Statespace {
                                               const int& theta) const;
 
     // Converts continuous pose(x,y,th) from real continuous values
-    // To relative discrete values
+    // To relative discrete values on graph representation
+    // ie for 10x10 grid of resolution 10 we have continuous values
+    // discretized between [1,10]
     Eigen::Vector3i continuous_pose_to_discrete(const double& x_m,
                                                 const double& y_m,
                                                 const double& theta_rad) const;
@@ -111,11 +113,13 @@ class Statespace {
     // Converts SE2 state, which holds continuous values
     // to discrete state for Statespace use
     Eigen::Vector3i continuous_pose_to_discrete(
-        const aikido::statespace::SE2::State& state_continuous) ;
+        const aikido::statespace::SE2::State& state_continuous);
+    
     // Returns the state ID (1D representation) for the given (x, y) cell
     int get_state_id(const int& x,
                      const int& y,
                      const int& theta) const;
+
     // Gets the coordinates for the given state ID and stores then in x and y
     // Return true if coordinates are valid and false otherwise
     bool get_coord_from_state_id(const int& state_id, Eigen::Vector3i& state) const;
@@ -123,8 +127,11 @@ class Statespace {
     // Return true if the state is valid and false otherwise
     bool is_valid_state(const int& x, const int& y, const int& theta) const;
 
+    // Returns size of the unordered map holding states
+    // Discrete state keyed to repsective id
     int get_map_size() const;
 
+    // Returns specific state from unordered map based on id
     void get_state(const int& state_id, std::unordered_map<int,Eigen::Vector3i>::const_iterator& itr);
 
  private:

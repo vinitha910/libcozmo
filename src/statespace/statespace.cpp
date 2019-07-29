@@ -231,11 +231,10 @@ int Statespace::get_map_size() const {
     return m_state_map.size();
 }
 
-void Statespace::get_state(const int& state_id, std::unordered_map<int,Eigen::Vector3i>::const_iterator& itr ) {
-    
+void Statespace::get_state(const int& state_id, \
+std::unordered_map<int, Eigen::Vector3i>::const_iterator& itr) {
     auto element = m_state_map.find(state_id);
     itr =  element;
-    // return Eigen::Vector3i(3,2,1);
 }
 
 }  // namespace statespace

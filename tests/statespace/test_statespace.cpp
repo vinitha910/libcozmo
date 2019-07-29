@@ -1,6 +1,5 @@
 #include "statespace/statespace.hpp"
 #include <gtest/gtest.h>
-#include<iostream>
 
 class myTestFixture1: public ::testing::Test { 
     public: 
@@ -10,13 +9,9 @@ class myTestFixture1: public ::testing::Test {
         res(10),
         num_theta_vals(4),
         myStateSpace(width, height, res, num_theta_vals) { 
-            // initialization code here
-
         } 
 
         void SetUp( ) { 
-            // code here will execute just before the test ensues 
-            // Add some example states
             const int& x_start = 0;
             const int& y_start = 0;
             const int& w_start = 0;
@@ -30,29 +25,16 @@ class myTestFixture1: public ::testing::Test {
         }
 
         void TearDown( ) { 
-            // code here will be called just after the test completes
-            // ok to through exceptions from here if need be
-            //    is_valid_state //wrong state
         }
 
         ~myTestFixture1( )  { 
-            // cleanup any pending stuff, but no exceptions allowed
         }
-   // put in any custom data members that you need 
-   //the member variables for statespace here
     const int& width;
     const int& height;
     const int& res;
     const int& num_theta_vals;
     libcozmo::statespace::Statespace myStateSpace;
 };
-
-// TEST (EqualityTest, ZeroShouldEqualZero)
-// {
-//     ASSERT_EQ(0, 0);
-// }
-
-// Declare tests
 
 // Check state_id conversion
 TEST_F (myTestFixture1, UnitTest1) { 
