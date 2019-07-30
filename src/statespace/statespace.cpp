@@ -44,15 +44,7 @@ Eigen::Vector3i Statespace::create_new_state(
 
 Eigen::Vector3i Statespace::create_new_state(
     const aikido::statespace::SE2::State& state_continuous) {
-    const auto transformation = state_continuous.getIsometry();
-    Eigen::Rotation2D<double> rotation;
-    rotation.fromRotationMatrix(transformation.linear());
-    const double theta_rad = rotation.angle();
-    const Eigen::Vector2d position = transformation.translation();
-    const int x = position.x();
-    const int y = position.y();
-    const int theta = continuous_angle_to_discrete(theta_rad);
-    create_new_state(Eigen::Vector3i(x, y, theta));
+    return create_new_state(continuous_pose_to_discrete(state_continuous)); 
 }
 
 Eigen::Vector3i Statespace::get_or_create_new_state(
@@ -67,8 +59,7 @@ Eigen::Vector3i Statespace::get_or_create_new_state(
 
 Eigen::Vector3i Statespace::get_or_create_new_state(
     const aikido::statespace::SE2::State& pose) {
-    Eigen::Vector3i discrete_state = continuous_pose_to_discrete(pose);
-    return get_or_create_new_state(discrete_state);
+    return get_or_create_new_state(continuous_pose_to_discrete(pose));
 }
 
 void Statespace::get_path_coordinates(
@@ -100,7 +91,7 @@ bool Statespace::get_coord_from_state_id(
 }
 
 bool Statespace::is_valid_state(const Eigen::Vector3i& state) const {
-    const int theta = state.z();
+    const int theta = state[2];
     if (!(theta >= 0 && theta < m_num_theta_vals)) {
         return false;
     }
@@ -139,13 +130,19 @@ Eigen::Vector2d Statespace::discrete_position_to_continuous(
     return Eigen::Vector2d(x_m, y_m);
 }
 
-Eigen::Vector3d Statespace::discrete_pose_to_continuous(
+aikido::statespace::SE2::State Statespace::discrete_pose_to_continuous(
     const Eigen::Vector3i pose_discrete) const {
     const Eigen::Vector2d position = 
         discrete_position_to_continuous(pose_discrete.head<2>());
     const double theta_discrete = 
         discrete_angle_to_continuous(pose_discrete[2]);
-    return Eigen::Vector3d(position[0], position[1], theta_discrete);
+    aikido::statespace::SE2::State state;
+    Eigen::Isometry2d transform = Eigen::Isometry2d::Identity();
+    const Eigen::Rotation2D<double> rot(theta_discrete);
+    transform.linear() = rot.toRotationMatrix();
+    transform.translation() = position;
+    state.setIsometry(transform);
+    return state;
 }
 
 Eigen::Vector3i Statespace::continuous_pose_to_discrete(
@@ -155,8 +152,8 @@ Eigen::Vector3i Statespace::continuous_pose_to_discrete(
     rotation.fromRotationMatrix(transformation.linear());
     const double theta_rad = rotation.angle();
     const Eigen::Vector2d position = transformation.translation();
-    const int x = position[0];
-    const int y = position[1];
+    const int x = position.x();
+    const int y = position.y();
     const int theta = continuous_angle_to_discrete(theta_rad);
     return Eigen::Vector3i(x, y, theta);
 }

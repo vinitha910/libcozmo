@@ -39,11 +39,9 @@
 namespace libcozmo {
 namespace statespace {
 
-// Custom Hash function for a SE2 state
-struct StateHasher
-{
-    std::size_t operator()(const Eigen::Vector3i& state) const
-    {
+// Custom Hash function for a discretized state
+struct StateHasher {
+    std::size_t operator()(const Eigen::Vector3i& state) const {
         using boost::hash_value;
         using boost::hash_combine;
         std::size_t seed = 0;
@@ -54,16 +52,14 @@ struct StateHasher
     }
 };
 
-// This class handles the two-dimensional special Euclidean group SE(2).
-// Note that the group operation for SE(2) differs from the group operation
-// of the Cartesian product space R^2 x SO(2) because it is constructed
-// through the semi-direct product.
+// This class implements the two-dimensional special Euclidean
+// group SE(2),i.e. the space of planar rigid body transformations.
 class Statespace {
  public:
     // Creates Statespace object
 
-    // \param res resolution of discretized state
-    // \param num_theta_vals number of discretized theta values
+    // \param res Resolution of discretized state
+    // \param num_theta_vals Number of discretized theta values
     Statespace(const double& res,
                const int& num_theta_vals) : \
                m_resolution(res),
@@ -72,41 +68,41 @@ class Statespace {
 
     ~Statespace() {}
 
-    // Creates new state given discretized coordinates
+    // Creates a new state given discretized coordinates
     
     // \param state The discrete state
     Eigen::Vector3i create_new_state(const Eigen::Vector3i& state);
 
-    // Creates new state given a SE2 transformation
+    // Creates a new state given a SE2 transformation
 
-    // \param state SE2 state in continuous value to discretize
-    Eigen::Vector3i create_new_state(const aikido::statespace::SE2::State& s);
+    // \param state The SE2 state in continuous value to discretize
+    Eigen::Vector3i create_new_state(const aikido::statespace::SE2::State& state);
 
-    // Returns state with given pose if it exists,
+    // Returns a state with given pose if it exists,
     // Otherwise creates and returns a new state
 
     // \param pose The discrete state 
     Eigen::Vector3i get_or_create_new_state(const Eigen::Vector3i& pose);
 
-    // Returns state with given transformation if it exists,
+    // Returns a state with given transformation if it exists,
     // Otherwise creates and returns a new state  
 
-    // \param state SE2 state                          
-    Eigen::Vector3i get_or_create_new_state(\
-        const aikido::statespace::SE2::State& s);
+    // \param state The SE2 state                          
+    Eigen::Vector3i get_or_create_new_state(
+        const aikido::statespace::SE2::State& state);
 
-    // Updates path coordinates vector with coordinates of given states
+    // Return coordinates for given set of states
 
-    // \param path_state_ids vector of state ids
-    // \param path_coordinates vector of discretized poses
+    // \param path_state_ids The vector of state ids
+    // \param path_coordinates The vector of discretized poses
     void get_path_coordinates(
         const std::vector<int>& path_state_ids,
         std::vector<Eigen::Vector3i> *path_coordinates);
 
     // Converts discretized state to continuous state
 
-    // \param pose_discrete discrete state vector
-    Eigen::Vector3d discrete_pose_to_continuous(\
+    // \param pose_discrete The discrete state
+    aikido::statespace::SE2::State discrete_pose_to_continuous(
         const Eigen::Vector3i pose_discrete) const;
 
     // Converts continuous state to discretized state
@@ -122,11 +118,12 @@ class Statespace {
     bool get_state_id(const Eigen::Vector3i& pose, int& id);
 
     // Gets discretized state given state ID
-    // Return true if state is valid and false otherwise
+    // Return true if state with given state ID exists and false otherwise
     
     // \param state_id The ID of the state
     // \param state The discrete state
-    bool get_coord_from_state_id(const int& state_id, \
+    bool get_coord_from_state_id(
+        const int& state_id,
         Eigen::Vector3i& state) const;
 
     // Return true if the state is valid and false otherwise
@@ -134,20 +131,19 @@ class Statespace {
     // \param state The discretized state
     bool is_valid_state(const Eigen::Vector3i& state) const;
 
-    // Returns size of the unordered map holding states
+    // Returns the number of currently existng states
     // Discrete state keyed to repsective id
     int get_num_states() const;
 
  private:
-     // Get normalized radians angle in [0, 2pi]
+     // Get normalized angle (radians) in [0, 2pi]
 
-     // \param theta_rad Angle in radians
+     // \param theta_rad Angle (radians)
     double normalize_angle_rad(const double& theta_rad) const;
 
-    // Convert normalized radian into int
-    // that corresponds to the bin
+    // Converts continuous angle (radians) to discrete
 
-    // \theta Normalized angle in radian
+    // \theta Normalized angle (radians)
     double discrete_angle_to_continuous(const int& theta) const;
 
     // Converts discrete angle to continuous (radians)
@@ -158,7 +154,7 @@ class Statespace {
     // Converts discrete position to continuous
 
     // \param position The discrete coordinates
-    Eigen::Vector2d discrete_position_to_continuous(\
+    Eigen::Vector2d discrete_position_to_continuous(
         const Eigen::Vector2i position) const;
 
     // Maps discrete state to state ID
