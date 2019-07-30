@@ -30,12 +30,13 @@
 #ifndef INCLUDE_STATESPACE_STATESPACE_H_
 #define INCLUDE_STATESPACE_STATESPACE_H_
 
+#include <boost/functional/hash.hpp>
 #include <Eigen/Dense>
 #include <vector>
 #include <utility>
 #include <unordered_map>
 #include "aikido/distance/SE2.hpp"
-#include <boost/functional/hash.hpp>
+
 namespace libcozmo {
 namespace statespace {
 
@@ -45,9 +46,9 @@ struct StateHasher {
         using boost::hash_value;
         using boost::hash_combine;
         std::size_t seed = 0;
-        hash_combine(seed,hash_value(state.x()));
-        hash_combine(seed,hash_value(state.y()));
-        hash_combine(seed,hash_value(state.z()));
+        hash_combine(seed, hash_value(state.x()));
+        hash_combine(seed, hash_value(state.y()));
+        hash_combine(seed, hash_value(state.z()));
         return seed;
     }
 };
@@ -69,25 +70,26 @@ class Statespace {
     ~Statespace() {}
 
     // Creates a new state given discretized coordinates
-    
+
     // \param state The discrete state
     Eigen::Vector3i create_new_state(const Eigen::Vector3i& state);
 
     // Creates a new state given a SE2 transformation
 
     // \param state The SE2 state in continuous value to discretize
-    Eigen::Vector3i create_new_state(const aikido::statespace::SE2::State& state);
+    Eigen::Vector3i create_new_state(
+        const aikido::statespace::SE2::State& state);
 
     // Returns a state with given pose if it exists,
     // Otherwise creates and returns a new state
 
-    // \param pose The discrete state 
+    // \param pose The discrete state
     Eigen::Vector3i get_or_create_new_state(const Eigen::Vector3i& pose);
 
     // Returns a state with given transformation if it exists,
-    // Otherwise creates and returns a new state  
+    // Otherwise creates and returns a new state
 
-    // \param state The SE2 state                          
+    // \param state The SE2 state
     Eigen::Vector3i get_or_create_new_state(
         const aikido::statespace::SE2::State& state);
 
@@ -106,20 +108,20 @@ class Statespace {
         const Eigen::Vector3i pose_discrete) const;
 
     // Converts continuous state to discretized state
-    
+
     // \param state_continuous The SE2 state
     Eigen::Vector3i continuous_pose_to_discrete(
         const aikido::statespace::SE2::State& state_continuous);
-    
+
     // Returns state ID of given pose
-    
+
     // \param pose The discrete state
     // \param id The state id
     bool get_state_id(const Eigen::Vector3i& pose, int& id);
 
     // Gets discretized state given state ID
     // Return true if state with given state ID exists and false otherwise
-    
+
     // \param state_id The ID of the state
     // \param state The discrete state
     bool get_coord_from_state_id(
@@ -127,7 +129,7 @@ class Statespace {
         Eigen::Vector3i& state) const;
 
     // Return true if the state is valid and false otherwise
-    
+
     // \param state The discretized state
     bool is_valid_state(const Eigen::Vector3i& state) const;
 

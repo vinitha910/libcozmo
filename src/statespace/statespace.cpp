@@ -44,7 +44,7 @@ Eigen::Vector3i Statespace::create_new_state(
 
 Eigen::Vector3i Statespace::create_new_state(
     const aikido::statespace::SE2::State& state_continuous) {
-    return create_new_state(continuous_pose_to_discrete(state_continuous)); 
+    return create_new_state(continuous_pose_to_discrete(state_continuous));
 }
 
 Eigen::Vector3i Statespace::get_or_create_new_state(
@@ -132,9 +132,9 @@ Eigen::Vector2d Statespace::discrete_position_to_continuous(
 
 aikido::statespace::SE2::State Statespace::discrete_pose_to_continuous(
     const Eigen::Vector3i pose_discrete) const {
-    const Eigen::Vector2d position = 
+    const Eigen::Vector2d position =
         discrete_position_to_continuous(pose_discrete.head<2>());
-    const double theta_discrete = 
+    const double theta_discrete =
         discrete_angle_to_continuous(pose_discrete[2]);
     aikido::statespace::SE2::State state;
     Eigen::Isometry2d transform = Eigen::Isometry2d::Identity();
