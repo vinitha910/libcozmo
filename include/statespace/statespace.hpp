@@ -71,14 +71,6 @@ class Statespace {
 
     ~Statespace() {}
 
-    // Sets and returns the start state ID (m_start_id)
-    // Throws exception if the state is not valid
-    int set_start_state(const int& x, const int& y, const int& theta);
-
-    // Sets and returns the goal state ID (m_goal_id)
-    // Throws exception if the state is not valid
-    int set_goal_state(const int& x, const int& y, const int& theta);
-
     // Creates new state with given width, height, and orientation
     Eigen::Vector3i create_new_state(const int& x, const int& y, const int& theta);
 
@@ -113,17 +105,13 @@ class Statespace {
 
     // Converts continuous pose(x,y,th) from relative discretized values
     // To real continuous values
-    Eigen::Vector3d discrete_pose_to_continuous(const int& x,
-                                              const int& y,
-                                              const int& theta) const;
+    Eigen::Vector3d discrete_pose_to_continuous(const Eigen::Vector3i pose_discrete) const;
 
     // Converts continuous pose(x,y,th) from real continuous values
     // To relative discrete values on graph representation
     // ie for 10x10 grid of resolution 10 we have continuous values
     // discretized between [1,10]
-    Eigen::Vector3i continuous_pose_to_discrete(const double& x_m,
-                                                const double& y_m,
-                                                const double& theta_rad) const;
+    Eigen::Vector3i continuous_pose_to_discrete(Eigen::Vector3d pose_continuous) const;
     
     // Overloading
     // Converts SE2 state, which holds continuous values
@@ -132,23 +120,18 @@ class Statespace {
         const aikido::statespace::SE2::State& state_continuous);
     
     // Returns the state ID (1D representation) for the given (x, y) cell
-    int get_state_id(const int& x,
-                     const int& y,
-                     const int& theta) const;
+    bool get_state_id(const Eigen::Vector3i& pose, int& id);
 
     // Gets the coordinates for the given state ID and stores then in x and y
     // Return true if coordinates are valid and false otherwise
     bool get_coord_from_state_id(const int& state_id, Eigen::Vector3i& state) const;
 
     // Return true if the state is valid and false otherwise
-    bool is_valid_state(const int& x, const int& y, const int& theta) const;
+    bool is_valid_state(const Eigen::Vector3i& state) const;
 
     // Returns size of the unordered map holding states
     // Discrete state keyed to repsective id
-    int get_map_size() const;
-
-    // Returns specific state from unordered map based on id
-    void get_state(const int& state_id, std::unordered_map<int,Eigen::Vector3i>::const_iterator& itr);
+    int get_num_states() const;
 
  private:
 
@@ -164,19 +147,15 @@ class Statespace {
 
     // Converts meter value of input position in discretized value
     // Based on the grid width, height, and resolution
-    Eigen::Vector2i continuous_position_to_discrete(const double& x_m,
-                                                  const double& y_m) const;
+    Eigen::Vector2i continuous_position_to_discrete(const Eigen::Vector2d position) const;
 
     // Dicrete value of position of input state into continuous values
-    Eigen::Vector2d discrete_position_to_continuous(const int& x,
-                                                  const int& y) const;
+    Eigen::Vector2d discrete_position_to_continuous(const Eigen::Vector2i position) const;
 
     std::unordered_map<Eigen::Vector3i, int, StateIdHasher> m_state_to_id_map;
     std::vector<Eigen::Vector3i> m_state_map;
     const int m_num_theta_vals;
     const double m_resolution;
-    int m_start_id;
-    int m_goal_id;
     //const aikido::distance::SE2 m_distance;
 };
 
