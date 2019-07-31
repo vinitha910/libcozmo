@@ -3,16 +3,11 @@ project(libcozmo)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 set(CMAKE_BUILD_TYPE Release)
-#SET(PYTHON_INCLUDE_DIRS "/usr/include/python2.7")
-#SET(PYTHON_LIBRARY "/usr/lib/python2.7/config/libpython2.7.so")
 
 find_package(catkin REQUIRED COMPONENTS roscpp pybind11_catkin std_msgs message_generation)
-find_package(aikido REQUIRED COMPONENTS rviz)
 find_package(Eigen3 REQUIRED)
 find_package(DART 6.8.2 REQUIRED COMPONENTS gui collision-bullet)
-#find_package(PythonInterp 2.7 REQUIRED)
-#find_package(PythonLibs 2.7 REQUIRED)
-find_package(aikido REQUIRED COMPONENTS statespace control rviz)
+find_package(aikido REQUIRED COMPONENTS statespace distance control rviz)
 find_package(aikidopy REQUIRED COMPONENTS libaikidopy)
 
 add_message_files(
@@ -47,7 +42,7 @@ target_include_directories(cozmo PUBLIC
 
 target_include_directories(cozmo PRIVATE ${DART_INCLUDE_DIRS} ${aikido_INCLUDE_DIRS})
 target_include_directories(cozmo PUBLIC ${EIGEN3_INCLUDE_DIR} ${aikido_INCLUDE_DIRS})
-target_link_libraries(cozmo PUBLIC ${DART_LIBRARIES} ${aikido_LIBRARIES})
+target_link_libraries(cozmo ${DART_LIBRARIES} ${aikido_LIBRARIES})
 
 catkin_add_gtest(test_libcozmo tests/statespace/test_statespace.cpp)
 target_link_libraries(test_libcozmo 

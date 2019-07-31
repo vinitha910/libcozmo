@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2019, Vinitha Ranganeni
+// Copyright (c) 2019, Vinitha Ranganeni, Brian Lee
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,7 @@ Eigen::Vector3i Statespace::create_new_state(
 
 Eigen::Vector3i Statespace::create_new_state(
     const aikido::statespace::SE2::State& state_continuous) {
-    return create_new_state(pose_to_state(state_continuous));
+    return create_new_state(continuous_state_to_discrete(state_continuous));
 }
 
 Eigen::Vector3i Statespace::get_or_create_new_state(
@@ -59,7 +59,7 @@ Eigen::Vector3i Statespace::get_or_create_new_state(
 
 Eigen::Vector3i Statespace::get_or_create_new_state(
     const aikido::statespace::SE2::State& pose) {
-    return get_or_create_new_state(pose_to_state(pose));
+    return get_or_create_new_state(continuous_state_to_discrete(pose));
 }
 
 void Statespace::get_path_states(
@@ -152,13 +152,14 @@ aikido::statespace::SE2::State Statespace::discrete_state_to_continuous(
     return discretized_state;
 }
 
-Eigen::Vector3i Statespace::pose_to_state(
+Eigen::Vector3i Statespace::continuous_state_to_discrete(
     const aikido::statespace::SE2::State& state) {
     const auto transformation = state.getIsometry();
     Eigen::Rotation2D<double> rotation;
     rotation.fromRotationMatrix(transformation.linear());
     const double theta_rad = rotation.angle();
-    const Eigen::Vector2i position = continuous_position_to_discrete(transformation.translation());
+    const Eigen::Vector2i position = 
+        continuous_position_to_discrete(transformation.translation());
     const int x = position.x();
     const int y = position.y();
     const int theta = continuous_angle_to_discrete(theta_rad);
@@ -167,6 +168,12 @@ Eigen::Vector3i Statespace::pose_to_state(
 
 int Statespace::get_num_states() const {
     return m_state_map.size();
+}
+
+double Statespace::get_distance(
+    const aikido::statespace::SE2::State* state_1,
+    const aikido::statespace::SE2::State* state_2) const {
+    return m_distance_metric.distance(state_1, state_2);
 }
 
 }  // namespace statespace

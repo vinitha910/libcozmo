@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2019, Vinitha Ranganeni
+// Copyright (c) 2019, Vinitha Ranganeni, Brian Lee
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -57,16 +57,18 @@ struct StateHasher {
 // group SE(2),i.e. the space of planar rigid body transformations.
 class Statespace {
  public:
-    // Creates Statespace object
+    // Constructor
 
     // \param res Resolution of discretized state
     // \param num_theta_vals Number of discretized theta values,
     // should be a power of 2
-    Statespace(const double& res,
-               const int& num_theta_vals) : \
-               m_resolution(res),
-               m_num_theta_vals(num_theta_vals)
-               {}
+    Statespace(
+        const double& res,
+        const int& num_theta_vals) : \
+        m_resolution(res),
+        m_num_theta_vals(num_theta_vals),
+        m_statespace(std::make_shared<aikido::statespace::SE2>()),
+        m_distance_metric(aikido::distance::SE2(m_statespace)) {}
 
     ~Statespace() {}
 
@@ -111,7 +113,7 @@ class Statespace {
     // Converts continuous state to discretized state
 
     // \param state_continuous The SE2 state
-    Eigen::Vector3i pose_to_state(
+    Eigen::Vector3i continuous_state_to_discrete(
         const aikido::statespace::SE2::State& state);
 
     // Returns state ID of given pose
@@ -135,6 +137,10 @@ class Statespace {
 
     // Returns the number of currently existng states
     int get_num_states() const;
+
+    double get_distance(
+        const aikido::statespace::SE2::State* state_1,
+        const aikido::statespace::SE2::State* state_2) const;
 
  private:
      // Get normalized angle (radians) in [0, 2pi]
@@ -175,6 +181,9 @@ class Statespace {
 
     // Resolution of discrete state
     const double m_resolution;
+
+    std::shared_ptr<aikido::statespace::SE2> m_statespace;
+    aikido::distance::SE2 m_distance_metric;
 };
 
 }  // namespace statespace

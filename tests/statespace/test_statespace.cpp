@@ -80,7 +80,7 @@ TEST_F(myTestFixture1, UnitTest3) {
     trans << 5.4, 2.0;
     t.translation() = trans;
     continuous_state.setIsometry(t);
-    Eigen::Vector3i pose = myStateSpace.pose_to_state(
+    Eigen::Vector3i pose = myStateSpace.continuous_state_to_discrete(
         continuous_state);
     EXPECT_EQ(54, pose.x());
     EXPECT_EQ(20, pose.y());
