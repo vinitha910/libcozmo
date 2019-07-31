@@ -82,8 +82,8 @@ TEST_F(myTestFixture1, UnitTest3) {
     continuous_state.setIsometry(t);
     Eigen::Vector3i pose = myStateSpace.pose_to_state(
         continuous_state);
-    EXPECT_EQ(54, pose[0]);
-    EXPECT_EQ(20, pose[1]);
+    EXPECT_EQ(54, pose.x());
+    EXPECT_EQ(20, pose.y());
     double angle = 2;
     EXPECT_EQ(angle, pose[2]);
 }
