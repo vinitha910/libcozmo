@@ -70,6 +70,8 @@ class GenericActionSpace(object):
     -------
     apply_action(index)
         applies an action from the generated action space
+    get_action_space()
+        returns the action space
     view_action_space()
         output all the actions in the action space with the corresponding indices
     """
@@ -135,6 +137,9 @@ class GenericActionSpace(object):
         except IndexError:
             print(action_id, ' is an invalid id\n Enter an id between 0 and ', len(self.actions) - 1)
     
+    def get_action_space(self):
+        return self.actions
+
     def view_action_space(self):
         """
         Outputs all the actions from the action space with their corresponding indices
@@ -170,9 +175,12 @@ class ObjectOrientedActionSpace(object):
     for cozmo to execute relative to an object, in this class
     we assume it to be a cube
 
-    Given the number of samples to generate, this class will
-    generate that many number of actions representing different
-    horizontal offsets from the center of the edge of a cube
+    Given the number of cube offsets, the min, max values for 
+    linear velocity and duration as well as the number of samples
+    for each, this class will generate lin_samples * dur_samples * cube offsets * 4
+    number of actions 
+    
+    Cube offset represents the horizontal offsets from the center of the edge of a cube
 
     Methods
     -------
@@ -181,7 +189,7 @@ class ObjectOrientedActionSpace(object):
     view_action_space()
         output all the actions in the action space with the corresponding indices
     """
-    def __init__(self, cozmo, cube, samples):
+    def __init__(self, cozmo, cube, samples, lin_min, lin_max, lin_samples, dur_min, dur_max, dur_samples):
         """
         Parameters
         ----------
@@ -196,6 +204,17 @@ class ObjectOrientedActionSpace(object):
         self.cozmo = cozmo
         self.cube = cube
         self.samples = samples
+        self.lin_min = lin_min
+        self.lin_max = lin_max
+        self.lin_samples = lin_samples
+        self.dur_min = dur_min
+        self.dur_max = dur_max
+        self.dur_samples = dur_samples
+
+        self.locations = []
+        self.location_names = []
+        self.actions = []
+        self.action_names = []
         self._generate_actions()
 
     def apply_action(self, action_id):
@@ -214,9 +233,14 @@ class ObjectOrientedActionSpace(object):
         """
 
         try:
-            print('Moving to: ', self.location_names[action_id])
-            action = self.cozmo.go_to_pose(self.locations[action_id])
+            print('Moving to: ', self.action_names[action_id][0], ' and apply action: ', self.action_names[action_id][1])
+            action = self.cozmo.go_to_pose(self.actions[action_id][0])
             action.wait_for_completed()
+            
+            action = self.actions[action_id][1]
+            left_wheel = action.lin_vel + action.ang_vel
+            right_wheel = action.lin_vel - action.ang_vel
+            self.cozmo.drive_wheels(left_wheel, right_wheel, duration=action.duration)
         except IndexError:
             print(action_id, 'is an invalid id\nEnter an id between 0 and', len(self.locations) - 1)
     
@@ -224,11 +248,12 @@ class ObjectOrientedActionSpace(object):
         """
         Outputs all the actions from the action space with their corresponding indices
         """
-
-        for idx, action in self.location_names.items():
-            if idx % (len(self.location_names) / 4) == 0:
+        idx = 0
+        for action in self.action_names:
+            if idx % 5 == 0:
                 print()
-            print(idx, ': ', action)
+            print(idx, ': ', action[0], ' ', action[1])
+            idx += 1
 
     def _cube_offset(self, offset, angle):
         """
@@ -276,34 +301,23 @@ class ObjectOrientedActionSpace(object):
 
         return ordered_sides
 
-    def _nearest_zero(self, values):
-        """
-        Helper function to find the value closest to zero in a list,
-        used in self._find_sides to identify which angle of the cube
-        is the front
-
-        Note: in case the corner of the cube is perfectly in align with cozmo
-        and there is no closest side, we choose the right side to be the front
-
-        Parameters
-        ----------
-        values : list of floats
-            the list to traverse
-
-        returns the index of the value closest to zero
-        """
-
-        nearest = 0
-        for i in range(len(values))[1:]:
-            if abs(values[i]) < abs(values[nearest]):
-                nearest = i
-            if values[i] == math.pi / 2:
-                return i
-        return nearest
-
     def _generate_actions(self, h_offset=40, v_offset=60):
         """
         Helper function to generate the action space
+        """
+
+        self._generate_offsets(h_offset, v_offset)
+        gen_space = GenericActionSpace(self.cozmo, self.lin_min, self.lin_max, self.lin_samples, 0, 0, 0, self.dur_min, self.dur_max, self.dur_samples)
+        actions = gen_space.get_action_space()
+
+        for i in range(len(self.locations)):
+            for action in actions:
+                self.actions.append((self.locations[i], action))
+                self.action_names.append((self.location_names[i], action))
+
+    def _generate_offsets(self, h_offset, v_offset):
+        """
+        Helper function to generate cube offset positions
 
         Parameters
         ----------
@@ -312,11 +326,11 @@ class ObjectOrientedActionSpace(object):
         v_offset : float
             the vertical offset away from the center of the cube, in millimeters
         """
-
-        self.locations = []
-        self.location_names = {}
-        choices = create_choices(-h_offset, h_offset, self.samples, True)
-    
+        if self.samples == 1:
+            choices = [0]
+        else:
+            choices = create_choices(-h_offset, h_offset, self.samples, True)
+        
         x = self.cube.pose.position.x
         y = self.cube.pose.position.y
         z = self.cube.pose.position.z
@@ -349,9 +363,33 @@ class ObjectOrientedActionSpace(object):
                 elif cube_side == 'right of cube ':
                     location = pose_z_angle(x + x_offset + choice, y - y_offset, z, radians(side))
                 self.locations.append(location)
-                self.location_names[key_idx] = cube_side + offset
+                self.location_names.append(cube_side + offset)
                 key_idx += 1
+    
+    def _nearest_zero(self, values):
+        """
+        Helper function to find the value closest to zero in a list,
+        used in self._find_sides to identify which angle of the cube
+        is the front
 
+        Note: in case the corner of the cube is perfectly in align with cozmo
+        and there is no closest side, we choose the right side to be the front
+
+        Parameters
+        ----------
+        values : list of floats
+            the list to traverse
+
+        returns the index of the value closest to zero
+        """
+
+        nearest = 0
+        for i in range(len(values))[1:]:
+            if abs(values[i]) < abs(values[nearest]):
+                nearest = i
+            if values[i] == math.pi / 2:
+                return i
+        return nearest
 
 def cozmo_run(robot: cozmo.robot):
     #action = GenericActionSpace(robot, 10, 100, 5, 10, 100, 5, 1, 5, 5)
@@ -365,9 +403,9 @@ def cozmo_run(robot: cozmo.robot):
     finally:
         look_around.stop()
     
-    oos = ObjectOrientedActionSpace(robot, cube, 3)
+    oos = ObjectOrientedActionSpace(robot, cube, 1, 10, 100, 3, 1, 5, 3)
     oos.view_action_space()
-    oos.apply_action(6)
+    oos.apply_action(33)
     
 if __name__ == '__main__':
     cozmo.run_program(cozmo_run)
