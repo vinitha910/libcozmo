@@ -7,7 +7,8 @@ set(CMAKE_BUILD_TYPE Release)
 find_package(catkin REQUIRED COMPONENTS roscpp pybind11_catkin std_msgs message_generation)
 find_package(Eigen3 REQUIRED)
 find_package(DART 6.8.2 REQUIRED COMPONENTS gui collision-bullet)
-find_package(aikido REQUIRED COMPONENTS statespace distance control rviz)
+#find_package(aikido REQUIRED COMPONENTS statespace trajectory distance control rviz)
+find_package(aikido 0.3.0 REQUIRED COMPONENTS common constraint statespace trajectory distance control rviz)
 find_package(aikidopy REQUIRED COMPONENTS libaikidopy)
 
 add_message_files(
@@ -41,8 +42,8 @@ target_include_directories(cozmo PUBLIC
 )
 
 target_include_directories(cozmo PRIVATE ${DART_INCLUDE_DIRS} ${aikido_INCLUDE_DIRS})
-target_include_directories(cozmo PUBLIC ${EIGEN3_INCLUDE_DIR} ${aikido_INCLUDE_DIRS})
-target_link_libraries(cozmo ${DART_LIBRARIES} ${aikido_LIBRARIES})
+target_include_directories(cozmo PUBLIC ${EIGEN3_INCLUDE_DIR})
+target_link_libraries(cozmo PUBLIC ${DART_LIBRARIES} ${aikido_LIBRARIES} aikido_distance)
 
 catkin_add_gtest(test_libcozmo tests/statespace/test_statespace.cpp)
 target_link_libraries(test_libcozmo 
@@ -64,9 +65,10 @@ target_link_libraries(rviz_example
 
 add_executable(dart_example src/examples/dart_example.cpp)
 target_include_directories(dart_example PRIVATE 
+  ${aikido_INCLUDE_DIRS}
   ${PYTHON_INCLUDE_DIRS}
 )
-target_link_libraries(dart_example cozmo)
+target_link_libraries(dart_example cozmo ${aikido_LIBRARIES})
 
 add_executable(execute_traj src/examples/execute_traj.cpp)
 target_include_directories(execute_traj PRIVATE
