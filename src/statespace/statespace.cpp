@@ -173,7 +173,8 @@ int Statespace::get_num_states() const {
 double Statespace::get_distance(
     const aikido::statespace::SE2::State* state_1,
     const aikido::statespace::SE2::State* state_2) const {
-    return m_distance_metric.distance(state_1, state_2);
+    // return m_distance_metric.distance(state_1, state_2);
+    return 0.0;
 }
 
 }  // namespace statespace
