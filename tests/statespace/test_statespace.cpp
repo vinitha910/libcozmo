@@ -31,22 +31,18 @@
 #include "statespace/statespace.hpp"
 
 class myTestFixture1: public ::testing::Test {
-    public:
-        myTestFixture1() : \
-        res(1),
-        num_theta_vals(4),
-        myStateSpace(res, num_theta_vals) {}
+ public:
+    myTestFixture1() : \
+    myStateSpace(0.1, 4) {}
 
-        void SetUp() {
-            myStateSpace.create_new_state(Eigen::Vector3i(3, 2, 1));
-            myStateSpace.create_new_state(Eigen::Vector3i(1, 3, 4));
-        }
+    void SetUp() {
+        myStateSpace.create_new_state(Eigen::Vector3i(3, 2, 1));
+        myStateSpace.create_new_state(Eigen::Vector3i(1, 3, 4));
+    }
 
-        void TearDown() {}
+    void TearDown() {}
 
-        ~myTestFixture1()  {}
-    const int& res;
-    const int& num_theta_vals;
+    ~myTestFixture1()  {}
     libcozmo::statespace::Statespace myStateSpace;
 };
 
@@ -84,10 +80,10 @@ TEST_F(myTestFixture1, UnitTest3) {
     trans << 5.4, 2.0;
     t.translation() = trans;
     continuous_state.setIsometry(t);
-    Eigen::Vector3i pose = myStateSpace.continuous_pose_to_discrete(
+    Eigen::Vector3i pose = myStateSpace.pose_to_state(
         continuous_state);
-    EXPECT_EQ(5, pose[0]);
-    EXPECT_EQ(2, pose[1]);
+    EXPECT_EQ(54, pose[0]);
+    EXPECT_EQ(20, pose[1]);
     double angle = 2;
     EXPECT_EQ(angle, pose[2]);
 }
@@ -103,7 +99,7 @@ TEST_F(myTestFixture1, UnitTest4) {
     std::vector<Eigen::Vector3i> expected;
     expected.push_back(Eigen::Vector3i(3, 2, 1));
     expected.push_back(Eigen::Vector3i(1, 3, 4));
-    myStateSpace.get_path_coordinates(state_ids, &path_coordinates);
+    myStateSpace.get_path_states(state_ids, &path_coordinates);
     EXPECT_EQ(expected[0][0], path_coordinates[0][0]);
     EXPECT_EQ(expected[0][1], path_coordinates[0][1]);
     EXPECT_EQ(expected[0][2], path_coordinates[0][2]);

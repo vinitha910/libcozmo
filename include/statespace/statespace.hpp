@@ -60,7 +60,8 @@ class Statespace {
     // Creates Statespace object
 
     // \param res Resolution of discretized state
-    // \param num_theta_vals Number of discretized theta values
+    // \param num_theta_vals Number of discretized theta values,
+    // should be a power of 2
     Statespace(const double& res,
                const int& num_theta_vals) : \
                m_resolution(res),
@@ -76,7 +77,7 @@ class Statespace {
 
     // Creates a new state given a SE2 transformation
 
-    // \param state The SE2 state in continuous value to discretize
+    // \param state The SE2 state
     Eigen::Vector3i create_new_state(
         const aikido::statespace::SE2::State& state);
 
@@ -93,33 +94,32 @@ class Statespace {
     Eigen::Vector3i get_or_create_new_state(
         const aikido::statespace::SE2::State& state);
 
-    // Return coordinates for given set of states
+    // Return coordinates for given set of discretized states
 
     // \param path_state_ids The vector of state ids
-    // \param path_coordinates The vector of discretized poses
-    void get_path_coordinates(
-        const std::vector<int>& path_state_ids,
-        std::vector<Eigen::Vector3i> *path_coordinates);
+    // \param states The vector of discretized poses
+    void get_path_states(
+        const std::vector<int>& state_ids,
+        std::vector<Eigen::Vector3i> *states);
 
     // Converts discretized state to continuous state
 
-    // \param pose_discrete The discrete state
-    aikido::statespace::SE2::State discrete_pose_to_continuous(
-        const Eigen::Vector3i pose_discrete) const;
+    // \param state The discrete state
+    aikido::statespace::SE2::State discrete_state_to_continuous(
+        const Eigen::Vector3i state) const;
 
     // Converts continuous state to discretized state
 
     // \param state_continuous The SE2 state
-    Eigen::Vector3i continuous_pose_to_discrete(
-        const aikido::statespace::SE2::State& state_continuous);
+    Eigen::Vector3i pose_to_state(
+        const aikido::statespace::SE2::State& state);
 
     // Returns state ID of given pose
 
     // \param pose The discrete state
     // \param id The state id
-    bool get_state_id(const Eigen::Vector3i& pose, int& id);
+    bool get_state_id(const Eigen::Vector3i& state, int& state_id);
 
-    // Gets discretized state given state ID
     // Return true if state with given state ID exists and false otherwise
 
     // \param state_id The ID of the state
@@ -134,7 +134,6 @@ class Statespace {
     bool is_valid_state(const Eigen::Vector3i& state) const;
 
     // Returns the number of currently existng states
-    // Discrete state keyed to repsective id
     int get_num_states() const;
 
  private:
@@ -143,14 +142,14 @@ class Statespace {
      // \param theta_rad Angle (radians)
     double normalize_angle_rad(const double& theta_rad) const;
 
-    // Converts continuous angle (radians) to discrete
+    // Converts discrete angle to continuous (radians)
 
-    // \theta Normalized angle (radians)
+    // \theta Discrete angle
     double discrete_angle_to_continuous(const int& theta) const;
 
     // Converts discrete angle to continuous (radians)
 
-    // \param theta Discretizd angle
+    // \param theta Continuous angle
     int continuous_angle_to_discrete(const double& theta) const;
 
     // Converts discrete position to continuous
@@ -158,6 +157,12 @@ class Statespace {
     // \param position The discrete coordinates
     Eigen::Vector2d discrete_position_to_continuous(
         const Eigen::Vector2i position) const;
+
+    // Converts discrete position to continuous
+
+    // \param position The discrete coordinates
+    Eigen::Vector2i continuous_position_to_discrete(
+        const Eigen::Vector2d position) const;
 
     // Maps discrete state to state ID
     std::unordered_map<Eigen::Vector3i, int, StateHasher> m_state_to_id_map;
