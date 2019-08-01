@@ -28,7 +28,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "MDP/MDP.hpp"
-#include <geometry_msgs/PoseStamped.h>
 
 // #include <ros/ros.h>
 // #include <assert.h>
@@ -44,8 +43,10 @@ namespace mdp {
             do {poseSharedPointer =
                 ros::topic::waitForMessage<geometry_msgs::Pose>("cozmo_pose",
                     ros::Duration(5));} while (poseSharedPointer == NULL);
-
-        
+            double x = poseSharedPointer->position.x;
+            double y = poseSharedPointer->position.y;
+            auto quaternion = poseSharedPointer->orientation;
+            // auto euler = quaternion.toRotationMatrix().eulerAngles(0, 1, 2);
 
         //     // waits for message from pose publisher
         //     ros::topic::waitForMessage 	("cozmo_pose", cozmo_handle);
