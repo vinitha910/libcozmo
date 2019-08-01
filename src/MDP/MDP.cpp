@@ -28,6 +28,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "MDP/MDP.hpp"
+#include <geometry_msgs/PoseStamped.h>
+
 // #include <ros/ros.h>
 // #include <assert.h>
 // #include <cmath>
@@ -36,20 +38,76 @@ namespace libcozmo {
 namespace mdp {
 
     void MDP::explore() const {
-        //get current location
+
+        while(true) {
+            boost::shared_ptr<geometry_msgs::Pose const> poseSharedPointer;
+            do {poseSharedPointer =
+                ros::topic::waitForMessage<geometry_msgs::Pose>("cozmo_pose",
+                    ros::Duration(5));} while (poseSharedPointer == NULL);
+
         
-        //generate arbitrary functions to explore
 
-        //apply chosen action
+        //     // waits for message from pose publisher
+        //     ros::topic::waitForMessage 	("cozmo_pose", cozmo_handle);
+        //     // convert message(position, quant) into SE2 state
+        //     // then insert it into statespace
 
-        //record new location
+        //     // current location set by m_current_state_id
+        //     // listen to rosnode to get current location
+        //     // use get_or_create_new_state on current location, then
+        //     // set m_current_state id to that idx
+            
+        //     //generate arbitrary functions to explore
+        //     std::vector<Action> = generate_actions();
+        //     // apply chosen action
+        //     // I can use eric's thing here
 
-        //update model, calculate transition
+        //     // record new location
+        //     // create new state at new location
 
+        //     //update model, calculate transition
+        //     // use get_distance to get transition in delta distance, delta theta
+        //     // if action exists, add and average it
+        //     // otherwise create new action
+        }
 
     }
 
-    std::vector<Action> MDP::generate_actions() const;
+    // aikido::statespace::SE2 MDP::get_cozmo_pose() const {
+
+    // }
+
+    // Action MDP::action_similarity(Action& action, std::vector<Action> actions) const {
+    //     Action similar;
+    //     // double similar_cost = - infity;
+    //     Action dissimilar;
+    //     // double dissimilar_cost = infty;
+        
+    //     for (int i = 0; i < actions.size(); i++) {
+    //         Action new_action = actions[i];
+    //         // if (myStateSpace.get_distance( the two states) > similar_cost) {
+    //             // similar = new_action;
+    //             // similar_cost = whatever I just compted
+    //         // }
+    //         // if (myStateSpace.get_distance( the two states) < similar_cost) {
+    //             // dissimilar = new_action;
+    //             // dissimilar_cost = whatever I just compted
+    //         // }
+    //     }
+    // }
+
+    // std::vector<Action> MDP::generate_actions() const {
+    //     std::vector<Action> actions;
+    //     actions.push_back(Action(Eigen::Vector2d(0, -1), Eigen::Vector2d(0, 1), 1.0));
+    //     actions.push_back(Action(Eigen::Vector2d(0, 1), Eigen::Vector2d(0, -1), 1.0));
+    //     actions.push_back(Action(Eigen::Vector2d(-1, 0), Eigen::Vector2d(1, 0), 1.0));
+    //     actions.push_back(Action(Eigen::Vector2d(1, 0), Eigen::Vector2d(-1, 0), 1.0));
+    //     return actions;
+    // }
+
+    void callback(const std_msgs::String::ConstPtr& msg) {
+        ROS_INFO("I heard: [%s]", msg->data.c_str());
+    }
 
 }  // namespace statespace
 }  // namespace libcozmo

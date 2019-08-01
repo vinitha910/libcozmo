@@ -33,6 +33,7 @@ include_directories(
 add_library(cozmo SHARED
   src/cozmo_description/cozmo.cpp
   src/statespace/statespace.cpp
+  src/MDP/MDP.cpp
 )
 
 target_include_directories(cozmo PUBLIC
