@@ -4,7 +4,7 @@ project(libcozmo)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 set(CMAKE_BUILD_TYPE Release)
 
-find_package(catkin REQUIRED COMPONENTS roscpp pybind11_catkin std_msgs message_generation)
+find_package(catkin REQUIRED COMPONENTS roscpp pybind11_catkin std_msgs message_generation tf tf_conversions geometry_msgs eigen_conversions)
 find_package(Eigen3 REQUIRED)
 find_package(DART 6.8.2 REQUIRED COMPONENTS gui collision-bullet)
 find_package(aikido REQUIRED COMPONENTS statespace distance control rviz)

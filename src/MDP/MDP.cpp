@@ -28,7 +28,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "MDP/MDP.hpp"
-
+#include <tf/tf.h>
+#include <tf_conversions/tf_eigen.h>
+#include <eigen_conversions/eigen_msg.h>
+#include <geometry_msgs/Pose.h>
+// #include <Quaternion.h>
 // #include <ros/ros.h>
 // #include <assert.h>
 // #include <cmath>
@@ -46,6 +50,9 @@ namespace mdp {
             double x = poseSharedPointer->position.x;
             double y = poseSharedPointer->position.y;
             auto quaternion = poseSharedPointer->orientation;
+            Eigen::Isometry3d rotation_matrix;
+            tf::poseMsgToEigen(*poseSharedPointer, rotation_matrix);
+            // auto rotation_mat = quaternion.toRotationMatrix();
             // auto euler = quaternion.toRotationMatrix().eulerAngles(0, 1, 2);
 
         //     // waits for message from pose publisher
