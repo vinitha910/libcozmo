@@ -199,6 +199,18 @@ class ObjectOrientedActionSpace(object):
             the object we are moving relative to
         samples : int
             the number of samples per side of the cube
+        lin_min : float
+            the minimum linear velocity to be generated, in millimeters/s
+        lin_max : float
+            the maximum linear velocity to be generated, in millimeters/s
+        lin_samples : int
+            the number of samples to be generated for linear velocity
+        dur_min : float
+            the minimum duration to be generated, in seconds
+        dur_max : float
+            the maximum duration to be generated, in seconds
+        dur_samples : int
+            the number of samples to be generated for angular velocity
         """
 
         self.cozmo = cozmo
