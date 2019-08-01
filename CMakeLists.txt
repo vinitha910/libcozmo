@@ -7,8 +7,7 @@ set(CMAKE_BUILD_TYPE Release)
 find_package(catkin REQUIRED COMPONENTS roscpp pybind11_catkin std_msgs message_generation tf tf_conversions geometry_msgs eigen_conversions)
 find_package(Eigen3 REQUIRED)
 find_package(DART 6.8.2 REQUIRED COMPONENTS gui collision-bullet)
-#find_package(aikido REQUIRED COMPONENTS statespace trajectory distance control rviz)
-find_package(aikido 0.3.0 REQUIRED COMPONENTS common constraint statespace trajectory distance control rviz)
+find_package(aikido REQUIRED COMPONENTS statespace trajectory distance control rviz)
 find_package(aikidopy REQUIRED COMPONENTS libaikidopy)
 
 add_message_files(
@@ -28,6 +27,7 @@ catkin_package(
 
 include_directories(
   ${catkin_INCLUDE_DIRS}
+  ${aikido_INCLUDE_DIRS}
   ${PYTHON_INCLUDE_DIRS}
 )
 
