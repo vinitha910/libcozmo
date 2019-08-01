@@ -28,14 +28,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "MDP/MDP.hpp"
-#include <tf/tf.h>
-#include <tf_conversions/tf_eigen.h>
-#include <eigen_conversions/eigen_msg.h>
-#include <geometry_msgs/Pose.h>
-// #include <Quaternion.h>
-// #include <ros/ros.h>
-// #include <assert.h>
-// #include <cmath>
 
 namespace libcozmo {
 namespace mdp {
@@ -43,15 +35,19 @@ namespace mdp {
     void MDP::explore() const {
 
         while(true) {
-            boost::shared_ptr<geometry_msgs::Pose const> poseSharedPointer;
-            do {poseSharedPointer =
-                ros::topic::waitForMessage<geometry_msgs::Pose>("cozmo_pose",
-                    ros::Duration(5));} while (poseSharedPointer == NULL);
-            double x = poseSharedPointer->position.x;
-            double y = poseSharedPointer->position.y;
-            auto quaternion = poseSharedPointer->orientation;
-            Eigen::Isometry3d rotation_matrix;
-            tf::poseMsgToEigen(*poseSharedPointer, rotation_matrix);
+            geometry_msgs::PoseConstPtr pose_msg;
+            do {
+                pose_msg =
+                    ros::topic::waitForMessage<geometry_msgs::Pose>("cozmo_pose",
+                        ros::Duration(5));
+            } while (pose_msg == NULL);
+            
+            const auto position = pose_msg->position;
+            const auto orientation = pose_msg->orientation;
+            Eigen::Isometry3d transformation = 
+                Eigen::Translation3d(position.x, position.y, position.z) *
+                Eigen::Quaterniond(orientation.w, orientation.x, orientation.y, orientation.z);
+           
             // auto rotation_mat = quaternion.toRotationMatrix();
             // auto euler = quaternion.toRotationMatrix().eulerAngles(0, 1, 2);
 
