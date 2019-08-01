@@ -150,7 +150,7 @@ class Statespace {
 
     // Converts discrete angle to continuous (radians)
 
-    // \theta Discrete angle
+    // \param theta Discrete angle
     double discrete_angle_to_continuous(const int& theta) const;
 
     // Converts discrete angle to continuous (radians)
