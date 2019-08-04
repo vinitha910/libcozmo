@@ -2,7 +2,6 @@
 #include <cfloat>
 #include <iostream>
 #include <iterator>
-#include <list>
 #include <math.h>
 #include <numeric>
 #include <vector>
@@ -89,9 +88,25 @@ class GenericActionSpace
           dur_max(dur_max),
           dur_samples(dur_samples)
         { generate_actions(); }
+        
+        Action get_action(int action_id) {
+            return actions[action_id];
+        }
 
-        list<Action> get_action_space() {
+        vector<Action> get_action_space() {
             return actions;
+        }
+
+        void view_action_space() {
+            for (size_t i = 0; i < actions.size(); i++) {
+                if (i % 5 == 0) {
+                    cout << "\n";
+                }
+                cout << i << " : ";
+                cout << "Linear Velocity: " << actions[i].lin_vel << ", ";
+                cout << "Angular Velocity: " << actions[i].ang_vel << ", ";
+                cout << "Duration: " << actions[i].duration << "\n";
+            }
         }
 
     private:
@@ -104,7 +119,7 @@ class GenericActionSpace
         double dur_min{ 0 };
         double dur_max{ 0 };
         double dur_samples{ 0 };
-        list<Action> actions;
+        vector<Action> actions;
 
         void generate_actions() {
             vector<double> lin_choices = create_choices(lin_min, lin_max, lin_samples, true);
@@ -146,8 +161,27 @@ class ObjectOrientedActionSpace
         { generate_actions();
         }
         
-        list<Object_Oriented_Action> get_action_space() {
+        Object_Oriented_Action get_action(int action_id) {
+            return actions[action_id];
+        }
+
+        vector<Object_Oriented_Action> get_action_space() {
             return actions;
+        }
+        
+        void view_action_space() {
+            for (size_t i = 0; i < actions.size(); i++) {
+                if (i % 5 == 0) {
+                    cout << "\n";
+                }
+                Pose p = actions[i].pose;
+                Action a = actions[i].action;
+                cout << i << " : ";
+                cout << "Location: " << p.x << ", " << p.y << "," << p.z << ", " << p.angle_z << ", ";
+                cout << "Linear Velocity: " << a.lin_vel << ", ";
+                cout << "Angular Velocity: " << a.ang_vel << ", ";
+                cout << "Duration: " << a.duration << "\n";
+            }
         }
 
     private:
@@ -159,7 +193,7 @@ class ObjectOrientedActionSpace
         double dur_min{ 0 };
         double dur_max{ 0 };
         double dur_samples{ 0 };
-        list<Object_Oriented_Action> actions;
+        vector<Object_Oriented_Action> actions;
 
         Point cube_offset(double offset, double angle) {
             return Point{offset * cos(angle), offset * sin(angle)};
@@ -208,7 +242,7 @@ class ObjectOrientedActionSpace
         {
             vector<Pose> locations = generate_offsets(h_offset, v_offset);
             GenericActionSpace gen_space (lin_min, lin_max, lin_samples, 0, 0, 0, dur_min, dur_max, dur_samples);
-            list<Action> gen_actions = gen_space.get_action_space();
+            vector<Action> gen_actions = gen_space.get_action_space();
             for (const auto& location : locations) {
                 for (const auto& action : gen_actions) {
                     Object_Oriented_Action ooa{location, action};
@@ -281,17 +315,14 @@ class ObjectOrientedActionSpace
 
 int main() {
     GenericActionSpace gen_space (10, 100, 5, 10, 100, 5, 1, 5, 5);
-    list<Action> gen_actions = gen_space.get_action_space();
-
-    // for (const auto& action : actions) {
-    //     cout << "Linear Velocity: " << action.lin_vel << " Angular Velocity: " << action.ang_vel << " Duration: " << action.duration << '\n';
-    // }
+    vector<Action> gen_actions = gen_space.get_action_space();
+    gen_space.view_action_space();
     cout << "Total actions: " << gen_actions.size() << '\n';
 
     Pose pose{100, 200, 10, 2};
     ObjectOrientedActionSpace oos (pose, 3, 10, 100, 3, 1, 5, 3);
-    list<Object_Oriented_Action> oo_actions = oos.get_action_space();
-
+    vector<Object_Oriented_Action> oo_actions = oos.get_action_space();
+    oos.view_action_space();
     cout << "Total actions: " << oo_actions.size() << '\n';
 
 }
