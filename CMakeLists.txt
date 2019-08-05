@@ -18,6 +18,9 @@ find_package(aikidopy REQUIRED COMPONENTS libaikidopy)
 add_message_files(
   FILES
   ForkLift.msg
+  Action.msg
+  ZPose.msg
+  OOAction.msg
 )
 
 generate_messages(
