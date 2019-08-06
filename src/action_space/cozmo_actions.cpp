@@ -1,38 +1,8 @@
+#include "cozmo_actions.hpp"
 #include <algorithm>
-#include <cfloat>
 #include <iostream>
 #include <iterator>
-#include <math.h>
-#include <numeric>
-#include <vector>
 using namespace std;
-
-struct Action
-{
-    double lin_vel;
-    double ang_vel;
-    double duration;
-};
-
-struct Pose
-{
-    double x;
-    double y;
-    double z;
-    double angle_z;
-};
-
-struct Point
-{
-    double x;
-    double y;
-};
-
-struct Object_Oriented_Action
-{
-    Pose pose;
-    Action action;
-};
 
 // Linear interpolation following MATLAB linspace
 vector<double> generate_samples(double min, double max, size_t N) {
@@ -66,18 +36,15 @@ vector<double> create_choices(double start, double stop, int num, bool include_z
     return choices;
 }
 
-class GenericActionSpace
-{
-    public:
-        GenericActionSpace(double lin_min,
-                           double lin_max,
-                           double lin_samples,
-                           double ang_min,
-                           double ang_max,
-                           double ang_samples,
-                           double dur_min,
-                           double dur_max,
-                           double dur_samples)
+GenericActionSpace::GenericActionSpace(double lin_min,
+                                       double lin_max,
+                                       double lin_samples,
+                                       double ang_min,
+                                       double ang_max,
+                                       double ang_samples,
+                                       double dur_min,
+                                       double dur_max,
+                                       double dur_samples)
         : lin_min(lin_min),
           lin_max(lin_max),
           lin_samples(lin_samples),
@@ -89,229 +56,200 @@ class GenericActionSpace
           dur_samples(dur_samples)
         { generate_actions(); }
         
-        Action get_action(int action_id) {
-            return actions[action_id];
+Action GenericActionSpace::get_action(int action_id) {
+    return actions[action_id];
+}
+
+vector<Action> GenericActionSpace::get_action_space() {
+    return actions;
+}
+
+void GenericActionSpace::view_action_space() {
+    for (size_t i = 0; i < actions.size(); i++) {
+        if (i % 5 == 0) {
+            cout << "\n";
         }
+        cout << i << " : ";
+        cout << "Linear Velocity: " << actions[i].lin_vel << ", ";
+        cout << "Angular Velocity: " << actions[i].ang_vel << ", ";
+        cout << "Duration: " << actions[i].duration << "\n";
+    }
+}
 
-        vector<Action> get_action_space() {
-            return actions;
-        }
+void GenericActionSpace::generate_actions() {
+    vector<double> lin_choices = create_choices(lin_min, lin_max, lin_samples, true);
+    vector<double> ang_choices = create_choices(ang_min, ang_max, ang_samples, true);
+    vector<double> dur_choices = create_choices(dur_min, dur_max, dur_samples, false);
 
-        void view_action_space() {
-            for (size_t i = 0; i < actions.size(); i++) {
-                if (i % 5 == 0) {
-                    cout << "\n";
-                }
-                cout << i << " : ";
-                cout << "Linear Velocity: " << actions[i].lin_vel << ", ";
-                cout << "Angular Velocity: " << actions[i].ang_vel << ", ";
-                cout << "Duration: " << actions[i].duration << "\n";
-            }
-        }
-
-    private:
-        double lin_min{ 0 };
-        double lin_max{ 0 };
-        double lin_samples{ 0 };
-        double ang_min{ 0 };
-        double ang_max{ 0 };
-        double ang_samples{ 0 };
-        double dur_min{ 0 };
-        double dur_max{ 0 };
-        double dur_samples{ 0 };
-        vector<Action> actions;
-
-        void generate_actions() {
-            vector<double> lin_choices = create_choices(lin_min, lin_max, lin_samples, true);
-            vector<double> ang_choices = create_choices(ang_min, ang_max, ang_samples, true);
-            vector<double> dur_choices = create_choices(dur_min, dur_max, dur_samples, false);
-
-            for (const auto& dur_choice : dur_choices) {
-                for (const auto& lin_choice : lin_choices) {
-                    for (const auto& ang_choice : ang_choices) {
-                        if (!(lin_choice == ang_choice && lin_choice == 0) || dur_choice == 0) {
-                            Action a {lin_choice, ang_choice, dur_choice};
-                            actions.push_back(a);
-                        }
-                    }
+    for (const auto& dur_choice : dur_choices) {
+        for (const auto& lin_choice : lin_choices) {
+            for (const auto& ang_choice : ang_choices) {
+                if (!(lin_choice == ang_choice && lin_choice == 0) || dur_choice == 0) {
+                    Action a {lin_choice, ang_choice, dur_choice};
+                    actions.push_back(a);
                 }
             }
         }
-};
+    }
+}
 
-class ObjectOrientedActionSpace
+ObjectOrientedActionSpace::ObjectOrientedActionSpace(Pose pose,
+                                                     int samples,
+                                                     double lin_min,
+                                                     double lin_max,
+                                                     double lin_samples,
+                                                     double dur_min,
+                                                     double dur_max,
+                                                     double dur_samples)
+: pose(pose),
+  samples(samples),
+  lin_min(lin_min),
+  lin_max(lin_max),
+  lin_samples(lin_samples),
+  dur_min(dur_min),
+  dur_max(dur_max),
+  dur_samples(dur_samples)
+{ generate_actions();
+}
+
+Object_Oriented_Action ObjectOrientedActionSpace::get_action(int action_id) {
+    return actions[action_id];
+}
+
+vector<Object_Oriented_Action> ObjectOrientedActionSpace::get_action_space() {
+    return actions;
+}
+
+void ObjectOrientedActionSpace::view_action_space() {
+    for (size_t i = 0; i < actions.size(); i++) {
+        if (i % 5 == 0) {
+            cout << "\n";
+        }
+        Pose p = actions[i].pose;
+        Action a = actions[i].action;
+        cout << i << " : ";
+        cout << "Location: " << p.x << ", " << p.y << "," << p.z << ", " << p.angle_z << ", ";
+        cout << "Linear Velocity: " << a.lin_vel << ", ";
+        cout << "Angular Velocity: " << a.ang_vel << ", ";
+        cout << "Duration: " << a.duration << "\n";
+    }
+}
+
+Point ObjectOrientedActionSpace::cube_offset(double offset, double angle) {
+    return Point{offset * cos(angle), offset * sin(angle)};
+}
+
+/*
+Helper function to find the location of all 4 sides of the cube
+
+Parameters
+----------
+angle : the angle of the cube, in radians
+
+returns a sorted list of the angle of each of the 4 sides where index
+    0 corresponds to front of cube
+    1 corresponds to left of cube
+    2 corresponds to back of cube
+    3 corresponds to right of cube
+*/
+vector<double> ObjectOrientedActionSpace::find_sides(double angle)
 {
-    public:
-        ObjectOrientedActionSpace(Pose pose,
-                                  int samples,
-                                  double lin_min,
-                                  double lin_max,
-                                  double lin_samples,
-                                  double dur_min,
-                                  double dur_max,
-                                  double dur_samples)
-        : pose(pose),
-          samples(samples),
-          lin_min(lin_min),
-          lin_max(lin_max),
-          lin_samples(lin_samples),
-          dur_min(dur_min),
-          dur_max(dur_max),
-          dur_samples(dur_samples)
-        { generate_actions();
+    vector<double> sides;
+    vector<double> ordered_sides;
+    
+    sides.push_back(angle);
+    for (size_t i = 0; i < 3; i++) {
+        // Adding in clockwise order
+        angle -= M_PI / 2;
+        if (angle < -M_PI) {
+            angle = 2 * M_PI + angle;
         }
-        
-        Object_Oriented_Action get_action(int action_id) {
-            return actions[action_id];
-        }
+        sides.push_back(angle);
+    }
+    
+    int front_idx = nearest_zero(sides);
+    ordered_sides.push_back(sides[front_idx]);
+    int idx = (front_idx + 1) % 4;
+    while (idx != front_idx) {
+        ordered_sides.push_back(sides[idx]);
+        idx = (idx + 1) % 4;
+    }
+    return ordered_sides;
+}
 
-        vector<Object_Oriented_Action> get_action_space() {
-            return actions;
+
+void ObjectOrientedActionSpace::generate_actions(double h_offset, double v_offset)
+{
+    vector<Pose> locations = generate_offsets(h_offset, v_offset);
+    GenericActionSpace gen_space (lin_min, lin_max, lin_samples, 0, 0, 0, dur_min, dur_max, dur_samples);
+    vector<Action> gen_actions = gen_space.get_action_space();
+    for (const auto& location : locations) {
+        for (const auto& action : gen_actions) {
+            Object_Oriented_Action ooa{location, action};
+            actions.push_back(ooa);
         }
-        
-        void view_action_space() {
-            for (size_t i = 0; i < actions.size(); i++) {
-                if (i % 5 == 0) {
-                    cout << "\n";
-                }
-                Pose p = actions[i].pose;
-                Action a = actions[i].action;
-                cout << i << " : ";
-                cout << "Location: " << p.x << ", " << p.y << "," << p.z << ", " << p.angle_z << ", ";
-                cout << "Linear Velocity: " << a.lin_vel << ", ";
-                cout << "Angular Velocity: " << a.ang_vel << ", ";
-                cout << "Duration: " << a.duration << "\n";
+    }
+}
+
+/*
+Helper function to generate cube offset positions
+
+Parameters
+----------
+h_offset : the max horizontal offset from the center of the edge of the cube, in millimeters
+v_offset : the vertical offset away from the center of the cube, in millimeters
+*/
+vector<Pose> ObjectOrientedActionSpace::generate_offsets(double h_offset, double v_offset)
+{
+    vector<double> choices;
+    if (samples == 1) {
+        choices.push_back(0);
+    } else {
+        choices = create_choices(-h_offset, h_offset, samples, true);
+    }
+    vector<double> cube_sides = find_sides(pose.angle_z);
+    vector<Pose> locations;
+    for (size_t i = 0; i < cube_sides.size(); i++) {
+        double side = cube_sides[i];
+        for (const auto& choice : choices) {
+            Point offset = cube_offset(v_offset, side);
+            Pose location;
+            if (i == 0) { // front of cube
+                location = Pose{pose.x - offset.x, pose.y - offset.y - choice, pose.z, side};
+            } else if (i == 1) { // left of cube
+                location = Pose{pose.x - offset.x - choice, pose.y - offset.y, pose.z, side};
+            } else if (i == 2) { // back of cube
+                location = Pose{pose.x - offset.x, pose.y + offset.y + choice, pose.z, side};
+            } else { // right of cube 
+                location = Pose{pose.x + offset.x + choice, pose.y - offset.y, pose.z, side};
             }
+            locations.push_back(location);
         }
+    }
+    return locations;
+}
 
-    private:
-        Pose pose{ 0, 0, 0, 0 };
-        double samples{ 0 };
-        double lin_min{ 0 };
-        double lin_max{ 0 };
-        double lin_samples{ 0 };
-        double dur_min{ 0 };
-        double dur_max{ 0 };
-        double dur_samples{ 0 };
-        vector<Object_Oriented_Action> actions;
+/** Helper function to find the value closest to zero in a list,
+    used in find_sides to identify which angle of the cube
+    is the front
 
-        Point cube_offset(double offset, double angle) {
-            return Point{offset * cos(angle), offset * sin(angle)};
+    Note: in case the corner of the cube is perfectly in align with cozmo
+    and there is no closest side, we choose the right side to be the front
+
+    returns the index of the value closest to zero
+*/
+int ObjectOrientedActionSpace::nearest_zero(vector<double> values) {
+    int nearest = 0;
+    for (size_t i = 1; i < values.size(); i++) {
+        if (abs(values[i]) < abs(values[nearest])) {
+            nearest = i;
         }
-        
-        /*
-        Helper function to find the location of all 4 sides of the cube
-
-        Parameters
-        ----------
-        angle : the angle of the cube, in radians
-        
-        returns a sorted list of the angle of each of the 4 sides where index
-            0 corresponds to front of cube
-            1 corresponds to left of cube
-            2 corresponds to back of cube
-            3 corresponds to right of cube
-        */
-        vector<double> find_sides(double angle)
-        {
-            vector<double> sides;
-            vector<double> ordered_sides;
-            
-            sides.push_back(angle);
-            for (size_t i = 0; i < 3; i++) {
-                // Adding in clockwise order
-                angle -= M_PI / 2;
-                if (angle < -M_PI) {
-                    angle = 2 * M_PI + angle;
-                }
-                sides.push_back(angle);
-            }
-            
-            int front_idx = nearest_zero(sides);
-            ordered_sides.push_back(sides[front_idx]);
-            int idx = (front_idx + 1) % 4;
-            while (idx != front_idx) {
-                ordered_sides.push_back(sides[idx]);
-                idx = (idx + 1) % 4;
-            }
-            return ordered_sides;
+        if (values[i] == M_PI / 2) {
+            return i;
         }
-        
-
-        void generate_actions(double h_offset=40, double v_offset=60)
-        {
-            vector<Pose> locations = generate_offsets(h_offset, v_offset);
-            GenericActionSpace gen_space (lin_min, lin_max, lin_samples, 0, 0, 0, dur_min, dur_max, dur_samples);
-            vector<Action> gen_actions = gen_space.get_action_space();
-            for (const auto& location : locations) {
-                for (const auto& action : gen_actions) {
-                    Object_Oriented_Action ooa{location, action};
-                    actions.push_back(ooa);
-                }
-            }
-        }
-
-        /*
-        Helper function to generate cube offset positions
-
-        Parameters
-        ----------
-        h_offset : the max horizontal offset from the center of the edge of the cube, in millimeters
-        v_offset : the vertical offset away from the center of the cube, in millimeters
-        */
-        vector<Pose> generate_offsets(double h_offset, double v_offset)
-        {
-            vector<double> choices;
-            if (samples == 1) {
-                choices.push_back(0);
-            } else {
-                choices = create_choices(-h_offset, h_offset, samples, true);
-            }
-            vector<double> cube_sides = find_sides(pose.angle_z);
-            vector<Pose> locations;
-            for (size_t i = 0; i < cube_sides.size(); i++) {
-                double side = cube_sides[i];
-                for (const auto& choice : choices) {
-                    Point offset = cube_offset(v_offset, side);
-                    Pose location;
-                    if (i == 0) { // front of cube
-                        location = Pose{pose.x - offset.x, pose.y - offset.y - choice, pose.z, side};
-                    } else if (i == 1) { // left of cube
-                        location = Pose{pose.x - offset.x - choice, pose.y - offset.y, pose.z, side};
-                    } else if (i == 2) { // back of cube
-                        location = Pose{pose.x - offset.x, pose.y + offset.y + choice, pose.z, side};
-                    } else { // right of cube 
-                        location = Pose{pose.x + offset.x + choice, pose.y - offset.y, pose.z, side};
-                    }
-                    locations.push_back(location);
-                }
-            }
-            return locations;
-        }
-
-        /** Helper function to find the value closest to zero in a list,
-            used in find_sides to identify which angle of the cube
-            is the front
-
-            Note: in case the corner of the cube is perfectly in align with cozmo
-            and there is no closest side, we choose the right side to be the front
-
-            returns the index of the value closest to zero
-        */
-        int nearest_zero(vector<double> values) {
-            int nearest = 0;
-            for (size_t i = 1; i < values.size(); i++) {
-                if (abs(values[i]) < abs(values[nearest])) {
-                    nearest = i;
-                }
-                if (values[i] == M_PI / 2) {
-                    return i;
-                }
-            }
-            return nearest;
-        }
-};
-
+    }
+    return nearest;
+}
 
 int main() {
     GenericActionSpace gen_space (10, 100, 5, 10, 100, 5, 1, 5, 5);
