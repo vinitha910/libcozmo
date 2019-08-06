@@ -37,19 +37,15 @@ std::vector<double> generate_samples(double min, double max, std::size_t N);
 // Utility function to generate [num] number of choices from [start] to [stop]
 // include_zero : True to add zero to choices, False to not
 //                This allows for 0 verlocity in either the linear or angular direction
-vector<double> create_choices(double start, double stop, int num, bool include_zero);
+std::vector<double> create_choices(double start, double stop, int num, bool include_zero);
 
 class GenericActionSpace {
     public:
-        GenericActionSpace(double lin_min,
-                           double lin_max,
-                           double lin_samples,
-                           double ang_min,
-                           double ang_max,
-                           double ang_samples,
-                           double dur_min,
-                           double dur_max,
-                           double dur_samples);
+        GenericActionSpace();
+
+        void generate_actions(double lin_min, double lin_max, double lin_samples,
+                              double ang_min, double ang_max, double ang_samples,
+                              double dur_min, double dur_max, double dur_samples);
 
         Action get_action(int action_id);
 
@@ -57,31 +53,19 @@ class GenericActionSpace {
 
         void view_action_space();
     private:
-        double lin_min;
-        double lin_max;
-        double lin_samples;
-        double ang_min;
-        double ang_max;
-        double ang_samples;
-        double dur_min;
-        double dur_max;
-        double dur_samples;
         std::vector<Action> actions;
 
-        void generate_actions();
 };
 
 class ObjectOrientedActionSpace {
     public:
-        ObjectOrientedActionSpace(Pose pose,
-                                  int samples,
-                                  double lin_min,
-                                  double lin_max,
-                                  double lin_samples,
-                                  double dur_min,
-                                  double dur_max,
-                                  double dur_samples);
-        
+        ObjectOrientedActionSpace();
+
+        void generate_actions(Pose pose, int num_offsets,
+                              double lin_min, double lin_max, double lin_samples,
+                              double dur_min, double dur_max, double dur_samples,
+                              double h_offset=40, double v_offset=60);
+
         Object_Oriented_Action get_action(int action_id);
 
         std::vector<Object_Oriented_Action> get_action_space();
@@ -89,14 +73,6 @@ class ObjectOrientedActionSpace {
         void view_action_space();
 
     private:
-        Pose pose;
-        double samples;
-        double lin_min;
-        double lin_max;
-        double lin_samples;
-        double dur_min;
-        double dur_max;
-        double dur_samples;
         std::vector<Object_Oriented_Action> actions;
 
         Point cube_offset(double offset, double angle);
@@ -116,8 +92,6 @@ class ObjectOrientedActionSpace {
         */
         std::vector<double> find_sides(double angle);
 
-        void generate_actions(double h_offset=40, double v_offset=60);
-
         /*
         Helper function to generate cube offset positions
 
@@ -126,7 +100,7 @@ class ObjectOrientedActionSpace {
         h_offset : the max horizontal offset from the center of the edge of the cube, in millimeters
         v_offset : the vertical offset away from the center of the cube, in millimeters
         */
-        std::vector<Pose> generate_offsets(double h_offset, double v_offset);
+        std::vector<Pose> generate_offsets(Pose pose, int num_offsets, double h_offset, double v_offset);
 
         /** Helper function to find the value closest to zero in a list,
             used in find_sides to identify which angle of the cube

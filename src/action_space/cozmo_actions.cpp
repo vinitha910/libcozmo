@@ -36,26 +36,29 @@ vector<double> create_choices(double start, double stop, int num, bool include_z
     return choices;
 }
 
-GenericActionSpace::GenericActionSpace(double lin_min,
-                                       double lin_max,
-                                       double lin_samples,
-                                       double ang_min,
-                                       double ang_max,
-                                       double ang_samples,
-                                       double dur_min,
-                                       double dur_max,
-                                       double dur_samples)
-        : lin_min(lin_min),
-          lin_max(lin_max),
-          lin_samples(lin_samples),
-          ang_min(ang_min),
-          ang_max(ang_max),
-          ang_samples(ang_samples),
-          dur_min(dur_min),
-          dur_max(dur_max),
-          dur_samples(dur_samples)
-        { generate_actions(); }
-        
+GenericActionSpace::GenericActionSpace() {}
+
+void GenericActionSpace::generate_actions(double lin_min, double lin_max, double lin_samples,
+                                          double ang_min, double ang_max, double ang_samples,
+                                          double dur_min, double dur_max, double dur_samples)
+{
+    actions.clear();
+    vector<double> lin_choices = create_choices(lin_min, lin_max, lin_samples, true);
+    vector<double> ang_choices = create_choices(ang_min, ang_max, ang_samples, true);
+    vector<double> dur_choices = create_choices(dur_min, dur_max, dur_samples, false);
+
+    for (const auto& dur_choice : dur_choices) {
+        for (const auto& lin_choice : lin_choices) {
+            for (const auto& ang_choice : ang_choices) {
+                if (!(lin_choice == ang_choice && lin_choice == 0) || dur_choice == 0) {
+                    Action a {lin_choice, ang_choice, dur_choice};
+                    actions.push_back(a);
+                }
+            }
+        }
+    }
+}
+
 Action GenericActionSpace::get_action(int action_id) {
     return actions[action_id];
 }
@@ -76,40 +79,24 @@ void GenericActionSpace::view_action_space() {
     }
 }
 
-void GenericActionSpace::generate_actions() {
-    vector<double> lin_choices = create_choices(lin_min, lin_max, lin_samples, true);
-    vector<double> ang_choices = create_choices(ang_min, ang_max, ang_samples, true);
-    vector<double> dur_choices = create_choices(dur_min, dur_max, dur_samples, false);
+ObjectOrientedActionSpace::ObjectOrientedActionSpace() {}
 
-    for (const auto& dur_choice : dur_choices) {
-        for (const auto& lin_choice : lin_choices) {
-            for (const auto& ang_choice : ang_choices) {
-                if (!(lin_choice == ang_choice && lin_choice == 0) || dur_choice == 0) {
-                    Action a {lin_choice, ang_choice, dur_choice};
-                    actions.push_back(a);
-                }
-            }
+void ObjectOrientedActionSpace::generate_actions(Pose pose, int num_offsets,
+                                                 double lin_min, double lin_max, double lin_samples,
+                                                 double dur_min, double dur_max, double dur_samples,
+                                                 double h_offset, double v_offset)
+{
+    actions.clear();
+    vector<Pose> locations = generate_offsets(pose, num_offsets, h_offset, v_offset);
+    GenericActionSpace gen_space {};
+    gen_space.generate_actions(lin_min, lin_max, lin_samples, 0, 0, 0, dur_min, dur_max, dur_samples);
+    vector<Action> gen_actions = gen_space.get_action_space();
+    for (const auto& location : locations) {
+        for (const auto& action : gen_actions) {
+            Object_Oriented_Action ooa{location, action};
+            actions.push_back(ooa);
         }
     }
-}
-
-ObjectOrientedActionSpace::ObjectOrientedActionSpace(Pose pose,
-                                                     int samples,
-                                                     double lin_min,
-                                                     double lin_max,
-                                                     double lin_samples,
-                                                     double dur_min,
-                                                     double dur_max,
-                                                     double dur_samples)
-: pose(pose),
-  samples(samples),
-  lin_min(lin_min),
-  lin_max(lin_max),
-  lin_samples(lin_samples),
-  dur_min(dur_min),
-  dur_max(dur_max),
-  dur_samples(dur_samples)
-{ generate_actions();
 }
 
 Object_Oriented_Action ObjectOrientedActionSpace::get_action(int action_id) {
@@ -178,19 +165,6 @@ vector<double> ObjectOrientedActionSpace::find_sides(double angle)
 }
 
 
-void ObjectOrientedActionSpace::generate_actions(double h_offset, double v_offset)
-{
-    vector<Pose> locations = generate_offsets(h_offset, v_offset);
-    GenericActionSpace gen_space (lin_min, lin_max, lin_samples, 0, 0, 0, dur_min, dur_max, dur_samples);
-    vector<Action> gen_actions = gen_space.get_action_space();
-    for (const auto& location : locations) {
-        for (const auto& action : gen_actions) {
-            Object_Oriented_Action ooa{location, action};
-            actions.push_back(ooa);
-        }
-    }
-}
-
 /*
 Helper function to generate cube offset positions
 
@@ -199,13 +173,13 @@ Parameters
 h_offset : the max horizontal offset from the center of the edge of the cube, in millimeters
 v_offset : the vertical offset away from the center of the cube, in millimeters
 */
-vector<Pose> ObjectOrientedActionSpace::generate_offsets(double h_offset, double v_offset)
+vector<Pose> ObjectOrientedActionSpace::generate_offsets(Pose pose, int num_offsets, double h_offset, double v_offset)
 {
     vector<double> choices;
-    if (samples == 1) {
+    if (num_offsets == 1) {
         choices.push_back(0);
     } else {
-        choices = create_choices(-h_offset, h_offset, samples, true);
+        choices = create_choices(-h_offset, h_offset, num_offsets, true);
     }
     vector<double> cube_sides = find_sides(pose.angle_z);
     vector<Pose> locations;
@@ -252,13 +226,16 @@ int ObjectOrientedActionSpace::nearest_zero(vector<double> values) {
 }
 
 int main() {
-    GenericActionSpace gen_space (10, 100, 5, 10, 100, 5, 1, 5, 5);
+    GenericActionSpace gen_space {};
+    gen_space.generate_actions(10, 100, 5, 10, 100, 5, 1, 5, 5);
     vector<Action> gen_actions = gen_space.get_action_space();
     gen_space.view_action_space();
     cout << "Total actions: " << gen_actions.size() << '\n';
 
+    // Angle_z value should be between -pi and pi
     Pose pose{100, 200, 10, 2};
-    ObjectOrientedActionSpace oos (pose, 3, 10, 100, 3, 1, 5, 3);
+    ObjectOrientedActionSpace oos {};
+    oos.generate_actions(pose, 3, 10, 100, 3, 1, 5, 3);
     vector<Object_Oriented_Action> oo_actions = oos.get_action_space();
     oos.view_action_space();
     cout << "Total actions: " << oo_actions.size() << '\n';
