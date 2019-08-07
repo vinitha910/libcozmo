@@ -3,6 +3,9 @@
 
 #include <vector>
 
+namespace libcozmo {
+namespace actionspace {
+
 struct Action
 {
     double lin_vel;
@@ -29,10 +32,6 @@ struct Object_Oriented_Action
     Pose pose;
     Action action;
 };
-
-
-// Linear interpolation following MATLAB linspace
-std::vector<double> generate_samples(double min, double max, std::size_t N);
 
 // Utility function to generate [num] number of choices from [start] to [stop]
 // include_zero : True to add zero to choices, False to not
@@ -113,5 +112,8 @@ class ObjectOrientedActionSpace {
         */
         int nearest_zero(std::vector<double> values);
 };
+
+} // namespace actionspace
+} // namespace libcozmo
 
 #endif

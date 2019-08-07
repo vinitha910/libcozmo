@@ -1,20 +1,12 @@
 #include "actionspace/actionspace.hpp"
+#include "utils/utils.hpp"
 #include <algorithm>
 #include <iostream>
 #include <iterator>
 using namespace std;
 
-// Linear interpolation following MATLAB linspace
-vector<double> generate_samples(double min, double max, size_t N) {
-    double step = (max - min) / static_cast<double>(N - 1);
-    vector<double> samples(N);
-    vector<double>::iterator i;
-    double val;
-    for (i = samples.begin(), val = min; i != samples.end(); ++i, val += step) {
-        *i = val;
-    }
-    return samples;
-}
+namespace libcozmo {
+namespace actionspace {
 
 // Utility function to generate [num] number of choices from [start] to [stop]
 // include_zero : True to add zero to choices, False to not
@@ -22,8 +14,8 @@ vector<double> generate_samples(double min, double max, size_t N) {
 vector<double> create_choices(double start, double stop, int num, bool include_zero)
 {
     double step = (stop - start) / (num - 1);
-    vector<double> choices = generate_samples(start, stop, num);
-    
+    vector<double> choices = libcozmo::utils::linspace(start, stop, num);
+
     if (include_zero) {
         bool contains_zero = false;
         if (find(choices.begin(), choices.end(), 0) != choices.end()) {
@@ -143,7 +135,7 @@ vector<double> ObjectOrientedActionSpace::find_sides(double angle)
 {
     vector<double> sides;
     vector<double> ordered_sides;
-    
+
     sides.push_back(angle);
     for (size_t i = 0; i < 3; i++) {
         // Adding in clockwise order
@@ -153,7 +145,7 @@ vector<double> ObjectOrientedActionSpace::find_sides(double angle)
         }
         sides.push_back(angle);
     }
-    
+
     int front_idx = nearest_zero(sides);
     ordered_sides.push_back(sides[front_idx]);
     int idx = (front_idx + 1) % 4;
@@ -194,7 +186,7 @@ vector<Pose> ObjectOrientedActionSpace::generate_offsets(Pose pose, int num_offs
                 location = Pose{pose.x - offset.x - choice, pose.y - offset.y, pose.z, side};
             } else if (i == 2) { // back of cube
                 location = Pose{pose.x - offset.x, pose.y + offset.y + choice, pose.z, side};
-            } else { // right of cube 
+            } else { // right of cube
                 location = Pose{pose.x + offset.x + choice, pose.y - offset.y, pose.z, side};
             }
             locations.push_back(location);
@@ -225,18 +217,21 @@ int ObjectOrientedActionSpace::nearest_zero(vector<double> values) {
     return nearest;
 }
 
+} // namespace actionspace
+} // namespace libcozmo
+
 int main() {
-    GenericActionSpace gen_space {};
+    libcozmo::actionspace::GenericActionSpace gen_space {};
     gen_space.generate_actions(10, 100, 5, 10, 100, 5, 1, 5, 5);
-    vector<Action> gen_actions = gen_space.get_action_space();
+    vector<libcozmo::actionspace::Action> gen_actions = gen_space.get_action_space();
     gen_space.view_action_space();
     cout << "Total actions: " << gen_actions.size() << '\n';
 
     // Angle_z value should be between -pi and pi
-    Pose pose{100, 200, 10, 2};
-    ObjectOrientedActionSpace oos {};
+    libcozmo::actionspace::Pose pose{100, 200, 10, 2};
+    libcozmo::actionspace::ObjectOrientedActionSpace oos {};
     oos.generate_actions(pose, 3, 10, 100, 3, 1, 5, 3);
-    vector<Object_Oriented_Action> oo_actions = oos.get_action_space();
+    vector<libcozmo::actionspace::Object_Oriented_Action> oo_actions = oos.get_action_space();
     oos.view_action_space();
     cout << "Total actions: " << oo_actions.size() << '\n';
 
