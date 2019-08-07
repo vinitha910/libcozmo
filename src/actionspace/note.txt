@@ -1,5 +1,0 @@
-self.body ?
-
-go_to_pose(position: xyz, rotation: xyzw)
-
-pose -> SE2 state, position xy, rotation -? theta ? 
