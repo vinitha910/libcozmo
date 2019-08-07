@@ -4,12 +4,13 @@
 class myTestFixture1: public ::testing::test { 
 public: 
    myTestFixture1() : \
-   myActionSpace(10, 100, 5, 10, 100, 5, 1, 5, 5) { 
+   myActionSpace() { 
        // initialization code here
    } 
 
    void SetUp( ) { 
        // code here will execute just before the test ensues 
+       myActionSpace.generate_actions(10, 100, 5, 10, 100, 5, 1, 5, 5);
    }
 
    void TearDown( ) { 
@@ -19,11 +20,15 @@ public:
 
    ~myTestFixture1( )  { 
        // cleanup any pending stuff, but no exceptions allowed
+       GenericActionSpace myActionSpace;
    }
 
    // put in any custom data members that you need 
 };
 
+TEST_F(myTestFixture1, UnitTest1) {
+    EXPECT_EQ(176, myActionSpace.get_action_space().size());
+}
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
