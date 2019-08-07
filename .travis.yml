@@ -81,7 +81,7 @@ script:
   - catkin build
   - source devel/setup.bash
   
-notifications:
-  slack: uwhcrlab:HG5jFJG5FtcQr1S6OdL06BS5
-  on_success: always
-  on_failure: always
+#notifications:
+#  slack: uwhcrlab:HG5jFJG5FtcQr1S6OdL06BS5
+#  on_success: always
+#  on_failure: always

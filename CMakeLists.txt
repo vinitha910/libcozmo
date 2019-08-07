@@ -40,6 +40,7 @@ include_directories(
 
 add_library(cozmo SHARED
   src/cozmo_description/cozmo.cpp
+  src/action_space/generic_action_space.cpp
 )
 
 target_include_directories(cozmo PUBLIC
