@@ -33,11 +33,6 @@ struct Object_Oriented_Action
     Action action;
 };
 
-// Utility function to generate [num] number of choices from [start] to [stop]
-// include_zero : True to add zero to choices, False to not
-//                This allows for 0 verlocity in either the linear or angular direction
-std::vector<double> create_choices(double start, double stop, int num, bool include_zero);
-
 class GenericActionSpace {
     public:
         GenericActionSpace();

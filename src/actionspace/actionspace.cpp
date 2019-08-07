@@ -8,26 +8,6 @@ using namespace std;
 namespace libcozmo {
 namespace actionspace {
 
-// Utility function to generate [num] number of choices from [start] to [stop]
-// include_zero : True to add zero to choices, False to not
-//                This allows for 0 verlocity in either the linear or angular direction
-vector<double> create_choices(double start, double stop, int num, bool include_zero)
-{
-    double step = (stop - start) / (num - 1);
-    vector<double> choices = libcozmo::utils::linspace(start, stop, num);
-
-    if (include_zero) {
-        bool contains_zero = false;
-        if (find(choices.begin(), choices.end(), 0) != choices.end()) {
-            contains_zero = true;
-        }
-        if (!contains_zero) {
-            choices.insert(choices.begin(), 0);
-        }
-    }
-    return choices;
-}
-
 GenericActionSpace::GenericActionSpace() {}
 
 void GenericActionSpace::generate_actions(double lin_min, double lin_max, double lin_samples,
@@ -35,9 +15,9 @@ void GenericActionSpace::generate_actions(double lin_min, double lin_max, double
                                           double dur_min, double dur_max, double dur_samples)
 {
     actions.clear();
-    vector<double> lin_choices = create_choices(lin_min, lin_max, lin_samples, true);
-    vector<double> ang_choices = create_choices(ang_min, ang_max, ang_samples, true);
-    vector<double> dur_choices = create_choices(dur_min, dur_max, dur_samples, false);
+    vector<double> lin_choices = libcozmo::utils::linspace(lin_min, lin_max, lin_samples);
+    vector<double> ang_choices = libcozmo::utils::linspace(ang_min, ang_max, ang_samples);
+    vector<double> dur_choices = libcozmo::utils::linspace(dur_min, dur_max, dur_samples);
 
     for (const auto& dur_choice : dur_choices) {
         for (const auto& lin_choice : lin_choices) {
@@ -81,7 +61,7 @@ void ObjectOrientedActionSpace::generate_actions(Pose pose, int num_offsets,
     actions.clear();
     vector<Pose> locations = generate_offsets(pose, num_offsets, h_offset, v_offset);
     GenericActionSpace gen_space {};
-    gen_space.generate_actions(lin_min, lin_max, lin_samples, 0, 0, 0, dur_min, dur_max, dur_samples);
+    gen_space.generate_actions(lin_min, lin_max, lin_samples, 0, 0, 1, dur_min, dur_max, dur_samples);
     vector<Action> gen_actions = gen_space.get_action_space();
     for (const auto& location : locations) {
         for (const auto& action : gen_actions) {
@@ -140,13 +120,14 @@ vector<double> ObjectOrientedActionSpace::find_sides(double angle)
     for (size_t i = 0; i < 3; i++) {
         // Adding in clockwise order
         angle -= M_PI / 2;
-        if (angle < -M_PI) {
+        if (angle < -M_PI) { // wrap around since angles are only in the range [-pi, pi]
             angle = 2 * M_PI + angle;
         }
         sides.push_back(angle);
     }
 
     int front_idx = nearest_zero(sides);
+    // Reorder the sides to be what we want it to be
     ordered_sides.push_back(sides[front_idx]);
     int idx = (front_idx + 1) % 4;
     while (idx != front_idx) {
@@ -158,27 +139,30 @@ vector<double> ObjectOrientedActionSpace::find_sides(double angle)
 
 
 /*
-Helper function to generate cube offset positions
+Helper function to generate cube offset positions, these are the positions cozmo will move to
+relative to the cube; there will be 4 * num_offsets number of different locations
 
 Parameters
 ----------
+pose : the cube position and orientation
+num_offsets : number of different positions per side of the cube
 h_offset : the max horizontal offset from the center of the edge of the cube, in millimeters
 v_offset : the vertical offset away from the center of the cube, in millimeters
 */
 vector<Pose> ObjectOrientedActionSpace::generate_offsets(Pose pose, int num_offsets, double h_offset, double v_offset)
 {
     vector<double> choices;
-    if (num_offsets == 1) {
+    if (num_offsets == 1) { // if only one offset, just use center of side
         choices.push_back(0);
     } else {
-        choices = create_choices(-h_offset, h_offset, num_offsets, true);
+        choices = libcozmo::utils::linspace(-h_offset, h_offset, num_offsets);
     }
-    vector<double> cube_sides = find_sides(pose.angle_z);
+    vector<double> cube_sides = find_sides(pose.angle_z); // find which sides correspond to front, back, etc of cube
     vector<Pose> locations;
     for (size_t i = 0; i < cube_sides.size(); i++) {
         double side = cube_sides[i];
         for (const auto& choice : choices) {
-            Point offset = cube_offset(v_offset, side);
+            Point offset = cube_offset(v_offset, side); // calculate x and y offsets
             Pose location;
             if (i == 0) { // front of cube
                 location = Pose{pose.x - offset.x, pose.y - offset.y - choice, pose.z, side};
@@ -197,7 +181,7 @@ vector<Pose> ObjectOrientedActionSpace::generate_offsets(Pose pose, int num_offs
 
 /** Helper function to find the value closest to zero in a list,
     used in find_sides to identify which angle of the cube
-    is the front
+    is the front, value closest to 0 is the front
 
     Note: in case the corner of the cube is perfectly in align with cozmo
     and there is no closest side, we choose the right side to be the front
