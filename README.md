@@ -6,13 +6,12 @@ libcozmo is a C++ library for simulating and running [Cozmo](https://anki.com/en
 
 Install [ROS Kinetic](http://wiki.ros.org/kinetic/Installation/Ubuntu) and then install the following dependencies:
 ```shell
-$ sudo add-apt-repository ppa:libccd-debs/ppa
-$ sudo add-apt-repository ppa:fcl-debs/ppa
 $ sudo add-apt-repository ppa:personalrobotics/ppa
 $ sudo apt-get update
 $ sudo apt-get install cmake build-essential libboost-filesystem-dev libmicrohttpd-dev libompl-dev libtinyxml2-dev libyaml-cpp-dev pr-control-msgs
 $ sudo apt-get install libnlopt-dev coinor-libipopt-dev libbullet-dev libode-dev
 $ sudo apt-get install ros-kinetic-rospy ros-kinetic-pybind11-catkin ros-kinetic-octomap-ros libeigen3-dev python-catkin-tools python-catkin-pkg
+$ sudo apt-get install libassimp-dev libccd-dev libfcl-dev libboost-regex-dev libboost-system-dev doxygen
 ```
 
 Install [DART](https://dartsim.github.io/install_dart_on_ubuntu.html#build-and-install-dart) from source:
