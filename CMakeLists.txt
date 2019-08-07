@@ -43,6 +43,8 @@ add_library(cozmo SHARED
   src/action_space/generic_action_space.cpp
 )
 
+
+
 target_include_directories(cozmo PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
@@ -76,6 +78,14 @@ target_link_libraries(execute_traj
   cozmo
   ${aikido_LIBRARIES}
 )
+
+catkin_add_gtest(test_generic_action_space tests/action_space/test_generic_action_space.cpp )
+target_link_libraries(test_generic_action_space
+  cozmo 
+  ${catkin_LIBRARIES}
+  ${aikido_LIBRARIES}
+)
+
 
 #################### PYBIND ##############################
 

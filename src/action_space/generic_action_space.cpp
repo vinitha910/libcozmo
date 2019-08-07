@@ -11,9 +11,8 @@ double GenericAction::action_similarity(GenericAction& other_action) const {
         pow((m_direction.y() - other_action.m_direction.y()), 2));
 }
 
-void GenericActionSpace::get_action(int& action_id, GenericAction* action) {
-    action = &m_actions[action_id];
+GenericAction* GenericActionSpace::get_action(const int& action_id) const {
+    return m_actions[action_id];
 }
-
 }
 }
