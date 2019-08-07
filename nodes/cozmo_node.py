@@ -5,7 +5,7 @@ This file implements publishers for various states and sensors of the Cozmo robo
 These include forklift position, head position, robot pose, camera data, and inertia data.
 """
 import rospy
-from libcozmo.msg import ForkLift, Action, OOAction
+from libcozmo.msg import ForkLift
 from std_msgs.msg import Float64
 from geometry_msgs.msg import Pose, Point, Quaternion
 from sensor_msgs.msg import Image, Imu
@@ -32,10 +32,6 @@ class CozmoROSNode(object):
         self.pose_publisher = rospy.Publisher('robot_pose', Pose, queue_size=1)
         self.camera_publisher = rospy.Publisher('camera', Image, queue_size=1)
         self.imu_publisher = rospy.Publisher('imu', Imu, queue_size=1)
-        self.gen_action_subscriber = rospy.Subscriber('gen_action', Action, self.callback)
-
-    def callback(data):
-        rospy.loginfo(rospy.get_caller_id() + data.data)
 
     def create_node(self):
         rate = rospy.Rate(10) # 10hz
