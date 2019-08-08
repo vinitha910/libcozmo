@@ -30,6 +30,8 @@
 #include <action_space/generic_action_space.hpp>
 #include <exception>
 #include <iostream>
+
+
 namespace libcozmo {
 namespace actionspace {
 
@@ -63,9 +65,21 @@ bool GenericActionSpace::is_valid_action_id(const int& action_id) const {
     return ((action_id < m_actions.size() && action_id >= 0));
 }
 
-void GenericActionSpace::execute_action(const int& action_id) const {
+void GenericActionSpace::publish_action(const int& action_id) const {
     // Connect to cozmo
     // publish action to cozmo
+    // heading (direction vec converted to angle)
+    // speed
+    // duration
+    libcozmo::ActionMsg msg;
+    auto action = get_action(action_id);
+
+    msg.speed = action->m_speed;
+    Eigen::Vector2d direction = action->m_direction;
+    msg.heading = atan(direction.y() / direction.x());
+    msg.duration = action->m_duration;
+    action_publisher.publish(msg);
+    ros::spinOnce();
 }
 }  // namespace actionspace
 }  // namespace libcozmo

@@ -16,8 +16,10 @@ find_package(aikido REQUIRED COMPONENTS statespace control rviz)
 find_package(aikidopy REQUIRED COMPONENTS libaikidopy)
 
 add_message_files(
+  DIRECTORY msg
   FILES
   ForkLift.msg
+  ActionMsg.msg
 )
 
 generate_messages(
@@ -40,8 +42,6 @@ add_library(cozmo SHARED
   src/action_space/generic_action_space.cpp
 )
 
-
-
 target_include_directories(cozmo PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
@@ -50,6 +50,7 @@ target_include_directories(cozmo PUBLIC
 target_include_directories(cozmo PRIVATE ${DART_INCLUDE_DIRS})
 target_include_directories(cozmo PUBLIC ${EIGEN3_INCLUDE_DIR} ${aikido_INCLUDE_DIRS})
 target_link_libraries(cozmo PUBLIC ${DART_LIBRARIES} ${aikido_LIBRARIES})
+
 
 add_executable(rviz_example src/examples/rviz_example.cpp)
 target_include_directories(rviz_example PRIVATE

@@ -78,6 +78,7 @@ TEST_F(GenericActionFixture, OORExceptionTest) {
 }
 
 int main(int argc, char **argv) {
+    ros::init(argc, argv, "talker");
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }

@@ -34,6 +34,7 @@
 #include <Eigen/Dense>
 #include <cmath>
 #include "utils/utils.hpp"
+#include <libcozmo/ActionMsg.h>
 
 namespace libcozmo {
 namespace actionspace {
@@ -118,6 +119,7 @@ class GenericActionSpace {
                   }
                 }
             }
+            action_publisher = cozmo_handle.advertise<libcozmo::ActionMsg>("Action", 1000);
         }
     ~GenericActionSpace() {
         for (int i = 0; i < m_actions.size(); ++i) {
@@ -140,15 +142,18 @@ class GenericActionSpace {
     // \param action_id The action ID
     GenericAction* get_action(const int& action_id) const;
 
-    // Executes action on cozmo given action ID
+    // Publishes action to a listener given action ID
 
     // \param action_id The action ID
-    void execute_action(const int& action_id) const;
+    void publish_action(const int& action_id) const;
 
  private:
     bool is_valid_action_id(const int& action_id) const;
     // // Vector of actions
     std::vector<GenericAction*> m_actions;
+    // Cozmo ROS node handle
+    ros::NodeHandle cozmo_handle;
+    ros::Publisher action_publisher;
 };
 }  // namespace actionspace
 }  // namespace libcozmo
