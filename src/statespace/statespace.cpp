@@ -35,29 +35,30 @@
 namespace libcozmo {
 namespace statespace {
 
-Eigen::Vector3i Statespace::create_new_state(
+int Statespace::create_new_state(
     const Eigen::Vector3i& state) {
     m_state_map.push_back(state);
-    m_state_to_id_map[state] = m_state_to_id_map.size() - 1;
-    return state;
+    int state_id = m_state_to_id_map.size() - 1;
+    m_state_to_id_map[state] = state_id;
+    return state_id;
 }
 
-Eigen::Vector3i Statespace::create_new_state(
+int Statespace::create_new_state(
     const aikido::statespace::SE2::State& state_continuous) {
     return create_new_state(continuous_state_to_discrete(state_continuous));
 }
 
-Eigen::Vector3i Statespace::get_or_create_new_state(
+int Statespace::get_or_create_new_state(
     const Eigen::Vector3i& pose) {
     const auto state_id = m_state_to_id_map.find(pose);
     if (state_id != m_state_to_id_map.end()) {
-        return m_state_map.at(state_id->second);
+        return state_id->second;
     } else {
         return create_new_state(pose);
     }
 }
 
-Eigen::Vector3i Statespace::get_or_create_new_state(
+int Statespace::get_or_create_new_state(
     const aikido::statespace::SE2::State& pose) {
     return get_or_create_new_state(continuous_state_to_discrete(pose));
 }
@@ -65,18 +66,18 @@ Eigen::Vector3i Statespace::get_or_create_new_state(
 void Statespace::get_path_states(
     const std::vector<int>& state_ids,
     std::vector<Eigen::Vector3i> *states) {
-    for (int i = 0; i < state_ids.size(); ++i) {
+    for (int i = 0; i < state_ids.size(); i++) {
         Eigen::Vector3i pose;
-        if (get_coord_from_state_id(state_ids[i], pose)) {
-            states->push_back(create_new_state(pose));
-        }
+        if (get_coord_from_state_id(state_ids[i], &pose)) {
+            states->push_back(pose);
+        }  
     }
 }
 
-bool Statespace::get_state_id(const Eigen::Vector3i& state, int& state_id) {
+bool Statespace::get_state_id(const Eigen::Vector3i& state, int* state_id) {
     const auto state_id_iter = m_state_to_id_map.find(state);
     if (state_id_iter != m_state_to_id_map.end()) {
-        state_id = state_id_iter->second;
+        *state_id = state_id_iter->second;
         return true;
     }
     return false;
@@ -84,9 +85,9 @@ bool Statespace::get_state_id(const Eigen::Vector3i& state, int& state_id) {
 
 bool Statespace::get_coord_from_state_id(
     const int& state_id,
-    Eigen::Vector3i& state) const {
-    state = m_state_map[state_id];
-    return (is_valid_state(state));
+    Eigen::Vector3i* state) const {
+    *state = m_state_map[state_id];
+    return (is_valid_state(*state));
 }
 
 bool Statespace::is_valid_state(const Eigen::Vector3i& state) const {
@@ -123,14 +124,14 @@ int Statespace::continuous_angle_to_discrete(const double& theta_rad) const {
 }
 
 Eigen::Vector2d Statespace::discrete_position_to_continuous(
-    const Eigen::Vector2i position) const {
+    const Eigen::Vector2i& position) const {
     const double x_m = position.x() * m_resolution + (m_resolution / 2.0);
     const double y_m = position.y() * m_resolution + (m_resolution / 2.0);
     return Eigen::Vector2d(x_m, y_m);
 }
 
 Eigen::Vector2i Statespace::continuous_position_to_discrete(
-    const Eigen::Vector2d position) const {
+    const Eigen::Vector2d& position) const {
         
     const int x = static_cast<int>(floor(position.x() / m_resolution));
     const int y = static_cast<int>(floor(position.y() / m_resolution));

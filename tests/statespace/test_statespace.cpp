@@ -37,7 +37,7 @@ class myTestFixture1: public ::testing::Test {
 
     void SetUp() {
         myStateSpace.create_new_state(Eigen::Vector3i(3, 2, 1));
-        myStateSpace.create_new_state(Eigen::Vector3i(1, 3, 4));
+        myStateSpace.create_new_state(Eigen::Vector3i(1, 3, 3));
     }
 
     void TearDown() {}
@@ -50,12 +50,12 @@ class myTestFixture1: public ::testing::Test {
 TEST_F(myTestFixture1, UnitTest1) {
     Eigen::Vector3i expected(3, 2, 1);
     Eigen::Vector3i state;
-    myStateSpace.get_coord_from_state_id(0, state);
+    myStateSpace.get_coord_from_state_id(0, &state);
     EXPECT_EQ(expected[0], state[0]);
     EXPECT_EQ(expected[1], state[1]);
     EXPECT_EQ(expected[2], state[2]);
-    expected << 1, 3, 4;
-    myStateSpace.get_coord_from_state_id(1, state);
+    expected << 1, 3, 3;
+    myStateSpace.get_coord_from_state_id(1, &state);
     EXPECT_EQ(expected[0], state[0]);
     EXPECT_EQ(expected[1], state[1]);
     EXPECT_EQ(expected[2], state[2]);
@@ -98,7 +98,7 @@ TEST_F(myTestFixture1, UnitTest4) {
     std::vector<Eigen::Vector3i> path_coordinates;
     std::vector<Eigen::Vector3i> expected;
     expected.push_back(Eigen::Vector3i(3, 2, 1));
-    expected.push_back(Eigen::Vector3i(1, 3, 4));
+    expected.push_back(Eigen::Vector3i(1, 3, 3));
     myStateSpace.get_path_states(state_ids, &path_coordinates);
     EXPECT_EQ(expected[0][0], path_coordinates[0][0]);
     EXPECT_EQ(expected[0][1], path_coordinates[0][1]);
@@ -110,7 +110,7 @@ TEST_F(myTestFixture1, UnitTest4) {
 
 // Check create_state and get_or_create_state
 TEST_F(myTestFixture1, UnitTest5) {
-    myStateSpace.get_or_create_new_state(Eigen::Vector3i(1, 3, 4));
+    myStateSpace.get_or_create_new_state(Eigen::Vector3i(1, 3, 3));
     EXPECT_EQ(2, myStateSpace.get_num_states());
 }
 
