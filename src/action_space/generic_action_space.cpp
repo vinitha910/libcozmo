@@ -37,11 +37,9 @@ double GenericActionSpace::action_similarity(
     const int& action_id1,
     const int& action_id2) const {
 
-    if (action_id1 >= m_actions.size() ||
-        action_id1 < 0 ||
-        action_id2 >= m_actions.size() ||
-        action_id2 < 0) {
-        throw std::out_of_range("Out Of Range exception");
+    if (!(is_valid_action_id(action_id1) &&
+        is_valid_action_id(action_id2))) {
+        throw std::out_of_range("Action ID invalid");
     }
     return sqrt(
         pow((m_actions[action_id1]->m_speed -
@@ -55,15 +53,19 @@ double GenericActionSpace::action_similarity(
 }
 
 GenericAction* GenericActionSpace::get_action(const int& action_id) const {
-    if (action_id >= m_actions.size() ||
-        action_id < 0) {
-        throw std::out_of_range("Out Of Range exception");
+    if (!is_valid_action_id(action_id)) {
+        throw std::out_of_range("Action ID invalid");
     }
-    try {
-        return m_actions[action_id];
-    } catch (const std::exception& e) {
-        std::cout << "An exception occured: " << e.what();
-    }
+    return m_actions[action_id];
+}
+
+bool GenericActionSpace::is_valid_action_id(const int& action_id) const {
+    return ((action_id < m_actions.size() && action_id >= 0));
+}
+
+void GenericActionSpace::execute_action(const int& action_id) const {
+    // Connect to cozmo
+    // publish action to cozmo
 }
 }  // namespace actionspace
 }  // namespace libcozmo

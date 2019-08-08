@@ -146,6 +146,7 @@ class GenericActionSpace {
     void execute_action(const int& action_id) const;
 
  private:
+    bool is_valid_action_id(const int& action_id) const;
     // // Vector of actions
     std::vector<GenericAction*> m_actions;
 };
