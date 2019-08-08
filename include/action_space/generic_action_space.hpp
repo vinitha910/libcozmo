@@ -33,6 +33,7 @@
 #include "utils/utils.hpp"
 #include <Eigen/Dense>
 #include <cmath>
+#include<ros/ros.h>
 
 namespace libcozmo {
 namespace actionspace {
@@ -54,13 +55,6 @@ class GenericAction {
         m_duration(duration),
         m_direction(direction) {}
     ~GenericAction() {}
-    
-    // Calculates and returns similarity with another action
-    // Similarity is defined by the euclidean distance w.r.t.
-    // their speed, duration, and direction (x,y calcualted separately)
-
-    // \param other_action The other action to compare to
-    double action_similarity(GenericAction& other_action) const;
 
     // Speed of action
     const double m_speed;
@@ -84,7 +78,8 @@ class GenericActionSpace {
     // \param max_duration The maximum duration of action
     // \param num_speed The number of speed values for the actions
     // \param num_duration The number of duration values for the actions
-    // \param num_theta The number of theta values for the actions
+    // \param num_directions The number of direction values for the actions
+    // num_directions must be in powers of 2 and >= 4
     GenericActionSpace(
         const double& min_speed,
         const double& max_speed,
@@ -92,57 +87,54 @@ class GenericActionSpace {
         const double& max_duration,
         const int& num_speed,
         const int& num_duration,
-        const int& num_theta) {
-            m_speeds = utils::linspace(min_speed, max_speed, static_cast<size_t>(num_speed));
-            m_durations = utils::linspace(min_duration, max_duration, num_duration);
-            for (int i = 0; i < num_theta; i++) {
-              double angle = i * 2.0 * M_PI / static_cast<double>(num_theta);
-              m_directions.push_back(Eigen::Vector2d(cos(angle), sin(angle)));
+        const int& num_directions) {
+            std::vector<double> m_speeds = utils::linspace(min_speed, max_speed, num_speed);
+            std::vector<double> m_durations = utils::linspace(min_duration, max_duration, num_duration);
+            std::vector<Eigen::Vector2d> m_directions;
+			for (int i = 0; i < num_directions; i++) {
+            	const double angle = i * 2.0 * M_PI / static_cast<double>(num_directions);
+            	m_directions.push_back(Eigen::Vector2d(cos(angle), sin(angle)));
             }
-            m_actions = std::vector<GenericAction*>(num_speed * num_duration * num_theta, nullptr);
+            m_actions = std::vector<GenericAction*>(num_speed * num_duration * num_directions, nullptr);
             for (int j = 0; j < num_speed; j++) {
                 for (int k = 0; k < num_duration; k++) {
-                  for (int l = 0; l < num_theta; l++) {
-                    const int id = j * num_duration * num_theta + k * num_theta + l;
-                    m_actions[id] = new GenericAction(
-                      m_speeds[j], 
-                      m_durations[k], 
-                      m_directions[l]);  
+                  	for (int l = 0; l < num_directions; l++) {
+                    	const int id = j * num_duration * num_directions + k * num_directions + l;
+                    	m_actions[id] = new GenericAction(
+                      		m_speeds[j], 
+                      		m_durations[k], 
+                      		m_directions[l]); 
                   } 
                 }
             }
         }
     ~GenericActionSpace() {
-      for (int i = 0; i < m_actions.size(); ++i) { 
-          delete(m_actions[i]);
-      }
-      m_actions.clear();
+    	for (int i = 0; i < m_actions.size(); ++i) { 
+        	delete(m_actions[i]);
+		}
+		m_actions.clear();
     }
 
-    // Assigns pointer to action given action ID
+	// Calculates and returns similarity with another action
+    // Similarity is defined by the euclidean distance w.r.t.
+    // their speed, duration, and direction (x,y calcualted separately)
+
+    // \param action_id1, actionid2 The ID of two actions to compare
+    double action_similarity(const int& action_id1, const int& action_id2) const;
+
+    // Returns pointer to action given action ID
 
     // \param action_id The action ID
-    // \param action Pointer for chosen action
     GenericAction* get_action(const int& action_id) const;
 
-    // Executes action given action ID
+    // Executes action on cozmo given action ID
 
     // \param action_id The action ID
     void execute_action(int& action_id) const;
 
   private:
-    // Vector of possible speed
-    std::vector<double> m_speeds;
-    // Vector of possible durations
-    std::vector<double> m_durations;
-    // Linspace count for speed and duration 
-    // const int m_num_vals;
-    // // Linspace count for angle, in power of 2 and >= 4
-    // const int m_num_theta;
     // // Vector of actions
     std::vector<GenericAction*> m_actions;
-    // Vector of possible directions
-    std::vector<Eigen::Vector2d> m_directions;
 };
 }  // namespace actionspace
 }  // namespace libcozmo
