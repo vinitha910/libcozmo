@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2019, Vinitha Ranganeni, Brian Lee
+// Copyright (c) 2019, Brian Lee, Vinitha Ranganeni
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,8 +28,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include <gtest/gtest.h>
-#include "action_space/generic_action_space.hpp"
 #include <iostream>
+#include "action_space/generic_action_space.hpp"
 
 class GenericActionFixture: public ::testing::Test {
  public:
@@ -40,10 +40,7 @@ class GenericActionFixture: public ::testing::Test {
     void SetUp() {
     }
 
-    // Check exception handling for get_action and action_similarity
     void TearDown() {
-        // m_actionspace.action_similarity(0, 64);
-        // m_actionspace.get_action(19);
     }
 
     ~GenericActionFixture()  {}
@@ -72,8 +69,12 @@ TEST_F(GenericActionFixture, ActionGenerationTest) {
     EXPECT_NEAR(-1, action->m_direction[1], 0.00001);
 }
 
+// Check out of range exception handling for action_similarity and get_action
 TEST_F(GenericActionFixture, OORExceptionTest) {
-    EXPECT_THROW(m_actionspace.action_similarity(0, 61), std::out_of_range); 
+    EXPECT_THROW(m_actionspace.action_similarity(0, 61), std::out_of_range);
+    EXPECT_THROW(m_actionspace.action_similarity(0, -5), std::out_of_range);
+    EXPECT_THROW(m_actionspace.get_action(61), std::out_of_range);
+    EXPECT_THROW(m_actionspace.get_action(-1), std::out_of_range);
 }
 
 int main(int argc, char **argv) {

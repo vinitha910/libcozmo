@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2019, Vinitha Ranganeni, Brian Lee
+// Copyright (c) 2019,  Brian Lee, Vinitha Ranganeni
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -30,24 +30,23 @@
 #ifndef COZMO_GENERIC_ACTION_SPACE_CPP
 #define COZMO_GENERIC_ACTION_SPACE_CPP
 
-#include "utils/utils.hpp"
+#include <ros/ros.h>
 #include <Eigen/Dense>
 #include <cmath>
-#include<ros/ros.h>
+#include "utils/utils.hpp"
 
 namespace libcozmo {
 namespace actionspace {
 
 // Generic Action class
 class GenericAction {
-  public:
-
+ public:
     // Constructor
 
     // \param speed The speed of action (m/s)
     // \param duration The duration of action (s)
     // \param direction The (x,y) direction vector of action (m)
-    GenericAction (
+    GenericAction(
         const double& speed,
         const double& duration,
         const Eigen::Vector2d& direction) : \
@@ -56,22 +55,21 @@ class GenericAction {
         m_direction(direction) {}
     ~GenericAction() {}
 
-    // Speed of action
+    // Speed of action (m/s)
     const double m_speed;
 
-    // Duration of action
+    // Duration of action (s)
     const double m_duration;
 
-    // (x,y) direction vector
+    // (x,y) direction vector (m)
     const Eigen::Vector2d m_direction;
 };
 
 // Generic Actionspace for Cozmo
 class GenericActionSpace {
-  public:
-
+ public:
     // Constructor
-    
+
     // \param min_speed The minimum speed of action
     // \param max_speed The maximum speed of action
     // \param min_duration The minimum duration of action
@@ -88,39 +86,54 @@ class GenericActionSpace {
         const int& num_speed,
         const int& num_duration,
         const int& num_directions) {
-            std::vector<double> m_speeds = utils::linspace(min_speed, max_speed, num_speed);
-            std::vector<double> m_durations = utils::linspace(min_duration, max_duration, num_duration);
+            std::vector<double> m_speeds = utils::linspace(
+                min_speed,
+                max_speed,
+                num_speed);
+            std::vector<double> m_durations = utils::linspace(
+                min_duration,
+                max_duration,
+                num_duration);
             std::vector<Eigen::Vector2d> m_directions;
-			for (int i = 0; i < num_directions; i++) {
-            	const double angle = i * 2.0 * M_PI / static_cast<double>(num_directions);
-            	m_directions.push_back(Eigen::Vector2d(cos(angle), sin(angle)));
+            for (int i = 0; i < num_directions; i++) {
+                const double angle = i * 2.0 * M_PI /
+                    static_cast<double>(num_directions);
+                m_directions.push_back(
+                    Eigen::Vector2d(cos(angle), sin(angle)));
             }
-            m_actions = std::vector<GenericAction*>(num_speed * num_duration * num_directions, nullptr);
+            m_actions = std::vector<GenericAction*>(
+                num_speed *
+                num_duration *
+                num_directions,
+                nullptr);
             for (int j = 0; j < num_speed; j++) {
                 for (int k = 0; k < num_duration; k++) {
-                  	for (int l = 0; l < num_directions; l++) {
-                    	const int id = j * num_duration * num_directions + k * num_directions + l;
-                    	m_actions[id] = new GenericAction(
-                      		m_speeds[j], 
-                      		m_durations[k], 
-                      		m_directions[l]); 
-                  } 
+                    for (int l = 0; l < num_directions; l++) {
+                        const int id = j * num_duration * num_directions +
+                            k * num_directions + l;
+                        m_actions[id] = new GenericAction(
+                            m_speeds[j],
+                            m_durations[k],
+                            m_directions[l]);
+                  }
                 }
             }
         }
     ~GenericActionSpace() {
-    	for (int i = 0; i < m_actions.size(); ++i) { 
-        	delete(m_actions[i]);
-		}
-		m_actions.clear();
+        for (int i = 0; i < m_actions.size(); ++i) {
+            delete(m_actions[i]);
+        }
+        m_actions.clear();
     }
 
-	// Calculates and returns similarity with another action
-    // Similarity is defined by the euclidean distance w.r.t.
+    // Calculates and returns similarity with another action
+    // Similarity is defined by the euclidean distance based on
     // their speed, duration, and direction (x,y calcualted separately)
 
     // \param action_id1, actionid2 The ID of two actions to compare
-    double action_similarity(const int& action_id1, const int& action_id2) const;
+    double action_similarity(
+        const int& action_id1,
+        const int& action_id2) const;
 
     // Returns pointer to action given action ID
 
@@ -130,9 +143,9 @@ class GenericActionSpace {
     // Executes action on cozmo given action ID
 
     // \param action_id The action ID
-    void execute_action(int& action_id) const;
+    void execute_action(const int& action_id) const;
 
-  private:
+ private:
     // // Vector of actions
     std::vector<GenericAction*> m_actions;
 };
