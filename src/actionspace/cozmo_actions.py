@@ -254,7 +254,7 @@ class ObjectOrientedActionSpace(object):
             right_wheel = action.lin_vel - action.ang_vel
             self.cozmo.drive_wheels(left_wheel, right_wheel, duration=action.duration)
         except IndexError:
-            print(action_id, 'is an invalid id\nEnter an id between 0 and', len(self.locations) - 1)
+            print(action_id, 'is an invalid id\nEnter an id between 0 and', len(self.actions) - 1)
     
     def view_action_space(self):
         """
@@ -303,15 +303,7 @@ class ObjectOrientedActionSpace(object):
             if angle < -math.pi:
                 angle = 2 * math.pi + angle
             sides.append(angle)
-
-        front_idx = self._nearest_zero(sides)
-        ordered_sides = [sides[front_idx]]
-        idx = (front_idx + 1) % 4
-        while idx != front_idx:
-            ordered_sides.append(sides[idx])
-            idx = (idx + 1) % 4
-
-        return ordered_sides
+        return sides
 
     def _generate_actions(self, h_offset=40, v_offset=60):
         """
@@ -366,43 +358,14 @@ class ObjectOrientedActionSpace(object):
             for choice in choices:
                 offset = 'with offset: ' + str(choice)
                 x_offset, y_offset = self._cube_offset(v_offset, side)
-                if cube_side == 'front of cube ':
-                    location = pose_z_angle(x - x_offset, y - y_offset - choice, z, radians(side))
-                elif cube_side == 'back of cube ':
-                    location = pose_z_angle(x - 1.2 * x_offset, y + y_offset + choice, z, radians(side))
-                elif cube_side == 'left of cube ':
-                    location = pose_z_angle(x - x_offset - choice, y - y_offset, z, radians(side))
-                elif cube_side == 'right of cube ':
-                    location = pose_z_angle(x + x_offset + choice, y - y_offset, z, radians(side))
+                cy_offset, cx_offset = self._cube_offset(choice, side)
+                
+                location = pose_z_angle(x - x_offset + cx_offset, y - y_offset - cy_offset, z, radians(side))
+                
                 self.locations.append(location)
                 self.location_names.append(cube_side + offset)
                 key_idx += 1
     
-    def _nearest_zero(self, values):
-        """
-        Helper function to find the value closest to zero in a list,
-        used in self._find_sides to identify which angle of the cube
-        is the front
-
-        Note: in case the corner of the cube is perfectly in align with cozmo
-        and there is no closest side, we choose the right side to be the front
-
-        Parameters
-        ----------
-        values : list of floats
-            the list to traverse
-
-        returns the index of the value closest to zero
-        """
-
-        nearest = 0
-        for i in range(len(values))[1:]:
-            if abs(values[i]) < abs(values[nearest]):
-                nearest = i
-            if values[i] == math.pi / 2:
-                return i
-        return nearest
-
 def cozmo_run(robot: cozmo.robot):
     #action = GenericActionSpace(robot, 10, 100, 5, 10, 100, 5, 1, 5, 5)
     #action.view_action_space()
@@ -415,9 +378,10 @@ def cozmo_run(robot: cozmo.robot):
     finally:
         look_around.stop()
     
-    oos = ObjectOrientedActionSpace(robot, cube, 1, 10, 100, 3, 1, 5, 3)
+    oos = ObjectOrientedActionSpace(robot, cube, 3, 10, 100, 3, 1, 5, 3)
+    print(cube.pose)
     oos.view_action_space()
-    oos.apply_action(33)
+    oos.apply_action(81)
     
 if __name__ == '__main__':
     cozmo.run_program(cozmo_run)
