@@ -33,7 +33,6 @@
 #include "utils/utils.hpp"
 #include <Eigen/Dense>
 #include <cmath>
-#include <iostream>
 
 namespace libcozmo {
 namespace actionspace {
@@ -44,9 +43,9 @@ class GenericAction {
 
     // Constructor
 
-    // \param speed The speed of action
-    // \param duration The duration of action
-    // \param direction The (x,y) direction of action
+    // \param speed The speed of action (m/s)
+    // \param duration The duration of action (s)
+    // \param direction The (x,y) direction vector of action (m)
     GenericAction (
         const double& speed,
         const double& duration,
@@ -57,6 +56,8 @@ class GenericAction {
     ~GenericAction() {}
     
     // Calculates and returns similarity with another action
+    // Similarity is defined by the euclidean distance w.r.t.
+    // their speed, duration, and direction (x,y calcualted separately)
 
     // \param other_action The other action to compare to
     double action_similarity(GenericAction& other_action) const;
@@ -81,9 +82,9 @@ class GenericActionSpace {
     // \param max_speed The maximum speed of action
     // \param min_duration The minimum duration of action
     // \param max_duration The maximum duration of action
-    // \param num_speed The number of values for action linspace
-    // \param num_duration The number of values for action linspace
-    // \param num_theta The number of theta values
+    // \param num_speed The number of speed values for the actions
+    // \param num_duration The number of duration values for the actions
+    // \param num_theta The number of theta values for the actions
     GenericActionSpace(
         const double& min_speed,
         const double& max_speed,
