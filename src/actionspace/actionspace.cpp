@@ -53,6 +53,8 @@ void GenericActionSpace::view_action_space() {
 
 ObjectOrientedActionSpace::ObjectOrientedActionSpace() {}
 
+/* If the num_offsets is even, there's no center position for each side of the cube
+ */
 void ObjectOrientedActionSpace::generate_actions(Pose pose, int num_offsets,
                                                  double lin_min, double lin_max, double lin_samples,
                                                  double dur_min, double dur_max, double dur_samples,
@@ -125,16 +127,7 @@ vector<double> ObjectOrientedActionSpace::find_sides(double angle)
         }
         sides.push_back(angle);
     }
-
-    int front_idx = nearest_zero(sides);
-    // Reorder the sides to be what we want it to be
-    ordered_sides.push_back(sides[front_idx]);
-    int idx = (front_idx + 1) % 4;
-    while (idx != front_idx) {
-        ordered_sides.push_back(sides[idx]);
-        idx = (idx + 1) % 4;
-    }
-    return ordered_sides;
+    return sides;
 }
 
 
@@ -157,48 +150,21 @@ vector<Pose> ObjectOrientedActionSpace::generate_offsets(Pose pose, int num_offs
     } else {
         choices = libcozmo::utils::linspace(-h_offset, h_offset, num_offsets);
     }
-    vector<double> cube_sides = find_sides(pose.angle_z); // find which sides correspond to front, back, etc of cube
+    vector<double> cube_sides = find_sides(pose.angle_z); // find the angles of the 4 sides of the cube
     vector<Pose> locations;
     for (size_t i = 0; i < cube_sides.size(); i++) {
         double side = cube_sides[i];
         for (const auto& choice : choices) {
-            Point offset = cube_offset(v_offset, side); // calculate x and y offsets
+            Point offset = cube_offset(v_offset, side); // calculate x and y offsets so cozmo doesn't hit the cube
+            Point c_offset = cube_offset(choice, side); // For center offset
+
             Pose location;
-            if (i == 0) { // front of cube
-                location = Pose{pose.x - offset.x, pose.y - offset.y - choice, pose.z, side};
-            } else if (i == 1) { // left of cube
-                location = Pose{pose.x - offset.x - choice, pose.y - offset.y, pose.z, side};
-            } else if (i == 2) { // back of cube
-                location = Pose{pose.x - offset.x, pose.y + offset.y + choice, pose.z, side};
-            } else { // right of cube
-                location = Pose{pose.x + offset.x + choice, pose.y - offset.y, pose.z, side};
-            }
+            // c_offset is reversed because it's perpendicular to offset
+            location = Pose{pose.x - offset.x + c_offset.y, pose.y - offset.y - c_offset.x, pose.z, side};
             locations.push_back(location);
         }
     }
     return locations;
-}
-
-/** Helper function to find the value closest to zero in a list,
-    used in find_sides to identify which angle of the cube
-    is the front, value closest to 0 is the front
-
-    Note: in case the corner of the cube is perfectly in align with cozmo
-    and there is no closest side, we choose the right side to be the front
-
-    returns the index of the value closest to zero
-*/
-int ObjectOrientedActionSpace::nearest_zero(vector<double> values) {
-    int nearest = 0;
-    for (size_t i = 1; i < values.size(); i++) {
-        if (abs(values[i]) < abs(values[nearest])) {
-            nearest = i;
-        }
-        if (values[i] == M_PI / 2) {
-            return i;
-        }
-    }
-    return nearest;
 }
 
 } // namespace actionspace
