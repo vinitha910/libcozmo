@@ -65,7 +65,7 @@ int Statespace::get_or_create_new_state(
 
 void Statespace::get_path_states(
     const std::vector<int>& state_ids,
-    std::vector<Eigen::Vector3i> *states) {
+    std::vector<Eigen::Vector3i>* states) {
     for (int i = 0; i < state_ids.size(); i++) {
         Eigen::Vector3i pose;
         if (get_coord_from_state_id(state_ids[i], &pose)) {

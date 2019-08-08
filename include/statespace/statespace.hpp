@@ -41,28 +41,15 @@
 namespace libcozmo {
 namespace statespace {
 
-// // Custom Hash function for a discretized state
-// struct StateHasher {
-//     std::size_t operator()(const Eigen::Vector3i& state) const {
-//         using boost::hash_value;
-//         using boost::hash_combine;
-//         std::size_t seed = 0;
-//         hash_combine(seed, hash_value(state.x()));
-//         hash_combine(seed, hash_value(state.y()));
-//         hash_combine(seed, hash_value(state.z()));
-//         return seed;
-//     }
-// };
-
-// This class implements a discretized two-dimensional special Euclidean
+// This class implements a discretized two-dimensional Special Euclidean
 // group SE(2),i.e. the space of planar rigid body transformations.
 class Statespace {
  public:
     // Constructor
 
-    // \param resolution_m Resolution of discretized state (meters)
+    // \param resolution_m Resolution of discretized state (m)
     // \param num_theta_vals Number of discretized theta values,
-    // should be a power of 2
+    // must be a power of 2
     Statespace(
         const double& resolution_m,
         const int& num_theta_vals) : \
@@ -74,36 +61,38 @@ class Statespace {
     ~Statespace() {}
 
     // Creates a new state given discretized coordinates
+    // Returns the ID of the created state
 
     // \param state The discrete state
     int create_new_state(const Eigen::Vector3i& state);
 
-    // Createss a new discrete state given a SE2 transformation
+    // Creates a new discrete state given a SE2 transformation
+    // Returns the ID of the created state
 
     // \param state The SE2 state
     int create_new_state(
         const aikido::statespace::SE2::State& state);
 
-    // Returns a state with given pose if it exists,
-    // Otherwise creates and returns a new state
+    // Returns ID of the state with given pose if it exists,
+    // Otherwise creates a new state and returns its ID
 
     // \param pose The discrete state
     int get_or_create_new_state(const Eigen::Vector3i& pose);
 
-    // Returns a state with given transformation if it exists,
-    // Otherwise creates and returns a new state
+    // Returns ID of the state with given transformation if it exists,
+    // Otherwise creates a new state and returns its ID
 
     // \param state The SE2 state
     int get_or_create_new_state(
         const aikido::statespace::SE2::State& state);
 
-    // Return coordinates for given set of discretized states
+    // Fills the states vector with states corresponding to given set of IDs
 
     // \param state_ids The vector of state ids
     // \param states The vector of discretized poses
     void get_path_states(
         const std::vector<int>& state_ids,
-        std::vector<Eigen::Vector3i> *states);
+        std::vector<Eigen::Vector3i>* states);
 
     // Converts discretized state to continuous state
 
@@ -117,13 +106,15 @@ class Statespace {
     Eigen::Vector3i continuous_state_to_discrete(
         const aikido::statespace::SE2::State& state);
 
-    // Returns true if state exists and false otherwise
+    // Returns true and fills state_id with corresponding ID 
+    // if state exists and false otherwise
 
     // \param pose The discrete state
     // \param id The state id
     bool get_state_id(const Eigen::Vector3i& state, int* state_id);
 
-    // Return true if state with given state ID exists and false otherwise
+    // Return true and fills state with corresponding state
+    // if state with given ID exists and false otherwise
 
     // \param state_id The ID of the state
     // \param state The discrete state
@@ -139,6 +130,10 @@ class Statespace {
     // Returns the number of currently existng states
     int get_num_states() const;
 
+    // Returns distance between two SE2 states
+
+    // \param state_1, state_2 The two states to
+    // calculate the distance between
     double get_distance(
         const aikido::statespace::SE2::State* state_1,
         const aikido::statespace::SE2::State* state_2) const;
