@@ -1,6 +1,7 @@
 #ifndef OBJECT_ORIENTED_ACTION_SPACE
 #define OBJECT_ORIENTED_ACTION_SPACE
 
+#include <Eigen/Dense>
 #include <vector>
 
 namespace libcozmo {
@@ -33,9 +34,55 @@ struct Object_Oriented_Action
     Action action;
 };
 
+// An object oriented action relative to some object, c
+class ObjectOrientedAction {
+    public:
+        // speed : in millimeters / s
+        // duration : in seconds
+        // obj_pos : x, y coordinate of c in the world, in millimeters
+        // offset : to allow another object, c2, to get near c without touching
+        //          x, y represents horizontal and vertical offsets from center of c,
+        //          in millimeters
+        // theta : the orientation of c, in radians
+        ObjectOrientedAction (
+            const double& speed,
+            const double& duration,
+            const Eigen::Vector2d& obj_pos,
+            const Eigen::Vector2d& offset,
+            const double& theta) : \
+            speed(speed),
+            duration(duration),
+            obj_pos(obj_pos),
+            offset(offset),
+            theta(theta) {}
+        ~ObjectOrientedAction() {}
+
+        // Calculates and returns similarity with another action
+        // other_action : the other action to compare to
+        double action_similarity(ObjectOrientedAction& other_action) const;
+
+        const double speed;
+        const double duration;
+        const Eigen::Vector2d obj_pos;
+        const Eigen::Vector2d offset;
+        const double theta;
+};
+
 class ObjectOrientedActionSpace {
     public:
-        ObjectOrientedActionSpace();
+        ObjectOrientedActionSpace(
+            const double& min_speed,
+            const double& max_speed,
+            const int& num_speed,
+            const double& min_duration,
+            const double& max_duration,
+            const int& num_duration) 
+        {
+            speeds = utils::linspace(min_speed, max_speed, num_speed);
+            durations = utils::linspace(min_duration, max_duration, num_duration);
+        }
+        
+        // Generate_actions(vector2d obj_pos, vector2d offset, double theta)
 
         void generate_actions(Pose pose, int num_offsets,
                               double lin_min, double lin_max, double lin_samples,
@@ -49,6 +96,9 @@ class ObjectOrientedActionSpace {
         void view_action_space();
 
     private:
+        std::vector<double> speeds;
+        std::vector<double> durations;
+
         std::vector<Object_Oriented_Action> actions;
 
         Point cube_offset(double offset, double angle);

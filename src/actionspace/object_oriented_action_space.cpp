@@ -21,8 +21,8 @@ void ObjectOrientedActionSpace::generate_actions(Pose pose, int num_offsets,
     vector<Pose> locations = generate_offsets(pose, num_offsets, h_offset, v_offset);
 
     vector<Action> gen_actions;
-    vector<double> lin_choices = libcozmo::utils::linspace(lin_min, lin_max, lin_samples);
-    vector<double> dur_choices = libcozmo::utils::linspace(dur_min, dur_max, dur_samples);
+    vector<double> lin_choices = utils::linspace(lin_min, lin_max, lin_samples);
+    vector<double> dur_choices = utils::linspace(dur_min, dur_max, dur_samples);
 
     for (const auto& dur_choice : dur_choices) {
         for (const auto& lin_choice : lin_choices) {
@@ -115,7 +115,7 @@ vector<Pose> ObjectOrientedActionSpace::generate_offsets(Pose pose, int num_offs
     if (num_offsets == 1) { // if only one offset, just use center of side
         choices.push_back(0);
     } else {
-        choices = libcozmo::utils::linspace(-h_offset, h_offset, num_offsets);
+        choices = utils::linspace(-h_offset, h_offset, num_offsets);
     }
     vector<double> cube_sides = find_sides(pose.angle_z); // find the angles of the 4 sides of the cube
     vector<Pose> locations;
