@@ -106,15 +106,15 @@ class Statespace {
     Eigen::Vector3i continuous_state_to_discrete(
         const aikido::statespace::SE2::State& state);
 
-    // Returns true and fills state_id with corresponding ID 
-    // if state exists and false otherwise
+    // Returns true and fills state_id with corresponding ID if state exists 
+    // and false otherwise
 
     // \param pose The discrete state
     // \param id The state id
     bool get_state_id(const Eigen::Vector3i& state, int* state_id);
 
-    // Return true and fills state with corresponding state
-    // if state with given ID exists and false otherwise
+    // Returns true and fills state with corresponding state if state with 
+    // given ID exists and false otherwise
 
     // \param state_id The ID of the state
     // \param state The discrete state
@@ -127,7 +127,7 @@ class Statespace {
     // \param state The discretized state
     bool is_valid_state(const Eigen::Vector3i& state) const;
 
-    // Returns the number of currently existng states
+    // Returns the number of currently existing states
     int get_num_states() const;
 
     // Returns distance between two SE2 states
