@@ -72,6 +72,10 @@ TEST_F(GenericActionFixture, ActionGenerationTest) {
     EXPECT_NEAR(-1, action->m_direction[1], 0.00001);
 }
 
+TEST_F(GenericActionFixture, OORExceptionTest) {
+    EXPECT_THROW(m_actionspace.action_similarity(0, 61), std::out_of_range); 
+}
+
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
