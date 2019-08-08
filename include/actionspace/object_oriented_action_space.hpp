@@ -1,5 +1,5 @@
-#ifndef COZMO_ACTIONS_HPP
-#define COZMO_ACTIONS_HPP
+#ifndef OBJECT_ORIENTED_ACTION_SPACE
+#define OBJECT_ORIENTED_ACTION_SPACE
 
 #include <vector>
 
@@ -31,24 +31,6 @@ struct Object_Oriented_Action
 {
     Pose pose;
     Action action;
-};
-
-class GenericActionSpace {
-    public:
-        GenericActionSpace();
-
-        void generate_actions(double lin_min, double lin_max, double lin_samples,
-                              double ang_min, double ang_max, double ang_samples,
-                              double dur_min, double dur_max, double dur_samples);
-
-        Action get_action(int action_id);
-
-        std::vector<Action> get_action_space();
-
-        void view_action_space();
-    private:
-        std::vector<Action> actions;
-
 };
 
 class ObjectOrientedActionSpace {
@@ -96,16 +78,6 @@ class ObjectOrientedActionSpace {
         */
         std::vector<Pose> generate_offsets(Pose pose, int num_offsets, double h_offset, double v_offset);
 
-        /** Helper function to find the value closest to zero in a list,
-            used in find_sides to identify which angle of the cube
-            is the front
-
-            Note: in case the corner of the cube is perfectly in align with cozmo
-            and there is no closest side, we choose the right side to be the front
-
-            returns the index of the value closest to zero
-        */
-        int nearest_zero(std::vector<double> values);
 };
 
 } // namespace actionspace
