@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2019, Vinitha Ranganeni, Brian Lee
+// Copyright (c) 2019, Brian Lee, Vinitha Ranganeni
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,50 +28,50 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include <gtest/gtest.h>
-#include "statespace/statespace.hpp"
+#include "statespace/SE2.hpp"
 
-class myTestFixture1: public ::testing::Test {
+class StatespaceTest: public ::testing::Test {
  public:
-    myTestFixture1() : \
-    myStateSpace(0.1, 4) {}
+    StatespaceTest() : statespace(0.1, 4) {}
 
     void SetUp() {
-        myStateSpace.create_new_state(Eigen::Vector3i(3, 2, 1));
-        myStateSpace.create_new_state(Eigen::Vector3i(1, 3, 3));
+        statespace.create_new_state(Eigen::Vector3i(3, 2, 1));
+        statespace.create_new_state(Eigen::Vector3i(1, 3, 3));
     }
 
     void TearDown() {}
 
-    ~myTestFixture1()  {}
-    libcozmo::statespace::Statespace myStateSpace;
+    ~StatespaceTest()  {}
+
+    libcozmo::statespace::Statespace statespace;
 };
 
 // Check state added correctly
-TEST_F(myTestFixture1, UnitTest1) {
+TEST_F(StatespaceTest, UnitTest1) {
     Eigen::Vector3i expected(3, 2, 1);
     Eigen::Vector3i state;
-    myStateSpace.get_coord_from_state_id(0, &state);
+    statespace.get_coord_from_state_id(0, &state);
     EXPECT_EQ(expected[0], state[0]);
     EXPECT_EQ(expected[1], state[1]);
     EXPECT_EQ(expected[2], state[2]);
     expected << 1, 3, 3;
-    myStateSpace.get_coord_from_state_id(1, &state);
+    statespace.get_coord_from_state_id(1, &state);
     EXPECT_EQ(expected[0], state[0]);
     EXPECT_EQ(expected[1], state[1]);
     EXPECT_EQ(expected[2], state[2]);
 }
 
 // Check distnguishing valid_state
-TEST_F(myTestFixture1, UnitTest2) {
-    EXPECT_EQ(true, myStateSpace.is_valid_state(Eigen::Vector3i(15, 2, 1)));
-    EXPECT_EQ(false, myStateSpace.is_valid_state(Eigen::Vector3i(-1, -2, -5)));
-    EXPECT_EQ(false, myStateSpace.is_valid_state(Eigen::Vector3i(0, 150, -1)));
-    EXPECT_EQ(true, myStateSpace.is_valid_state(Eigen::Vector3i(1, 2, 1)));
-    EXPECT_EQ(true, myStateSpace.is_valid_state(Eigen::Vector3i(9, 8, 2)));
+TEST_F(StatespaceTest, UnitTest2) {
+    EXPECT_EQ(true, statespace.is_valid_state(Eigen::Vector3i(15, 2, 1)));
+    EXPECT_EQ(false, statespace.is_valid_state(Eigen::Vector3i(-1, -2, -5)));
+    EXPECT_EQ(false, statespace.is_valid_state(Eigen::Vector3i(0, 150, -1)));
+    EXPECT_EQ(true, statespace.is_valid_state(Eigen::Vector3i(1, 2, 1)));
+    EXPECT_EQ(true, statespace.is_valid_state(Eigen::Vector3i(9, 8, 2)));
 }
 
 // Check continuous --> discrete pose (SE2 input)
-TEST_F(myTestFixture1, UnitTest3) {
+TEST_F(StatespaceTest, UnitTest3) {
     aikido::statespace::SE2::State continuous_state;
     Eigen::Isometry2d t = Eigen::Isometry2d::Identity();
     const Eigen::Rotation2D<double> rot(M_PI);
@@ -80,8 +80,8 @@ TEST_F(myTestFixture1, UnitTest3) {
     trans << 5.4, 2.0;
     t.translation() = trans;
     continuous_state.setIsometry(t);
-    Eigen::Vector3i pose = myStateSpace.continuous_state_to_discrete(
-        continuous_state);
+    Eigen::Vector3i pose = 
+        statespace.continuous_state_to_discrete(continuous_state);
     EXPECT_EQ(54, pose.x());
     EXPECT_EQ(20, pose.y());
     double angle = 2;
@@ -89,7 +89,7 @@ TEST_F(myTestFixture1, UnitTest3) {
 }
 
 // Check path generation
-TEST_F(myTestFixture1, UnitTest4) {
+TEST_F(StatespaceTest, UnitTest4) {
     int myints[] = {0, 1};
     std::vector<int> state_ids;
     for (int i = 0; i < 2; i++) {
@@ -99,7 +99,7 @@ TEST_F(myTestFixture1, UnitTest4) {
     std::vector<Eigen::Vector3i> expected;
     expected.push_back(Eigen::Vector3i(3, 2, 1));
     expected.push_back(Eigen::Vector3i(1, 3, 3));
-    myStateSpace.get_path_states(state_ids, &path_coordinates);
+    statespace.get_path_states(state_ids, &path_coordinates);
     EXPECT_EQ(expected[0][0], path_coordinates[0][0]);
     EXPECT_EQ(expected[0][1], path_coordinates[0][1]);
     EXPECT_EQ(expected[0][2], path_coordinates[0][2]);
@@ -109,9 +109,9 @@ TEST_F(myTestFixture1, UnitTest4) {
 }
 
 // Check create_state and get_or_create_state
-TEST_F(myTestFixture1, UnitTest5) {
-    myStateSpace.get_or_create_new_state(Eigen::Vector3i(1, 3, 3));
-    EXPECT_EQ(2, myStateSpace.get_num_states());
+TEST_F(StatespaceTest, UnitTest5) {
+    statespace.get_or_create_new_state(Eigen::Vector3i(1, 3, 3));
+    EXPECT_EQ(2, statespace.get_num_states());
 }
 
 int main(int argc, char **argv) {

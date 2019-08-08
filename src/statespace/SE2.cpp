@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2019, Vinitha Ranganeni, Brian Lee
+// Copyright (c) 2019, Brian Lee, Vinitha Ranganeni
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -27,7 +27,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "statespace/statespace.hpp"
+#include "statespace/SE2.hpp"
 #include <ros/ros.h>
 #include <assert.h>
 #include <cmath>
@@ -174,8 +174,7 @@ int Statespace::get_num_states() const {
 double Statespace::get_distance(
     const aikido::statespace::SE2::State* state_1,
     const aikido::statespace::SE2::State* state_2) const {
-    // return m_distance_metric.distance(state_1, state_2);
-    return 0.0;
+    return m_distance_metric.distance(state_1, state_2);
 }
 
 }  // namespace statespace

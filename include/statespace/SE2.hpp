@@ -48,8 +48,8 @@ class Statespace {
     // Constructor
 
     // \param resolution_m Resolution of discretized state (m)
-    // \param num_theta_vals Number of discretized theta values,
-    // must be a power of 2
+    // \param num_theta_vals Number of discretized theta values; Must be a 
+    // power of 2
     Statespace(
         const double& resolution_m,
         const int& num_theta_vals) : \
@@ -132,8 +132,7 @@ class Statespace {
 
     // Returns distance between two SE2 states
 
-    // \param state_1, state_2 The two states to
-    // calculate the distance between
+    // \param state_1, state_2 The states to calculate the SE2 distance between
     double get_distance(
         const aikido::statespace::SE2::State* state_1,
         const aikido::statespace::SE2::State* state_2) const;
