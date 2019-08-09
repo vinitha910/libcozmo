@@ -36,21 +36,51 @@
 #include <utility>
 #include <unordered_map>
 #include "aikido/distance/SE2.hpp"
-#include "statehasher.hpp"
+#include "StateSpace.hpp"
 
 namespace libcozmo {
 namespace statespace {
 
 // This class implements a discretized two-dimensional Special Euclidean
 // group SE(2),i.e. the space of planar rigid body transformations.
-class Statespace {
+class SE2 : public virtual StateSpace {
  public:
+    class State : public StateSpace::State 
+    {
+     public:
+        State() : x(0), y(0), theta(0) {};
+
+        ~State() = default;
+
+        explicit State(const int& x, const int& y, const int& theta) : \
+            x(x), y(y), theta(theta) {};
+        
+        bool operator== (const State& state) const {
+            return x == state.x && y == state.y && theta == state.theta;
+        }
+
+        friend std::size_t hash_value(const State& state) {
+            std::size_t seed = 0;
+            boost::hash_combine(seed, boost::hash_value(state.x));
+            boost::hash_combine(seed, boost::hash_value(state.y));
+            boost::hash_combine(seed, boost::hash_value(state.theta));
+            return seed;
+        }
+
+     private:
+        int x;
+        int y;
+        int theta;
+    
+        friend class SE2;
+    };
+
     // Constructor
 
     // \param resolution_m Resolution of discretized state (m)
     // \param num_theta_vals Number of discretized theta values; Must be a 
     // power of 2
-    Statespace(
+    SE2(
         const double& resolution_m,
         const int& num_theta_vals) : \
         m_resolution(resolution_m),
@@ -58,74 +88,55 @@ class Statespace {
         m_statespace(std::make_shared<aikido::statespace::SE2>()),
         m_distance_metric(aikido::distance::SE2(m_statespace)) {}
 
-    ~Statespace() {}
-
-    // Creates a new state given discretized coordinates
-    // Returns the ID of the created state
-
-    // \param state The discrete state
-    int create_new_state(const Eigen::Vector3i& state);
-
-    // Creates a new discrete state given a SE2 transformation
-    // Returns the ID of the created state
-
-    // \param state The SE2 state
-    int create_new_state(
-        const aikido::statespace::SE2::State& state);
+    ~SE2() {}
 
     // Returns ID of the state with given pose if it exists,
     // Otherwise creates a new state and returns its ID
 
     // \param pose The discrete state
-    int get_or_create_new_state(const Eigen::Vector3i& pose);
+    int get_or_create_state(const StateSpace::State* _state) override;
 
     // Returns ID of the state with given transformation if it exists,
     // Otherwise creates a new state and returns its ID
 
     // \param state The SE2 state
-    int get_or_create_new_state(
-        const aikido::statespace::SE2::State& state);
-
-    // Fills the states vector with states corresponding to given set of IDs
-
-    // \param state_ids The vector of state ids
-    // \param states The vector of discretized poses
-    void get_path_states(
-        const std::vector<int>& state_ids,
-        std::vector<Eigen::Vector3i>* states);
+    int get_or_create_state(
+        const aikido::statespace::SE2::State* state,
+        StateSpace::State* discrete_state);
 
     // Converts discretized state to continuous state
 
     // \param state The discrete state
-    aikido::statespace::SE2::State discrete_state_to_continuous(
-        const Eigen::Vector3i state) const;
+    void discrete_state_to_continuous(
+        const StateSpace::State* _state,
+        aikido::statespace::SE2::State* state_continuous) const;
 
     // Converts continuous state to discretized state
 
     // \param state The SE2 state
-    Eigen::Vector3i continuous_state_to_discrete(
-        const aikido::statespace::SE2::State& state);
+    void continuous_state_to_discrete(
+        const aikido::statespace::SE2::State* state, 
+        StateSpace::State* discrete_state);
 
     // Returns true and fills state_id with corresponding ID if state exists 
     // and false otherwise
 
     // \param pose The discrete state
     // \param id The state id
-    bool get_state_id(const Eigen::Vector3i& state, int* state_id);
+    bool get_state_id(
+        const StateSpace::State* _state, int* state_id) const override;
 
     // Returns true and fills state with corresponding state if state with 
     // given ID exists and false otherwise
 
     // \param state_id The ID of the state
     // \param state The discrete state
-    bool get_coord_from_state_id(
-        const int& state_id,
-        Eigen::Vector3i* state) const;
+    bool get_state(const int& state_id, StateSpace::State* state) const override;
 
     // Return true if the state is valid and false otherwise
 
     // \param state The discretized state
-    bool is_valid_state(const Eigen::Vector3i& state) const;
+    bool is_valid_state(const StateSpace::State* _state) const override;
 
     // Returns the number of currently existing states
     int get_num_states() const;
@@ -138,9 +149,17 @@ class Statespace {
         const aikido::statespace::SE2::State* state_2) const;
 
  private:
-     // Get normalized angle (radians) in [0, 2pi]
+    /// Creates a new state and adds it to the statespace
+    ///
+    /// \return pointer to the state
+    StateSpace::State* create_state() override;
 
-     // \param theta_rad Angle (radians)
+    void copy_state(
+        const StateSpace::State* _source, StateSpace::State* _destination) const;
+
+    // Get normalized angle (radians) in [0, 2pi]
+
+    // \param theta_rad Angle (radians)
     double normalize_angle_rad(const double& theta_rad) const;
 
     // Converts discrete angle to continuous (radians)
@@ -166,10 +185,10 @@ class Statespace {
         const Eigen::Vector2d& position) const;
 
     // Maps discrete state to state ID
-    std::unordered_map<Eigen::Vector3i, int, StateHasher> m_state_to_id_map;
+    std::unordered_map<State, int, boost::hash<State>> m_state_to_id_map;
 
     // Vector of discrete states; index of state is the state ID.
-    std::vector<Eigen::Vector3i> m_state_map;
+    std::vector<State*> m_state_map;
 
     // Number of discretized theta values
     const int m_num_theta_vals;

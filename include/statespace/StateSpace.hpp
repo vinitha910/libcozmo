@@ -27,12 +27,45 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
-template <class State>
+#ifndef LIBCOZMO_STATESPACE_STATESPACE_HPP_
+#define LIBCOZMO_STATESPACE_STATESPACE_HPP_
+
+namespace libcozmo {
+namespace statespace {
+
+
 class StateSpace
 {
  public:
 
- 	// Create 
- 	virtual int create_new_state(const State& state) = 0;
+ 	// Base class for all states
+ 	class State;
 
-}
+ private:
+ 	virtual State* create_state() = 0;
+
+ 	virtual int get_or_create_state(const State* _state) = 0;
+ 	
+ 	virtual bool get_state_id(
+        const StateSpace::State* _state, int* state_id) const = 0;
+
+ 	virtual bool get_state(
+ 		const int& state_id, StateSpace::State* state) const = 0;
+
+ 	virtual bool is_valid_state(const StateSpace::State* _state) const = 0;
+};
+
+
+class StateSpace::State
+{
+ protected:
+  	// This is a base class that should only only be used in derived classes.
+  	State() = default;
+
+  	~State() = default;
+};
+
+}  // namespace statespace
+}  // namespace libcozmo
+
+#endif

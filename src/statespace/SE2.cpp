@@ -35,47 +35,42 @@
 namespace libcozmo {
 namespace statespace {
 
-int Statespace::create_new_state(
-    const Eigen::Vector3i& state) {
-    m_state_map.push_back(state);
-    int state_id = m_state_to_id_map.size() - 1;
-    m_state_to_id_map[state] = state_id;
-    return state_id;
+StateSpace::State* SE2::create_state() {
+    m_state_map.push_back(new State());
+    const auto state = m_state_map.back();
+    m_state_to_id_map[*state] = m_state_map.size() - 1;
+    return m_state_map.back();
 }
 
-int Statespace::create_new_state(
-    const aikido::statespace::SE2::State& state_continuous) {
-    return create_new_state(continuous_state_to_discrete(state_continuous));
+void SE2::copy_state(
+    const StateSpace::State* _source, StateSpace::State* _destination) const {
+    const State* source = static_cast<const State*>(_source);
+    State* destination = static_cast<State*>(_destination);
+    *destination = State(source->x, source->y, source->theta);
 }
 
-int Statespace::get_or_create_new_state(
-    const Eigen::Vector3i& pose) {
-    const auto state_id = m_state_to_id_map.find(pose);
+int SE2::get_or_create_state(const StateSpace::State* _state) {
+    const auto state = static_cast<const State*>(_state);
+    const auto state_id = m_state_to_id_map.find(*state);
     if (state_id != m_state_to_id_map.end()) {
         return state_id->second;
     } else {
-        return create_new_state(pose);
+        auto new_state = create_state();
+        copy_state(state, new_state);
+        return m_state_map.size() - 1;
     }
 }
 
-int Statespace::get_or_create_new_state(
-    const aikido::statespace::SE2::State& pose) {
-    return get_or_create_new_state(continuous_state_to_discrete(pose));
+int SE2::get_or_create_state(
+    const aikido::statespace::SE2::State* state,
+    StateSpace::State* discrete_state) {
+    continuous_state_to_discrete(state, discrete_state);
+    return get_or_create_state(discrete_state);
 }
 
-void Statespace::get_path_states(
-    const std::vector<int>& state_ids,
-    std::vector<Eigen::Vector3i>* states) {
-    for (int i = 0; i < state_ids.size(); i++) {
-        Eigen::Vector3i pose;
-        if (get_coord_from_state_id(state_ids[i], &pose)) {
-            states->push_back(pose);
-        }  
-    }
-}
-
-bool Statespace::get_state_id(const Eigen::Vector3i& state, int* state_id) {
-    const auto state_id_iter = m_state_to_id_map.find(state);
+bool SE2::get_state_id(const StateSpace::State* _state, int* state_id) const {
+    const auto state = static_cast<const State*>(_state);
+    const auto state_id_iter = m_state_to_id_map.find(*state);
     if (state_id_iter != m_state_to_id_map.end()) {
         *state_id = state_id_iter->second;
         return true;
@@ -83,22 +78,20 @@ bool Statespace::get_state_id(const Eigen::Vector3i& state, int* state_id) {
     return false;
 }
 
-bool Statespace::get_coord_from_state_id(
-    const int& state_id,
-    Eigen::Vector3i* state) const {
-    *state = m_state_map[state_id];
-    return (is_valid_state(*state));
+bool SE2::get_state(const int& state_id, StateSpace::State* state) const {
+    state = m_state_map[state_id];
+    return (is_valid_state(state));
 }
 
-bool Statespace::is_valid_state(const Eigen::Vector3i& state) const {
-    const int theta = state[2];
-    if (!(theta >= 0 && theta < m_num_theta_vals)) {
+bool SE2::is_valid_state(const StateSpace::State* _state) const {
+    const auto state = static_cast<const State*>(_state);
+    if (!(state->theta >= 0 && state->theta < m_num_theta_vals)) {
         return false;
     }
     return true;
 }
 
-double Statespace::normalize_angle_rad(const double& theta_rad) const {
+double SE2::normalize_angle_rad(const double& theta_rad) const {
     assert(m_bins % 2 == 0);
     double normalized_theta_rad = theta_rad;
     if (abs(theta_rad) > 2.0 * M_PI) {
@@ -111,11 +104,11 @@ double Statespace::normalize_angle_rad(const double& theta_rad) const {
     return normalized_theta_rad;
 }
 
-double Statespace::discrete_angle_to_continuous(const int& theta) const {
+double SE2::discrete_angle_to_continuous(const int& theta) const {
     return theta * (2 * M_PI /m_num_theta_vals);
 }
 
-int Statespace::continuous_angle_to_discrete(const double& theta_rad) const {
+int SE2::continuous_angle_to_discrete(const double& theta_rad) const {
     const double bin_size = 2.0 * M_PI / static_cast<double>(m_num_theta_vals);
     const int theta =
         normalize_angle_rad(theta_rad + bin_size / 2.0) / (2.0 * M_PI)
@@ -123,14 +116,14 @@ int Statespace::continuous_angle_to_discrete(const double& theta_rad) const {
     return static_cast<int>(theta);
 }
 
-Eigen::Vector2d Statespace::discrete_position_to_continuous(
+Eigen::Vector2d SE2::discrete_position_to_continuous(
     const Eigen::Vector2i& position) const {
     const double x_m = position.x() * m_resolution + (m_resolution / 2.0);
     const double y_m = position.y() * m_resolution + (m_resolution / 2.0);
     return Eigen::Vector2d(x_m, y_m);
 }
 
-Eigen::Vector2i Statespace::continuous_position_to_discrete(
+Eigen::Vector2i SE2::continuous_position_to_discrete(
     const Eigen::Vector2d& position) const {
         
     const int x = static_cast<int>(floor(position.x() / m_resolution));
@@ -138,40 +131,37 @@ Eigen::Vector2i Statespace::continuous_position_to_discrete(
     return Eigen::Vector2i(x, y);
 }
 
-aikido::statespace::SE2::State Statespace::discrete_state_to_continuous(
-    const Eigen::Vector3i state) const {
-    const Eigen::Vector2d position =
-        discrete_position_to_continuous(state.head<2>());
-    const double theta_discrete =
-        discrete_angle_to_continuous(state[2]);
-    aikido::statespace::SE2::State discretized_state;
-    Eigen::Isometry2d transform = Eigen::Isometry2d::Identity();
-    const Eigen::Rotation2D<double> rot(theta_discrete);
-    transform.linear() = rot.toRotationMatrix();
-    transform.translation() = position;
-    discretized_state.setIsometry(transform);
-    return discretized_state;
+void SE2::discrete_state_to_continuous(
+    const StateSpace::State* _state,
+    aikido::statespace::SE2::State* state_continuous) const {
+    const auto state = static_cast<const State*>(_state);
+    
+    Eigen::VectorXd state_log;
+    state_log.head<2>() =
+        discrete_position_to_continuous(Eigen::Vector2i(state->x, state->y));
+    state_log[2] =
+        discrete_angle_to_continuous(state->theta);
+    m_statespace->expMap(state_log, state_continuous);
 }
 
-Eigen::Vector3i Statespace::continuous_state_to_discrete(
-    const aikido::statespace::SE2::State& state) {
-    const auto transformation = state.getIsometry();
-    Eigen::Rotation2D<double> rotation;
-    rotation.fromRotationMatrix(transformation.linear());
-    const double theta_rad = rotation.angle();
+void SE2::continuous_state_to_discrete(
+    const aikido::statespace::SE2::State* state, 
+    StateSpace::State* discrete_state) {
+    Eigen::VectorXd log_state;
+    m_statespace->logMap(state, log_state);
+
     const Eigen::Vector2i position = 
-        continuous_position_to_discrete(transformation.translation());
-    const int x = position.x();
-    const int y = position.y();
-    const int theta = continuous_angle_to_discrete(theta_rad);
-    return Eigen::Vector3i(x, y, theta);
+        continuous_position_to_discrete(log_state.head<2>());
+    const int theta = continuous_angle_to_discrete(log_state[2]);
+    
+    *discrete_state = State(position.x(), position.y(), theta);
 }
 
-int Statespace::get_num_states() const {
+int SE2::get_num_states() const {
     return m_state_map.size();
 }
 
-double Statespace::get_distance(
+double SE2::get_distance(
     const aikido::statespace::SE2::State* state_1,
     const aikido::statespace::SE2::State* state_2) const {
     return m_distance_metric.distance(state_1, state_2);
