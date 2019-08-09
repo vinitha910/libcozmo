@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2019,  Brian Lee, Vinitha Ranganeni
+// Copyright (c) 2019, Brian Lee, Vinitha Ranganeni
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -27,53 +27,32 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <action_space/generic_action_space.hpp>
-#include <exception>
-#include <iostream>
-
+#include <Eigen/Dense>
+#include <geometry_msgs/Pose.h>
+#include "ros/ros.h"
+#include "aikido/distance/SE2.hpp"
 
 namespace libcozmo {
-namespace actionspace {
+namespace actionlistener {
+    class ActionListener {
+     public:
+        CozmoListener() {}
 
-double GenericActionSpace::action_similarity(
-    const int& action_id1,
-    const int& action_id2) const {
+        // Broadcasts SE2 state of given pose
+        libcomo::ActionMsg getAction() const {
+            
+            libcozmo::ActionMsgConstPtr action_msg;
+            do {
+                action_msg =
+                    ros::topic::waitForMessage<g>("Action",
+                        ros::Duration(5));
+            } while (action_msg == NULL);
+            
+            return action_msg
+        }
+     private:
+        // const ros::NodeHandle cozmo_handle;
+    };
 
-    if (!(is_valid_action_id(action_id1) &&
-        is_valid_action_id(action_id2))) {
-        throw std::out_of_range("Action ID invalid");
-    }
-    return sqrt(
-        pow((m_actions[action_id1]->m_speed -
-            m_actions[action_id2]->m_speed), 2) +
-        pow((m_actions[action_id1]->m_duration -
-            m_actions[action_id2]->m_duration), 2) +
-        pow((m_actions[action_id1]->m_direction.x() -
-            m_actions[action_id2]->m_direction.x()), 2) +
-        pow((m_actions[action_id1]->m_direction.y() -
-            m_actions[action_id2]->m_direction.y()), 2));
-}
-
-GenericAction* GenericActionSpace::get_action(const int& action_id) const {
-    if (!is_valid_action_id(action_id)) {
-        throw std::out_of_range("Action ID invalid");
-    }
-    return m_actions[action_id];
-}
-
-bool GenericActionSpace::is_valid_action_id(const int& action_id) const {
-    return ((action_id < m_actions.size() && action_id >= 0));
-}
-
-void GenericActionSpace::publish_action(const int& action_id) const {
-    libcozmo::ActionMsg msg;
-    auto action = get_action(action_id);
-    msg.speed = action->m_speed;
-    Eigen::Vector2d direction = action->m_direction;
-    msg.heading = atan(direction.y() / direction.x());
-    msg.duration = action->m_duration;
-    action_publisher.publish(msg);
-    ros::spinOnce();
-}
-}  // namespace actionspace
+}  // namespace cozmolistener
 }  // namespace libcozmo
