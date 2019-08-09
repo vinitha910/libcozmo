@@ -27,38 +27,41 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_STATESPACE_STATESPACE_H_
-#define INCLUDE_STATESPACE_STATESPACE_H_
+#ifndef LIBCOZMO_STATESPACE_SE2_HPP_
+#define LIBCOZMO_STATESPACE_SE2_HPP_
 
+#include "StateSpace.hpp"
 #include <boost/functional/hash.hpp>
 #include <Eigen/Dense>
 #include <vector>
 #include <utility>
 #include <unordered_map>
-#include "aikido/distance/SE2.hpp"
-#include "StateSpace.hpp"
 
 namespace libcozmo {
 namespace statespace {
 
 // This class implements a discretized two-dimensional Special Euclidean
-// group SE(2),i.e. the space of planar rigid body transformations.
+// group SE(2), i.e. the space of planar rigid body transformations.
 class SE2 : public virtual StateSpace {
  public:
     class State : public StateSpace::State 
     {
      public:
+        /// Constructs identity state
         State() : x(0), y(0), theta(0) {};
 
         ~State() = default;
 
+        /// Constructs state with given parameters
         explicit State(const int& x, const int& y, const int& theta) : \
             x(x), y(y), theta(theta) {};
         
+        /// Equality operator
         bool operator== (const State& state) const {
             return x == state.x && y == state.y && theta == state.theta;
         }
 
+        /// Custom state hash
         friend std::size_t hash_value(const State& state) {
             std::size_t seed = 0;
             boost::hash_combine(seed, boost::hash_value(state.x));
@@ -75,11 +78,11 @@ class SE2 : public virtual StateSpace {
         friend class SE2;
     };
 
-    // Constructor
-
-    // \param resolution_m Resolution of discretized state (m)
-    // \param num_theta_vals Number of discretized theta values; Must be a 
-    // power of 2
+    /// Constructs a discretized SE2 state space 
+    ///
+    /// \param resolution_m Resolution of the environment (m)
+    /// \param num_theta_vals Number of discretized theta values; Must be a 
+    /// power of 2
     SE2(
         const double& resolution_m,
         const int& num_theta_vals) : \
@@ -88,65 +91,54 @@ class SE2 : public virtual StateSpace {
         m_statespace(std::make_shared<aikido::statespace::SE2>()),
         m_distance_metric(aikido::distance::SE2(m_statespace)) {}
 
-    ~SE2() {}
+    ~SE2();
 
-    // Returns ID of the state with given pose if it exists,
-    // Otherwise creates a new state and returns its ID
-
-    // \param pose The discrete state
+    /// Documentation inherited
     int get_or_create_state(const StateSpace::State* _state) override;
 
-    // Returns ID of the state with given transformation if it exists,
-    // Otherwise creates a new state and returns its ID
-
-    // \param state The SE2 state
+    /// Documentation inherited
     int get_or_create_state(
-        const aikido::statespace::SE2::State* state,
-        StateSpace::State* discrete_state);
-
-    // Converts discretized state to continuous state
-
-    // \param state The discrete state
+        const aikido::statespace::StateSpace::State* _state) override;
+    
+    /// Documentation inherited    
     void discrete_state_to_continuous(
         const StateSpace::State* _state,
-        aikido::statespace::SE2::State* state_continuous) const;
+        aikido::statespace::StateSpace::State* _continuous_state) const override;
 
-    // Converts continuous state to discretized state
-
-    // \param state The SE2 state
+    /// Documentation inherited
     void continuous_state_to_discrete(
-        const aikido::statespace::SE2::State* state, 
-        StateSpace::State* discrete_state);
+        const aikido::statespace::StateSpace::State* _state, 
+        StateSpace::State* _discrete_state) const override;
 
-    // Returns true and fills state_id with corresponding ID if state exists 
-    // and false otherwise
-
-    // \param pose The discrete state
-    // \param id The state id
+    /// Documentation inherited
     bool get_state_id(
-        const StateSpace::State* _state, int* state_id) const override;
+        const StateSpace::State* _state, int* _state_id) const override;
 
-    // Returns true and fills state with corresponding state if state with 
-    // given ID exists and false otherwise
+    /// Documentation inherited
+    bool get_state(
+        const int& _state_id, StateSpace::State* _state) const override;
 
-    // \param state_id The ID of the state
-    // \param state The discrete state
-    bool get_state(const int& state_id, StateSpace::State* state) const override;
-
-    // Return true if the state is valid and false otherwise
-
-    // \param state The discretized state
+    /// Documentation inherited
+    /// State is valid if theta is in [0, num_theta_vals]
     bool is_valid_state(const StateSpace::State* _state) const override;
 
-    // Returns the number of currently existing states
-    int get_num_states() const;
+    /// Documentation inherited
+    int statespace_size() const override;
 
-    // Returns distance between two SE2 states
-
-    // \param state_1, state_2 The states to calculate the SE2 distance between
+    /// Documentation inherited
     double get_distance(
-        const aikido::statespace::SE2::State* state_1,
-        const aikido::statespace::SE2::State* state_2) const;
+        const StateSpace::State* _state_1,
+        const StateSpace::State* _state_2) const override;
+    
+    /// Documentation inherited
+    double get_distance(
+        const aikido::statespace::StateSpace::State* _state_1,
+        const aikido::statespace::StateSpace::State* _state_2) const override;
+    
+    /// Documentation inherited
+    void copy_state(
+        const StateSpace::State* _source, 
+        StateSpace::State* _destination) const override;
 
  private:
     /// Creates a new state and adds it to the statespace
@@ -154,46 +146,49 @@ class SE2 : public virtual StateSpace {
     /// \return pointer to the state
     StateSpace::State* create_state() override;
 
-    void copy_state(
-        const StateSpace::State* _source, StateSpace::State* _destination) const;
-
-    // Get normalized angle (radians) in [0, 2pi]
-
-    // \param theta_rad Angle (radians)
+    /// Gets normalized angle (radians) in [0, 2pi]
+    ///
+    /// \param theta_rad Angle (radians)
+    /// \return normalized angle
     double normalize_angle_rad(const double& theta_rad) const;
 
-    // Converts discrete angle to continuous (radians)
-
-    // \param theta Discrete angle
+    /// Converts discrete angle to continuous (radians)
+    ///
+    /// \param theta Discrete angle in [0, num_theta_vals]
+    /// \return Continuous angle in [0, 2pi]
     double discrete_angle_to_continuous(const int& theta) const;
 
-    // Converts discrete angle to continuous (radians)
-
-    // \param theta Continuous angle
+    /// Converts discrete angle to continuous (radians)
+    ///
+    /// \param theta Continuous angle (radians)
+    /// \return Discrete angle in [0, num_theta_vals]
     int continuous_angle_to_discrete(const double& theta) const;
 
-    // Converts discrete position to continuous
-
-    // \param position The discrete coordinates
+    /// Converts discrete position to continuous (x_m, y_m)
+    ///
+    /// \param position Discrete coordinates
+    /// \return Continous coordinates in meters
     Eigen::Vector2d discrete_position_to_continuous(
         const Eigen::Vector2i& position) const;
 
-    // Converts discrete position to continuous
-
-    // \param position The discrete coordinates
+    /// Converts continuous position (x_m, y_m) to discrete
+    ///
+    /// \param position Continuous coordinates in meters
+    /// \return Discrete coordinates
     Eigen::Vector2i continuous_position_to_discrete(
         const Eigen::Vector2d& position) const;
 
-    // Maps discrete state to state ID
+    /// Maps discrete state (libcozmo::statespace::SE2::State) to state ID
     std::unordered_map<State, int, boost::hash<State>> m_state_to_id_map;
 
-    // Vector of discrete states; index of state is the state ID.
+    /// Vector of discrete states (libcozmo::statespace::SE2::State)
+    /// Index of state is the state ID
     std::vector<State*> m_state_map;
 
-    // Number of discretized theta values
+    /// Number of discretized theta values
     const int m_num_theta_vals;
 
-    // Resolution of discrete state
+    /// Resolution of environment (m)
     const double m_resolution;
 
     std::shared_ptr<aikido::statespace::SE2> m_statespace;
@@ -203,5 +198,5 @@ class SE2 : public virtual StateSpace {
 }  // namespace statespace
 }  // namespace libcozmo
 
-#endif  // INCLUDE_STATESPACE_STATESPACE_H_
+#endif  // LIBCOZMO_STATESPACE_SE2_HPP_
 
