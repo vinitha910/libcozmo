@@ -1,5 +1,4 @@
 #include "actionspace/object_oriented_action_space.hpp"
-#include "utils/utils.hpp"
 #include <algorithm>
 #include <iostream>
 #include <iterator>
@@ -8,143 +7,107 @@ using namespace std;
 namespace libcozmo {
 namespace actionspace {
 
-ObjectOrientedActionSpace::ObjectOrientedActionSpace() {}
+/**
+    Finds the angles, relative to a cartesian plane, to all
+    4 sides of the cube given the angle of one of the sides
 
-/* If the num_offsets is even, there's no center position for each side of the cube
- */
-void ObjectOrientedActionSpace::generate_actions(Pose pose, int num_offsets,
-                                                 double lin_min, double lin_max, double lin_samples,
-                                                 double dur_min, double dur_max, double dur_samples,
-                                                 double h_offset, double v_offset)
+    The angles are found in clockwise order where index
+        0 corresponds to front of cube
+        1 corresponds to left of cube
+        2 corresponds to back of cube
+        3 corresponds to right of cube
+    Angles are in radians and are in the range [-pi, pi]
+*/
+void ObjectOrientedActionSpace::find_sides(vector<double>& cube_sides, const double& theta) const {
+    double angle = theta;
+    cube_sides.push_back(angle);
+    for (size_t i = 0; i < 3; i++) {
+        angle -= M_PI / 2;
+        if (angle < -M_PI) {
+            angle = 2 * M_PI + angle;
+        }
+        cube_sides.push_back(angle);
+    }
+}
+
+/**
+    Finds the start position given some other object's position,
+    its theta, and the vertical (v_offset) and horizontal (cube_offset)
+    distances away from said object
+*/
+void ObjectOrientedActionSpace::find_start_pos(
+    const Eigen::Vector2d& obj_pos,
+    Eigen::Vector2d& start_pos,
+    const double& v_offset,
+    const double& cube_offset,
+    const double& theta) const
 {
-    actions.clear();
-    vector<Pose> locations = generate_offsets(pose, num_offsets, h_offset, v_offset);
+    double x = obj_pos(0);
+    double y = obj_pos(1);
 
-    vector<Action> gen_actions;
-    vector<double> lin_choices = utils::linspace(lin_min, lin_max, lin_samples);
-    vector<double> dur_choices = utils::linspace(dur_min, dur_max, dur_samples);
+    double x_new = x - v_offset * cos(theta) + cube_offset * sin(theta);
+    double y_new = y - v_offset * sin(theta) - cube_offset * cos(theta);
 
-    for (const auto& dur_choice : dur_choices) {
-        for (const auto& lin_choice : lin_choices) {
-            if (!(lin_choice == 0) || dur_choice == 0) {
-                Action a {lin_choice, 0, dur_choice};
-                gen_actions.push_back(a);
+    start_pos(x_new, y_new);
+}
+
+void ObjectOrientedActionSpace::generate_actions(
+    const Eigen::Vector2d& obj_pos,
+    const double& theta,
+    const double& h_offset,
+    const double& v_offset)
+{
+    vector<double> cube_offsets;
+    if (num_offset == 1) { // if only one offset, just use center of side of object
+        cube_offsets.push_back(0);
+    } else {
+        cube_offsets = utils::linspace(-h_offset, h_offset, num_offset);
+    }
+    vector<double> cube_sides;
+    find_sides(cube_sides, theta);
+
+    for (size_t i = 0; i < cube_sides.size(); i++) {
+        double side = cube_sides[i];
+        for (const auto& cube_offset : cube_offsets) {
+            for (const auto& speed : speeds) {
+                for (const auto& duration : durations) {
+                    Eigen::Vector2d start_pos;
+                    find_start_pos(obj_pos, start_pos, v_offset, cube_offset, theta);
+                    actions.push_back(new ObjectOrientedAction(speed, duration, start_pos, theta));
+                }
             }
         }
     }
-    for (const auto& location : locations) {
-        for (const auto& action : gen_actions) {
-            Object_Oriented_Action ooa{location, action};
-            actions.push_back(ooa);
-        }
-    }
 }
 
-Object_Oriented_Action ObjectOrientedActionSpace::get_action(int action_id) {
+ObjectOrientedAction* ObjectOrientedActionSpace::get_action(const int& action_id) const {
     return actions[action_id];
 }
 
-vector<Object_Oriented_Action> ObjectOrientedActionSpace::get_action_space() {
-    return actions;
-}
-
-void ObjectOrientedActionSpace::view_action_space() {
+void ObjectOrientedActionSpace::view_action_space() const {
     for (size_t i = 0; i < actions.size(); i++) {
         if (i % 5 == 0) {
             cout << "\n";
         }
-        Pose p = actions[i].pose;
-        Action a = actions[i].action;
+        ObjectOrientedAction* a = actions[i];
         cout << i << " : ";
-        cout << "Location: " << p.x << ", " << p.y << "," << p.z << ", " << p.angle_z << ", ";
-        cout << "Linear Velocity: " << a.lin_vel << ", ";
-        cout << "Angular Velocity: " << a.ang_vel << ", ";
-        cout << "Duration: " << a.duration << "\n";
+        cout << "Location: " << a->start_pos(0) << ", " << a->start_pos(1) << ", " << a->theta << ",";
+        cout << "Speed: " << a->speed << ", ";
+        cout << "Duration: " << a->duration << "\n";
     }
-}
-
-Point ObjectOrientedActionSpace::cube_offset(double offset, double angle) {
-    return Point{offset * cos(angle), offset * sin(angle)};
-}
-
-/*
-Helper function to find the location of all 4 sides of the cube
-
-Parameters
-----------
-angle : the angle of the cube, in radians
-
-returns a sorted list of the angle of each of the 4 sides where index
-    0 corresponds to front of cube
-    1 corresponds to left of cube
-    2 corresponds to back of cube
-    3 corresponds to right of cube
-*/
-vector<double> ObjectOrientedActionSpace::find_sides(double angle)
-{
-    vector<double> sides;
-    vector<double> ordered_sides;
-
-    sides.push_back(angle);
-    for (size_t i = 0; i < 3; i++) {
-        // Adding in clockwise order
-        angle -= M_PI / 2;
-        if (angle < -M_PI) { // wrap around since angles are only in the range [-pi, pi]
-            angle = 2 * M_PI + angle;
-        }
-        sides.push_back(angle);
-    }
-    return sides;
-}
-
-
-/*
-Helper function to generate cube offset positions, these are the positions cozmo will move to
-relative to the cube; there will be 4 * num_offsets number of different locations
-
-Parameters
-----------
-pose : the cube position and orientation
-num_offsets : number of different positions per side of the cube
-h_offset : the max horizontal offset from the center of the edge of the cube, in millimeters
-v_offset : the vertical offset away from the center of the cube, in millimeters
-*/
-vector<Pose> ObjectOrientedActionSpace::generate_offsets(Pose pose, int num_offsets, double h_offset, double v_offset)
-{
-    vector<double> choices;
-    if (num_offsets == 1) { // if only one offset, just use center of side
-        choices.push_back(0);
-    } else {
-        choices = utils::linspace(-h_offset, h_offset, num_offsets);
-    }
-    vector<double> cube_sides = find_sides(pose.angle_z); // find the angles of the 4 sides of the cube
-    vector<Pose> locations;
-    for (size_t i = 0; i < cube_sides.size(); i++) {
-        double side = cube_sides[i];
-        for (const auto& choice : choices) {
-            Point offset = cube_offset(v_offset, side); // calculate x and y offsets so cozmo doesn't hit the cube
-            Point c_offset = cube_offset(choice, side); // For center offset
-
-            Pose location;
-            // c_offset is reversed because it's perpendicular to offset
-            location = Pose{pose.x - offset.x + c_offset.y, pose.y - offset.y - c_offset.x, pose.z, side};
-            locations.push_back(location);
-        }
-    }
-    return locations;
 }
 
 } // namespace actionspace
 } // namespace libcozmo
 
 int main() {
-
+    cout << "Hello";
     // Angle_z value should be between -pi and pi
-    libcozmo::actionspace::Pose pose{100, 200, 10, 2};
-    libcozmo::actionspace::ObjectOrientedActionSpace oos {};
-    oos.generate_actions(pose, 3, 10, 100, 3, 1, 5, 3);
-    vector<libcozmo::actionspace::Object_Oriented_Action> oo_actions = oos.get_action_space();
-    oos.view_action_space();
-    cout << "Total actions: " << oo_actions.size() << '\n';
+    // libcozmo::actionspace::Pose pose{100, 200, 10, 2};
+    // libcozmo::actionspace::ObjectOrientedActionSpace oos {};
+    // oos.generate_actions(pose, 3, 10, 100, 3, 1, 5, 3);
+    // vector<libcozmo::actionspace::Object_Oriented_Action> oo_actions = oos.get_action_space();
+    // oos.view_action_space();
+    // cout << "Total actions: " << oo_actions.size() << '\n';
 
 }
