@@ -36,14 +36,15 @@ namespace test {
 
 class SE2StatespaceTest: public ::testing::Test {
  public:
-    SE2StatespaceTest() : statespace(0.1, 4) {}
+    SE2StatespaceTest() : \
+        statespace(0.1, 8), resolution(0.1), num_theta_vals(8) {}
 
     void SetUp() {
         SE2::State state_1(3, 2, 1);
-        // statespace.get_or_create_state(&state_1);
+        statespace.get_or_create_state(&state_1);
 
         SE2::State state_2(1, 3, 3);
-        // statespace.get_or_create_state(&state_2);
+        statespace.get_or_create_state(&state_2);
     }
 
     void TearDown() {}
@@ -51,10 +52,52 @@ class SE2StatespaceTest: public ::testing::Test {
     ~SE2StatespaceTest()  {}
 
     SE2 statespace;
+    aikido::statespace::SE2 continuous_statespace;
+    const double resolution;
+    const int num_theta_vals;
 };
 
 TEST_F(SE2StatespaceTest, GetsOrCreatesDiscreteState) {
+    // Cheking existing states IDs are returned correctly
+    SE2::State state_1(3, 2, 1);
+    EXPECT_EQ(0, statespace.get_or_create_state(&state_1));
+    SE2::State state_2(1, 3, 3);
+    EXPECT_EQ(1, statespace.get_or_create_state(&state_2));
 
+    // Checking that new state is created and appropiate ID is returned
+    SE2::State state_3(1, 1, 1);
+    EXPECT_EQ(2, statespace.get_or_create_state(&state_3));
+}
+
+TEST_F(SE2StatespaceTest, GetsOrCreatesContinuousState) {
+    // Checking that new state is created and appropiate ID is returned
+    aikido::statespace::SE2::State state;
+    continuous_statespace.expMap(Eigen::Vector3d(1, 1, 1), &state);
+    EXPECT_EQ(2, statespace.get_or_create_state(&state));
+}
+
+TEST_F(SE2StatespaceTest, DiscreteToContinuousStateConversion) {
+    SE2::State in_state(1, 2, 1);
+    aikido::statespace::SE2::State out_state;
+    statespace.discrete_state_to_continuous(&in_state, &out_state);
+
+    Eigen::VectorXd log_state;
+    continuous_statespace.logMap(&out_state, log_state);
+    EXPECT_DOUBLE_EQ(log_state[0], 0.15);
+    EXPECT_DOUBLE_EQ(log_state[1], 0.25);
+    EXPECT_DOUBLE_EQ(log_state[2], M_PI/4);
+}
+
+TEST_F(SE2StatespaceTest, ContinuousToDiscreteStateConversion) {
+    aikido::statespace::SE2::State in_state;
+    continuous_statespace.expMap(Eigen::Vector3d(0.17, 0.257, M_PI/5), &in_state);
+    
+    SE2::State out_state;
+    statespace.continuous_state_to_discrete(&in_state, &out_state);
+
+    EXPECT_DOUBLE_EQ(out_state.x, 1);
+    EXPECT_DOUBLE_EQ(out_state.y, 2);
+    EXPECT_DOUBLE_EQ(out_state.theta, 1);
 }
 
 // // Check state added correctly
@@ -125,11 +168,11 @@ TEST_F(SE2StatespaceTest, GetsOrCreatesDiscreteState) {
 //     EXPECT_EQ(2, statespace.get_num_states());
 // }
 
+}  // namespace test
+}  // namspace statespace
+}  // namespace libcozmo
+
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
-
-}  // namespace test
-}  // namspace statespace
-}  // namespace libcozmo

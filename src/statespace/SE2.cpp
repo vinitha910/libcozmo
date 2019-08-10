@@ -30,6 +30,7 @@
 #include "statespace/SE2.hpp"
 #include <assert.h>
 #include <cmath>
+#include <iostream>
 
 namespace libcozmo {
 namespace statespace {
@@ -49,6 +50,7 @@ int SE2::get_or_create_state(const StateSpace::State* _state) {
     } else {
         auto new_state = create_state();
         copy_state(state, new_state);
+        m_state_to_id_map[*state] = m_state_map.size() - 1;
         return m_state_map.size() - 1;
     }
 }
@@ -65,7 +67,7 @@ void SE2::discrete_state_to_continuous(
     aikido::statespace::StateSpace::State* _continuous_state) const {
     const auto state = static_cast<const State*>(_state);
     
-    Eigen::VectorXd state_log;
+    Eigen::VectorXd state_log(3);
     state_log.head<2>() =
         discrete_position_to_continuous(Eigen::Vector2i(state->x, state->y));
     state_log[2] =
@@ -139,7 +141,6 @@ void SE2::copy_state(
 StateSpace::State* SE2::create_state() {
     m_state_map.push_back(new State());
     const auto state = m_state_map.back();
-    m_state_to_id_map[*state] = m_state_map.size() - 1;
     return m_state_map.back();
 }
 

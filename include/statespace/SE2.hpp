@@ -70,7 +70,6 @@ class SE2 : public virtual StateSpace {
             return seed;
         }
 
-     private:
         int x;
         int y;
         int theta;
