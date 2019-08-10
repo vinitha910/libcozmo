@@ -80,8 +80,6 @@ target_link_libraries(execute_traj
 catkin_add_gtest(test_oo_action_space tests/actionspace/test_object_oriented_action_space.cpp)
 target_link_libraries(test_oo_action_space
     cozmo
-    ${catkin_LIBRARIES}
-    ${aikido_LIBRARIES}
 )
 #################### PYBIND ##############################
 

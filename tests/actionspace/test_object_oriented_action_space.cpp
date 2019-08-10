@@ -1,30 +1,32 @@
 #include <gtest/gtest.h>
 #include "actionspace/object_oriented_action_space.hpp"
 
-class myTestFixture1: public ::testing::test {
+class OOActionFixture: public ::testing::Test {
 public:
-   myTestFixture1() : \
+   OOActionFixture() : \
        m_actionspace(0, 5, 3, 0, 5, 3, 3),
        m_action(100, 5, Eigen::Vector2d(0, 1), 2) {}
 
    void SetUp( ) {
        m_actionspace.generate_actions(Eigen::Vector2d(100, 200), 2);
+       m_actionspace.view_action_space();
    }
 
-   void TearDown( ) {
-       // code here will be called just after the test completes
-       // ok to through exceptions from here if need be
-   }
+   void TearDown( ) {}
 
-   ~myTestFixture1( )  {
-       // cleanup any pending stuff, but no exceptions allowed
-       libcozmo::actionspace::ObjectOrientedAction m_action;
-       libcozmo::actionspace::ObjectOrientedActionSpace m_actionspace;
-   }
+   ~OOActionFixture( )  {}
+
+   libcozmo::actionspace::ObjectOrientedAction m_action;
+   libcozmo::actionspace::ObjectOrientedActionSpace m_actionspace;
+
 };
 
-TEST_F(myTestFixture1, UnitTest1) {
-    EXPECT_EQ(176, m_actionspace.get_action_space().size());
+TEST_F(OOActionFixture, ActionSpaceSizeTest) {
+    EXPECT_EQ(108, m_actionspace.get_action_space_size());
+}
+
+TEST_F(OOActionFixture, OORExceptionTest) {
+    EXPECT_THROW(m_actionspace.get_action(-1), std::out_of_range);
 }
 
 int main(int argc, char **argv) {

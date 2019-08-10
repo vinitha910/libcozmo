@@ -7,6 +7,13 @@ using namespace std;
 namespace libcozmo {
 namespace actionspace {
 
+void ObjectOrientedActionSpace::clear_actions() {
+    for (size_t i = 0; i < actions.size(); ++i) {
+        delete(actions[i]);
+    }
+    actions.clear();
+}
+
 /**
     Finds the angles, relative to a cartesian plane, to all
     4 sides of the cube given the angle of one of the sides
@@ -34,6 +41,9 @@ void ObjectOrientedActionSpace::find_sides(vector<double>& cube_sides, const dou
     Finds the start position given some other object's position,
     its theta, and the vertical (v_offset) and horizontal (cube_offset)
     distances away from said object
+    
+    Vertical means perpendicular to the edge of an object
+    Horizontal means parallel to the edge of an object
 */
 void ObjectOrientedActionSpace::find_start_pos(
     const Eigen::Vector2d& obj_pos,
@@ -42,21 +52,34 @@ void ObjectOrientedActionSpace::find_start_pos(
     const double& cube_offset,
     const double& theta) const
 {
-    double x = obj_pos(0);
-    double y = obj_pos(1);
-
-    double x_new = x - v_offset * cos(theta) + cube_offset * sin(theta);
-    double y_new = y - v_offset * sin(theta) - cube_offset * cos(theta);
-
-    start_pos(x_new, y_new);
+    start_pos(0) = obj_pos(0) - v_offset * cos(theta) + cube_offset * sin(theta);
+    start_pos(1) = obj_pos(1) - v_offset * sin(theta) - cube_offset * cos(theta);
 }
 
+/** 
+    Generates actions given another object's position and theta
+    
+    Parameters
+    ----------
+    obj_pos is an (x, y) coordinate in millimeters
+    theta is an orientation angle in radians
+    h_offset (optional) is the max horizontal distance
+        from center of the edge of the object
+    v_offset (optional) is the max vertical distance
+        from center of the object
+
+    Horizontal means parallel to the edge of an object
+    Vertical means perpendicular to the edge of an object
+    
+    This function will clear any previously generated actions in the action space
+*/
 void ObjectOrientedActionSpace::generate_actions(
     const Eigen::Vector2d& obj_pos,
     const double& theta,
     const double& h_offset,
     const double& v_offset)
 {
+    clear_actions();
     vector<double> cube_offsets;
     if (num_offset == 1) { // if only one offset, just use center of side of object
         cube_offsets.push_back(0);
@@ -73,7 +96,7 @@ void ObjectOrientedActionSpace::generate_actions(
                 for (const auto& duration : durations) {
                     Eigen::Vector2d start_pos;
                     find_start_pos(obj_pos, start_pos, v_offset, cube_offset, theta);
-                    actions.push_back(new ObjectOrientedAction(speed, duration, start_pos, theta));
+                    actions.push_back(new ObjectOrientedAction(speed, duration, start_pos, side));
                 }
             }
         }
@@ -81,7 +104,18 @@ void ObjectOrientedActionSpace::generate_actions(
 }
 
 ObjectOrientedAction* ObjectOrientedActionSpace::get_action(const int& action_id) const {
+    if (!is_valid_action_id(action_id)) {
+        throw out_of_range("Action ID invalid");
+    }
     return actions[action_id];
+}
+
+int ObjectOrientedActionSpace::get_action_space_size() const {
+    return actions.size();
+}
+
+bool ObjectOrientedActionSpace::is_valid_action_id(const int& action_id) const {
+    return action_id < actions.size() && action_id >= 0;
 }
 
 void ObjectOrientedActionSpace::view_action_space() const {
@@ -91,7 +125,7 @@ void ObjectOrientedActionSpace::view_action_space() const {
         }
         ObjectOrientedAction* a = actions[i];
         cout << i << " : ";
-        cout << "Location: " << a->start_pos(0) << ", " << a->start_pos(1) << ", " << a->theta << ",";
+        cout << "Location: " << a->start_pos(0) << ", " << a->start_pos(1) << ", " << a->theta << ", ";
         cout << "Speed: " << a->speed << ", ";
         cout << "Duration: " << a->duration << "\n";
     }
@@ -99,14 +133,3 @@ void ObjectOrientedActionSpace::view_action_space() const {
 
 } // namespace actionspace
 } // namespace libcozmo
-
-int main() {
-    // Angle_z value should be between -pi and pi
-    // libcozmo::actionspace::Pose pose{100, 200, 10, 2};
-    // libcozmo::actionspace::ObjectOrientedActionSpace oos {};
-    // oos.generate_actions(pose, 3, 10, 100, 3, 1, 5, 3);
-    // vector<libcozmo::actionspace::Object_Oriented_Action> oo_actions = oos.get_action_space();
-    // oos.view_action_space();
-    // cout << "Total actions: " << oo_actions.size() << '\n';
-
-}

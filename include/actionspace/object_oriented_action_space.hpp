@@ -56,12 +56,28 @@ class ObjectOrientedActionSpace {
         }
 
         ~ObjectOrientedActionSpace() {
-            for (size_t i = 0; i < actions.size(); ++i) {
-                delete(actions[i]);
-            }
-            actions.clear();
+            clear_actions();
         }
 
+        double action_similarity(
+            const int& action_id1,
+            const int& action_id2) const;
+
+        /** 
+            Generates actions given another object's position and theta
+            
+            Parameters
+            ----------
+            obj_pos is an (x, y) coordinate in millimeters
+            theta is an orientation angle in radians
+            h_offset (optional) is the max horizontal distance
+                from center of the edge of the object
+            v_offset (optional) is the max vertical distance
+                from center of the object
+
+            Horizontal means parallel to the edge of an object
+            Vertical means perpendicular to the edge of an object
+        */
         void generate_actions(
             const Eigen::Vector2d& obj_pos,
             const double& theta,
@@ -70,6 +86,9 @@ class ObjectOrientedActionSpace {
 
         ObjectOrientedAction* get_action(const int& action_id) const;
 
+        int get_action_space_size() const;
+
+        // Outputs all the actions in the action space with their corresponding action id
         void view_action_space() const;
 
     private:
@@ -77,6 +96,8 @@ class ObjectOrientedActionSpace {
         std::vector<double> durations;
         int num_offset;
         std::vector<ObjectOrientedAction*> actions;
+
+        void clear_actions();
 
         void find_sides(std::vector<double>& cube_sides, const double& theta) const;
 
@@ -86,6 +107,8 @@ class ObjectOrientedActionSpace {
             const double& v_offset,
             const double& cube_offset,
             const double& theta) const;
+
+        bool is_valid_action_id(const int& action_id) const;
 };
 
 } // namespace actionspace
