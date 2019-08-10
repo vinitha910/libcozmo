@@ -21,7 +21,7 @@ namespace actionspace {
 void ObjectOrientedActionSpace::find_sides(vector<double>& cube_sides, const double& theta) const {
     double angle = theta;
     cube_sides.push_back(angle);
-    for (size_t i = 0; i < 3; i++) {
+    for (size_t i = 0; i < 3; ++i) {
         angle -= M_PI / 2;
         if (angle < -M_PI) {
             angle = 2 * M_PI + angle;
@@ -66,7 +66,7 @@ void ObjectOrientedActionSpace::generate_actions(
     vector<double> cube_sides;
     find_sides(cube_sides, theta);
 
-    for (size_t i = 0; i < cube_sides.size(); i++) {
+    for (size_t i = 0; i < cube_sides.size(); ++i) {
         double side = cube_sides[i];
         for (const auto& cube_offset : cube_offsets) {
             for (const auto& speed : speeds) {
@@ -85,7 +85,7 @@ ObjectOrientedAction* ObjectOrientedActionSpace::get_action(const int& action_id
 }
 
 void ObjectOrientedActionSpace::view_action_space() const {
-    for (size_t i = 0; i < actions.size(); i++) {
+    for (size_t i = 0; i < actions.size(); ++i) {
         if (i % 5 == 0) {
             cout << "\n";
         }
@@ -101,7 +101,6 @@ void ObjectOrientedActionSpace::view_action_space() const {
 } // namespace libcozmo
 
 int main() {
-    cout << "Hello";
     // Angle_z value should be between -pi and pi
     // libcozmo::actionspace::Pose pose{100, 200, 10, 2};
     // libcozmo::actionspace::ObjectOrientedActionSpace oos {};

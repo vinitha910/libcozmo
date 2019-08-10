@@ -55,6 +55,13 @@ class ObjectOrientedActionSpace {
             durations = utils::linspace(min_duration, max_duration, num_duration);
         }
 
+        ~ObjectOrientedActionSpace() {
+            for (size_t i = 0; i < actions.size(); ++i) {
+                delete(actions[i]);
+            }
+            actions.clear();
+        }
+
         void generate_actions(
             const Eigen::Vector2d& obj_pos,
             const double& theta,
