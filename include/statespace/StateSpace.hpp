@@ -39,29 +39,29 @@ class StateSpace
 {
  public:
 
- 	/// Base class for all discrete states
- 	class State;
+    /// Base class for all discrete states
+    class State;
 
- 	/// Checks if given (discrete) state exists in the statespace; if not, 
+    /// Checks if given (discrete) state exists in the statespace; if not, 
     /// creates and adds the state to the statespace
     ///
     /// \param state Input state
     /// \return state ID
- 	virtual int get_or_create_state(const State* _state) = 0;
- 	
- 	/// Checks if given (continuous) state exists in the statespace; if not, 
+    virtual int get_or_create_state(const State* _state) = 0;
+    
+    /// Checks if given (continuous) state exists in the statespace; if not, 
     /// creates and adds the state to the statespace
     ///
     /// \param state Input state
     /// \return State ID
- 	virtual int get_or_create_state(
- 		const aikido::statespace::StateSpace::State* _state) = 0;
+    virtual int get_or_create_state(
+        const aikido::statespace::StateSpace::State* _state) = 0;
 
     /// Converts the given discrete state into a continuous state
     ///
     /// \param _state Input discrete state
     /// \param[out] _state Output continuous state
- 	virtual void discrete_state_to_continuous(
+    virtual void discrete_state_to_continuous(
         const State* _state,
         aikido::statespace::StateSpace::State* _continuous_state) const = 0;
 
@@ -69,30 +69,30 @@ class StateSpace
     ///
     /// \param _state Input discrete state 
     /// \param[out] _state Output continuous state
- 	virtual void continuous_state_to_discrete(
+    virtual void continuous_state_to_discrete(
         const aikido::statespace::StateSpace::State* _state, 
         State* _discrete_state) const = 0;
 
- 	/// Gets the state ID for the given state if the state exists in the
+    /// Gets the state ID for the given state if the state exists in the
     /// statespace
     ///
     /// \param _state Input discrete state
     /// \param[out] state_id State ID
     /// \return True if the state ID was found and false otherwise
- 	virtual bool get_state_id(const State* _state, int* _state_id) const = 0;
+    virtual bool get_state_id(const State* _state, int* _state_id) const = 0;
 
- 	/// Gets the state for the give ID if the state exists in the statespace
+    /// Gets the state for the give ID if the state exists in the statespace
     ///
     /// \param state_id The ID of the state
     /// \return Pointer to the discrete state
- 	virtual State* get_state(const int& _state_id) const = 0;
+    virtual State* get_state(const int& _state_id) const = 0;
 
- 	/// Checks if the given state is a valid state; validity of state varies 
- 	/// based on state type
+    /// Checks if the given state is a valid state; validity of state varies 
+    /// based on state type
     ///
     /// \param _state Input discrete state
     /// \return True if the state if valid and false otherwise
- 	virtual bool is_valid_state(const State* _state) const = 0;
+    virtual bool is_valid_state(const State* _state) const = 0;
 
     /// Get the number of states in the statespace
     ///
@@ -123,17 +123,17 @@ class StateSpace
     virtual void copy_state(const State* _source, State* _destination) const = 0;
 
  private:
- 	virtual State* create_state() = 0;
+    virtual State* create_state() = 0;
 };
 
 
 class StateSpace::State
 {
  protected:
-  	// This is a base class that should only only be used in derived classes.
-  	State() = default;
+    // This is a base class that should only only be used in derived classes.
+    State() = default;
 
-  	~State() = default;
+    ~State() = default;
 };
 
 }  // namespace statespace
