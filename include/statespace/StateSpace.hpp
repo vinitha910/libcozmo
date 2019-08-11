@@ -84,9 +84,8 @@ class StateSpace
  	/// Gets the state for the give ID if the state exists in the statespace
     ///
     /// \param state_id The ID of the state
-    /// \param[out] state Output discrete state
-    /// \return True if the state was found and false otherwise
- 	virtual bool get_state(const int& _state_id, State* _state) const = 0;
+    /// \return Pointer to the discrete state
+ 	virtual State* get_state(const int& _state_id) const = 0;
 
  	/// Checks if the given state is a valid state; validity of state varies 
  	/// based on state type
@@ -98,7 +97,7 @@ class StateSpace
     /// Get the number of states in the statespace
     ///
     /// \return Number of states
-    virtual int statespace_size() const = 0;
+    virtual int size() const = 0;
 
     /// Gets the distance between two SE2 states
     ///

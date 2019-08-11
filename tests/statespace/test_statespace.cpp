@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2019, Brian Lee, Vinitha Ranganeni
+// Copyright (c) 2019, Vinitha Ranganeni, Brian Lee
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -49,7 +49,7 @@ class SE2StatespaceTest: public ::testing::Test {
 
     void TearDown() {}
 
-    ~SE2StatespaceTest()  {}
+    ~SE2StatespaceTest() {}
 
     SE2 statespace;
     aikido::statespace::SE2 continuous_statespace;
@@ -90,83 +90,79 @@ TEST_F(SE2StatespaceTest, DiscreteToContinuousStateConversion) {
 
 TEST_F(SE2StatespaceTest, ContinuousToDiscreteStateConversion) {
     aikido::statespace::SE2::State in_state;
-    continuous_statespace.expMap(Eigen::Vector3d(0.17, 0.257, M_PI/5), &in_state);
+    continuous_statespace.expMap(
+        Eigen::Vector3d(0.17, 0.257, M_PI/5), &in_state);
     
     SE2::State out_state;
     statespace.continuous_state_to_discrete(&in_state, &out_state);
 
-    EXPECT_DOUBLE_EQ(out_state.x, 1);
-    EXPECT_DOUBLE_EQ(out_state.y, 2);
-    EXPECT_DOUBLE_EQ(out_state.theta, 1);
+    EXPECT_DOUBLE_EQ(out_state.getX(), 1);
+    EXPECT_DOUBLE_EQ(out_state.getY(), 2);
+    EXPECT_DOUBLE_EQ(out_state.getTheta(), 1);
 }
 
-// // Check state added correctly
-// TEST_F(SE2StatespaceTest, UnitTest1) {
-//     Eigen::Vector3i expected(3, 2, 1);
-//     Eigen::Vector3i state;
-//     statespace.get_coord_from_state_id(0, &state);
-//     EXPECT_EQ(expected[0], state[0]);
-//     EXPECT_EQ(expected[1], state[1]);
-//     EXPECT_EQ(expected[2], state[2]);
-//     expected << 1, 3, 3;
-//     statespace.get_coord_from_state_id(1, &state);
-//     EXPECT_EQ(expected[0], state[0]);
-//     EXPECT_EQ(expected[1], state[1]);
-//     EXPECT_EQ(expected[2], state[2]);
-// }
+TEST_F(SE2StatespaceTest, GetsStateID) {
+    int state_id;
+    SE2::State state_1(3, 2, 1);
+    EXPECT_TRUE(statespace.get_state_id(&state_1, &state_id));
+    EXPECT_EQ(state_id, 0);
 
-// // Check distnguishing valid_state
-// TEST_F(SE2StatespaceTest, UnitTest2) {
-//     EXPECT_EQ(true, statespace.is_valid_state(Eigen::Vector3i(15, 2, 1)));
-//     EXPECT_EQ(false, statespace.is_valid_state(Eigen::Vector3i(-1, -2, -5)));
-//     EXPECT_EQ(false, statespace.is_valid_state(Eigen::Vector3i(0, 150, -1)));
-//     EXPECT_EQ(true, statespace.is_valid_state(Eigen::Vector3i(1, 2, 1)));
-//     EXPECT_EQ(true, statespace.is_valid_state(Eigen::Vector3i(9, 8, 2)));
-// }
+    SE2::State state_2(1, 3, 3);
+    EXPECT_TRUE(statespace.get_state_id(&state_2, &state_id));
+    EXPECT_EQ(state_id, 1);   
 
-// // Check continuous --> discrete pose (SE2 input)
-// TEST_F(SE2StatespaceTest, UnitTest3) {
-//     aikido::statespace::SE2::State continuous_state;
-//     Eigen::Isometry2d t = Eigen::Isometry2d::Identity();
-//     const Eigen::Rotation2D<double> rot(M_PI);
-//     t.linear() = rot.toRotationMatrix();
-//     Eigen::Vector2d trans;
-//     trans << 5.4, 2.0;
-//     t.translation() = trans;
-//     continuous_state.setIsometry(t);
-//     Eigen::Vector3i pose = 
-//         statespace.continuous_state_to_discrete(continuous_state);
-//     EXPECT_EQ(54, pose.x());
-//     EXPECT_EQ(20, pose.y());
-//     double angle = 2;
-//     EXPECT_EQ(angle, pose[2]);
-// }
+    SE2::State state_3(1, 0, 3);
+    EXPECT_FALSE(statespace.get_state_id(&state_3, &state_id));       
+}
 
-// // Check path generation
-// TEST_F(SE2StatespaceTest, UnitTest4) {
-//     int myints[] = {0, 1};
-//     std::vector<int> state_ids;
-//     for (int i = 0; i < 2; i++) {
-//         state_ids.push_back(myints[i]);
-//     }
-//     std::vector<Eigen::Vector3i> path_coordinates;
-//     std::vector<Eigen::Vector3i> expected;
-//     expected.push_back(Eigen::Vector3i(3, 2, 1));
-//     expected.push_back(Eigen::Vector3i(1, 3, 3));
-//     statespace.get_path_states(state_ids, &path_coordinates);
-//     EXPECT_EQ(expected[0][0], path_coordinates[0][0]);
-//     EXPECT_EQ(expected[0][1], path_coordinates[0][1]);
-//     EXPECT_EQ(expected[0][2], path_coordinates[0][2]);
-//     EXPECT_EQ(expected[1][0], path_coordinates[1][0]);
-//     EXPECT_EQ(expected[1][1], path_coordinates[1][1]);
-//     EXPECT_EQ(expected[1][2], path_coordinates[1][2]);
-// }
+TEST_F(SE2StatespaceTest, GetsState) {
+    const SE2::State* s1 = static_cast<SE2::State*>(statespace.get_state(0));
+    EXPECT_EQ(3, s1->getX());
+    EXPECT_EQ(2, s1->getY());
+    EXPECT_EQ(1, s1->getTheta());
 
-// // Check create_state and get_or_create_state
-// TEST_F(SE2StatespaceTest, UnitTest5) {
-//     statespace.get_or_create_new_state(Eigen::Vector3i(1, 3, 3));
-//     EXPECT_EQ(2, statespace.get_num_states());
-// }
+    const SE2::State* s2 = static_cast<SE2::State*>(statespace.get_state(1));
+    EXPECT_EQ(1, s2->getX());
+    EXPECT_EQ(3, s2->getY());
+    EXPECT_EQ(3, s2->getTheta());
+
+    EXPECT_EQ(nullptr, statespace.get_state(2));
+}
+
+TEST_F(SE2StatespaceTest, IsValidState) {
+    SE2::State state_1(1, 1, 0);
+    EXPECT_TRUE(statespace.is_valid_state(&state_1));
+
+    SE2::State state_2(1, 1, 7);
+    EXPECT_TRUE(statespace.is_valid_state(&state_2));
+
+    SE2::State state_3(1, 1, 8);
+    EXPECT_FALSE(statespace.is_valid_state(&state_3));
+}
+
+TEST_F(SE2StatespaceTest, StateSpaceSize) {
+    EXPECT_EQ(statespace.size(), 2);
+}
+
+TEST_F(SE2StatespaceTest, GetsDistanceBetweenDiscreteStates) {
+    SE2::State s1(1, 1, 1);
+    SE2::State s2(2, 2, 1);
+    EXPECT_DOUBLE_EQ(sqrt(0.02), statespace.get_distance(&s1, &s2));
+
+    SE2::State s3(1, 1, 0);
+    SE2::State s4(2, 2, 1);
+    EXPECT_NEAR(0.7980, statespace.get_distance(&s3, &s4), 0.0001);
+}
+
+TEST_F(SE2StatespaceTest, CopyState) {
+    SE2::State src(1, 1, 1);
+    SE2::State dest;
+    statespace.copy_state(&src, &dest);
+
+    EXPECT_EQ(1, dest.getX());
+    EXPECT_EQ(1, dest.getY());
+    EXPECT_EQ(1, dest.getTheta());    
+}
 
 }  // namespace test
 }  // namspace statespace

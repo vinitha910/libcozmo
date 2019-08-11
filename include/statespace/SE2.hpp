@@ -70,10 +70,15 @@ class SE2 : public virtual StateSpace {
             return seed;
         }
 
+        int getX() const { return x; }
+        int getY() const { return y; }
+        int getTheta() const { return theta; } 
+
+     private:
         int x;
         int y;
         int theta;
-    
+
         friend class SE2;
     };
 
@@ -114,15 +119,14 @@ class SE2 : public virtual StateSpace {
         const StateSpace::State* _state, int* _state_id) const override;
 
     /// Documentation inherited
-    bool get_state(
-        const int& _state_id, StateSpace::State* _state) const override;
+    StateSpace::State* get_state(const int& _state_id) const override;
 
     /// Documentation inherited
     /// State is valid if theta is in [0, num_theta_vals]
     bool is_valid_state(const StateSpace::State* _state) const override;
 
     /// Documentation inherited
-    int statespace_size() const override;
+    int size() const override;
 
     /// Documentation inherited
     double get_distance(

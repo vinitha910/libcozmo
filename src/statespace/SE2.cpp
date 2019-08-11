@@ -85,7 +85,8 @@ void SE2::continuous_state_to_discrete(
         continuous_position_to_discrete(log_state.head<2>());
     const int theta = continuous_angle_to_discrete(log_state[2]);
     
-    *_discrete_state = State(position.x(), position.y(), theta);
+    auto discrete_state = static_cast<State*>(_discrete_state);
+    *discrete_state = State(position.x(), position.y(), theta);
 }
 
 bool SE2::get_state_id(const StateSpace::State* _state, int* _state_id) const {
@@ -98,9 +99,12 @@ bool SE2::get_state_id(const StateSpace::State* _state, int* _state_id) const {
     return false;
 }
 
-bool SE2::get_state(const int& _state_id, StateSpace::State* _state) const {
-    _state = m_state_map[_state_id];
-    return (is_valid_state(_state));
+StateSpace::State* SE2::get_state(const int& _state_id) const {
+    if (_state_id >= size()) {
+        return nullptr;
+    }
+
+    return m_state_map[_state_id];
 }
 
 bool SE2::is_valid_state(const StateSpace::State* _state) const {
@@ -111,7 +115,7 @@ bool SE2::is_valid_state(const StateSpace::State* _state) const {
     return true;
 }
 
-int SE2::statespace_size() const {
+int SE2::size() const {
     return m_state_map.size();
 }
 

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.0)
 project(libcozmo)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
@@ -53,16 +53,34 @@ target_include_directories(cozmo PUBLIC
   $<INSTALL_INTERFACE:include>
 )
 
-target_include_directories(cozmo PRIVATE ${DART_INCLUDE_DIRS} ${aikido_INCLUDE_DIRS})
-target_include_directories(cozmo PUBLIC ${EIGEN3_INCLUDE_DIR})
-target_link_libraries(cozmo PUBLIC ${DART_LIBRARIES} ${aikido_LIBRARIES} aikido_distance)
+target_include_directories(
+  cozmo 
+  PUBLIC 
+    ${EIGEN3_INCLUDE_DIR}
+  PRIVATE 
+    ${DART_INCLUDE_DIRS} 
+    ${aikido_INCLUDE_DIRS}
+)
+target_link_libraries(
+  cozmo 
+  PUBLIC 
+    ${DART_LIBRARIES} 
+    ${aikido_LIBRARIES} 
+)
 
+################################################################################
+# TESTS       
+################################################################################
 catkin_add_gtest(test_libcozmo tests/statespace/test_statespace.cpp)
 target_link_libraries(test_libcozmo 
   cozmo 
   ${catkin_LIBRARIES}
   ${aikido_LIBRARIES}
 )
+
+################################################################################
+# EXECUTABLES       
+################################################################################
 
 add_executable(rviz_example src/examples/rviz_example.cpp)
 target_include_directories(rviz_example PRIVATE
@@ -91,7 +109,9 @@ target_link_libraries(execute_traj
   ${aikido_LIBRARIES}
 )
 
-#################### PYBIND ##############################
+################################################################################
+# PYBIND 
+################################################################################
 
 include_directories(${catkin_INCLUDE_DIRS})
 
