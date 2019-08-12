@@ -41,6 +41,15 @@ class ObjectOrientedAction {
 
 class ObjectOrientedActionSpace {
     public:
+        /**
+            Speed can be any real number, in millimeters / s
+            negative speed refers to backward movement
+
+            Duration should be >= 0, in seconds
+
+            If num_offset is even, there will be no
+            center position for edges of the object
+        */
         ObjectOrientedActionSpace(
             const double& min_speed,
             const double& max_speed,
@@ -59,13 +68,19 @@ class ObjectOrientedActionSpace {
             clear_actions();
         }
 
+        /**
+            Calculates the similarity between two actions in the action space
+
+            Similarity is defined by the euclidean distance
+            between all attributes of an ObjectOrientedAction
+        */
         double action_similarity(
             const int& action_id1,
             const int& action_id2) const;
 
-        /** 
+        /**
             Generates actions given another object's position and theta
-            
+
             Parameters
             ----------
             obj_pos is an (x, y) coordinate in millimeters

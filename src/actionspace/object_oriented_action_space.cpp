@@ -7,6 +7,26 @@ using namespace std;
 namespace libcozmo {
 namespace actionspace {
 
+double ObjectOrientedActionSpace::action_similarity(
+    const int& action_id1,
+    const int& action_id2) const
+{
+    if (!(is_valid_action_id(action_id1) && is_valid_action_id(action_id2))) {
+        throw std::out_of_range("Action ID invalid");
+    }
+    return sqrt(
+        pow((actions[action_id1]->speed -
+            actions[action_id2]->speed), 2) +
+        pow((actions[action_id1]->duration -
+            actions[action_id2]->duration), 2) +
+        pow((actions[action_id1]->start_pos(0) -
+            actions[action_id2]->start_pos(0)), 2) +
+        pow((actions[action_id1]->start_pos(1) -
+            actions[action_id2]->start_pos(1)), 2) +
+        pow((actions[action_id1]->theta -
+            actions[action_id2]->theta), 2));
+}
+
 void ObjectOrientedActionSpace::clear_actions() {
     for (size_t i = 0; i < actions.size(); ++i) {
         delete(actions[i]);
@@ -41,7 +61,7 @@ void ObjectOrientedActionSpace::find_sides(vector<double>& cube_sides, const dou
     Finds the start position given some other object's position,
     its theta, and the vertical (v_offset) and horizontal (cube_offset)
     distances away from said object
-    
+
     Vertical means perpendicular to the edge of an object
     Horizontal means parallel to the edge of an object
 */
@@ -56,9 +76,9 @@ void ObjectOrientedActionSpace::find_start_pos(
     start_pos(1) = obj_pos(1) - v_offset * sin(theta) - cube_offset * cos(theta);
 }
 
-/** 
+/**
     Generates actions given another object's position and theta
-    
+
     Parameters
     ----------
     obj_pos is an (x, y) coordinate in millimeters
@@ -70,7 +90,7 @@ void ObjectOrientedActionSpace::find_start_pos(
 
     Horizontal means parallel to the edge of an object
     Vertical means perpendicular to the edge of an object
-    
+
     This function will clear any previously generated actions in the action space
 */
 void ObjectOrientedActionSpace::generate_actions(
@@ -95,7 +115,7 @@ void ObjectOrientedActionSpace::generate_actions(
             for (const auto& speed : speeds) {
                 for (const auto& duration : durations) {
                     Eigen::Vector2d start_pos;
-                    find_start_pos(obj_pos, start_pos, v_offset, cube_offset, theta);
+                    find_start_pos(obj_pos, start_pos, v_offset, cube_offset, side);
                     actions.push_back(new ObjectOrientedAction(speed, duration, start_pos, side));
                 }
             }
@@ -121,13 +141,13 @@ bool ObjectOrientedActionSpace::is_valid_action_id(const int& action_id) const {
 void ObjectOrientedActionSpace::view_action_space() const {
     for (size_t i = 0; i < actions.size(); ++i) {
         if (i % 5 == 0) {
-            cout << "\n";
+            ObjectOrientedAction* a = actions[i];
+            cout << i << " : ";
+            cout << "Position: (" << a->start_pos(0) << ", " << a->start_pos(1) << "), ";
+            cout << "Angle: "<< a->theta << ", ";
+            cout << "Speed: " << a->speed << ", ";
+            cout << "Duration: " << a->duration << "\n";
         }
-        ObjectOrientedAction* a = actions[i];
-        cout << i << " : ";
-        cout << "Location: " << a->start_pos(0) << ", " << a->start_pos(1) << ", " << a->theta << ", ";
-        cout << "Speed: " << a->speed << ", ";
-        cout << "Duration: " << a->duration << "\n";
     }
 }
 
