@@ -101,16 +101,17 @@ class StateSpace
 
     /// Gets the distance between two SE2 states
     ///
-    /// \param _state_1, _state_2 The discrete states to calculate the SE2 
-    /// distance between (assumption: states are valid)
+    /// \param _state_1, _state_2 The discrete states to calculate the distance
+    /// between; distance metric varies based on states (assumption: states are 
+    /// valid)
     /// \return Distance between the states
     virtual double get_distance(
         const State& _state_1, const State& _state_2) const = 0;
 
     /// Gets the distance between two SE2 states
     ///
-    /// \param _state_1, _state_2 The continuous states to calculate the SE2 
-    /// distance between
+    /// \param _state_1, _state_2 The continuous states to calculate the 
+    /// distance between; distance metric varies based on states
     /// \return Distance between the states
     virtual double get_distance(
         const aikido::statespace::StateSpace::State& _state_1,
