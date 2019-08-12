@@ -379,7 +379,6 @@ def cozmo_run(robot: cozmo.robot):
         look_around.stop()
     
     oos = ObjectOrientedActionSpace(robot, cube, 3, 10, 100, 3, 1, 5, 3)
-    print(cube.pose)
     oos.view_action_space()
     oos.apply_action(81)
     
