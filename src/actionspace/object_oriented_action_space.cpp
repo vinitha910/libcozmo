@@ -72,8 +72,8 @@ void ObjectOrientedActionSpace::find_start_pos(
     const double& cube_offset,
     const double& theta) const
 {
-    start_pos(0) = obj_pos(0) - v_offset * cos(theta) + cube_offset * sin(theta);
-    start_pos(1) = obj_pos(1) - v_offset * sin(theta) - cube_offset * cos(theta);
+    start_pos.x() = obj_pos.x() - v_offset * cos(theta) + cube_offset * sin(theta);
+    start_pos.y() = obj_pos.y() - v_offset * sin(theta) - cube_offset * cos(theta);
 }
 
 /**
@@ -136,6 +136,23 @@ int ObjectOrientedActionSpace::get_action_space_size() const {
 
 bool ObjectOrientedActionSpace::is_valid_action_id(const int& action_id) const {
     return action_id < actions.size() && action_id >= 0;
+}
+
+void ObjectOrientedActionSpace::publish_action(const int& action_id) const {
+    if (!is_valid_action_id(action_id)) {
+        throw out_of_range("Action ID invalid");
+    }
+    libcozmo::OOAction msg;
+    auto action = get_action(action_id);
+    msg.speed = action->speed;
+    msg.duration = action->duration;
+    msg.x = action->start_pos.x();
+    msg.y = action->start_pos.x();
+    msg.theta = action->theta;
+
+    action_publisher.publish(msg);
+    ros::spinOnce();
+
 }
 
 void ObjectOrientedActionSpace::view_action_space() const {

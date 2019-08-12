@@ -2,8 +2,10 @@
 #define OBJECT_ORIENTED_ACTION_SPACE
 
 #include <Eigen/Dense>
-#include "utils/utils.hpp"
+#include <ros/ros.h>
 #include <vector>
+#include "utils/utils.hpp"
+#include <libcozmo/OOAction.h>
 
 namespace libcozmo {
 namespace actionspace {
@@ -103,6 +105,8 @@ class ObjectOrientedActionSpace {
 
         int get_action_space_size() const;
 
+        void publish_action(const int& action_id) const;
+
         // Outputs all the actions in the action space with their corresponding action id
         void view_action_space() const;
 
@@ -111,6 +115,10 @@ class ObjectOrientedActionSpace {
         std::vector<double> durations;
         int num_offset;
         std::vector<ObjectOrientedAction*> actions;
+
+        // Cozmo ROS node handle
+        ros::NodeHandle cozmo_handle;
+        ros::Publisher action_publisher;
 
         void clear_actions();
 
