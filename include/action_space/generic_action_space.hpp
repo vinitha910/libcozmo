@@ -27,48 +27,48 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef COZMO_GENERIC_ACTION_SPACE_CPP
-#define COZMO_GENERIC_ACTION_SPACE_CPP
+#ifndef LIBCOZMO_ACTIONSPACE_GENERICACTIONSPACE_HPP
+#define LIBCOZMO_ACTIONSPACE_GENERICACTIONSPACE_HPP
 
 #include <ros/ros.h>
 #include <Eigen/Dense>
 #include <cmath>
 #include "utils/utils.hpp"
 #include <libcozmo/ActionMsg.h>
+#include "ActionSpace.hpp"
 
 namespace libcozmo {
 namespace actionspace {
 
-// Generic Action class
-class GenericAction {
- public:
-    // Constructor
-
-    // \param speed The speed of action (m/s)
-    // \param duration The duration of action (s)
-    // \param direction The (x,y) direction vector of action (m)
-    GenericAction(
-        const double& speed,
-        const double& duration,
-        const Eigen::Vector2d& direction) : \
-        m_speed(speed),
-        m_duration(duration),
-        m_direction(direction) {}
-    ~GenericAction() {}
-
-    // Speed of action (m/s)
-    const double m_speed;
-
-    // Duration of action (s)
-    const double m_duration;
-
-    // (x,y) direction vector (m)
-    const Eigen::Vector2d m_direction;
-};
-
 // Generic Actionspace for Cozmo
-class GenericActionSpace {
+class GenericActionSpace : public virtual ActionSpace {
  public:
+        // Generic Action class
+    class Action : public ActionSpace::Action {
+      public:
+        // Constructor
+
+        // \param speed The speed of action (m/s)
+        // \param duration The duration of action (s)
+        // \param direction The (x,y) direction vector of action (m)
+        Action(
+            const double& speed,
+            const double& duration,
+            const Eigen::Vector2d& direction) : \
+            m_speed(speed),
+            m_duration(duration),
+            m_direction(direction) {}
+        ~Action() {}
+
+        // Speed of action (m/s)
+        const double m_speed;
+
+        // Duration of action (s)
+        const double m_duration;
+
+        // (x,y) direction vector (m)
+        const Eigen::Vector2d m_direction;
+    };
     // Constructor
 
     // \param min_speed The minimum speed of action
@@ -102,7 +102,7 @@ class GenericActionSpace {
                 m_directions.push_back(
                     Eigen::Vector2d(cos(angle), sin(angle)));
             }
-            m_actions = std::vector<GenericAction*>(
+            m_actions = std::vector<Action*>(
                 num_speed *
                 num_duration *
                 num_directions,
@@ -112,7 +112,7 @@ class GenericActionSpace {
                     for (int l = 0; l < num_directions; l++) {
                         const int id = j * num_duration * num_directions +
                             k * num_directions + l;
-                        m_actions[id] = new GenericAction(
+                        m_actions[id] = new Action(
                             m_speeds[j],
                             m_durations[k],
                             m_directions[l]);
@@ -135,22 +135,22 @@ class GenericActionSpace {
     // \param action_id1, actionid2 The ID of two actions to compare
     double action_similarity(
         const int& action_id1,
-        const int& action_id2) const;
+        const int& action_id2) const override;
 
     // Returns pointer to action given action ID
 
     // \param action_id The action ID
-    GenericAction* get_action(const int& action_id) const;
+    Action* get_action(const int& action_id) const override;
 
     // Publishes action to a listener given action ID
 
     // \param action_id The action ID
-    void publish_action(const int& action_id) const;
+    void publish_action(const int& action_id) const override;
 
  private:
-    bool is_valid_action_id(const int& action_id) const;
+    bool is_valid_action_id(const int& action_id) const override;
     // // Vector of actions
-    std::vector<GenericAction*> m_actions;
+    std::vector<Action*> m_actions;
     // Cozmo ROS node handle
     ros::NodeHandle cozmo_handle;
     ros::Publisher action_publisher;

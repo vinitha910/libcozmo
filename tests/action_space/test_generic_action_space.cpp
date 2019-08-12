@@ -44,7 +44,7 @@ class GenericActionFixture: public ::testing::Test {
     }
 
     ~GenericActionFixture()  {}
-    libcozmo::actionspace::GenericAction m_action;
+    libcozmo::actionspace::GenericActionSpace::Action m_action;
     libcozmo::actionspace::GenericActionSpace m_actionspace;
 };
 
@@ -55,7 +55,7 @@ TEST_F(GenericActionFixture, ActionSimilarityTest) {
 
 // Check actions generated, along with get_action
 TEST_F(GenericActionFixture, ActionGenerationTest) {
-    libcozmo::actionspace::GenericAction* action = m_actionspace.get_action(0);
+    libcozmo::actionspace::GenericActionSpace::Action* action = m_actionspace.get_action(0);
 
     EXPECT_NEAR(0, action->m_speed, 0.00001);
     EXPECT_NEAR(0, action->m_duration, 0.00001);

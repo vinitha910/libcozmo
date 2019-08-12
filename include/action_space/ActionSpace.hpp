@@ -1,5 +1,5 @@
-////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2019,  Brian Lee, Vinitha Ranganeni
+//////////////////////////////////////////////////////////////////////////////
+// Copyright (c) 2019, Vinitha Ranganeni
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -27,53 +27,45 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <action_space/generic_action_space.hpp>
-#include <exception>
-#include <iostream>
-
+#ifndef LIBCOZMO_ACTIONSPACE_ACTIONSPACE_HPP_
+#define LIBCOZMO_ACTIONSPACE_ACTIONSPACE_HPP_
 
 namespace libcozmo {
 namespace actionspace {
 
-double GenericActionSpace::action_similarity(
-    const int& action_id1,
-    const int& action_id2) const {
+class ActionSpace
+{
+ public:
 
-    if (!(is_valid_action_id(action_id1) &&
-        is_valid_action_id(action_id2))) {
-        throw std::out_of_range("Action ID invalid");
-    }
-    return sqrt(
-        pow((m_actions[action_id1]->m_speed -
-            m_actions[action_id2]->m_speed), 2) +
-        pow((m_actions[action_id1]->m_duration -
-            m_actions[action_id2]->m_duration), 2) +
-        pow((m_actions[action_id1]->m_direction.x() -
-            m_actions[action_id2]->m_direction.x()), 2) +
-        pow((m_actions[action_id1]->m_direction.y() -
-            m_actions[action_id2]->m_direction.y()), 2));
-}
+    /// Base class for all Actions
+    class Action;
 
-GenericActionSpace::Action* GenericActionSpace::get_action(const int& action_id) const {
-    if (!is_valid_action_id(action_id)) {
-        throw std::out_of_range("Action ID invalid");
-    }
-    return m_actions[action_id];
-}
+    // Calculates and returns similarity with another action
+    // Similarity is defined by the euclidean distance based on
+    // their speed, duration, and direction (x,y calcualted separately)
 
-bool GenericActionSpace::is_valid_action_id(const int& action_id) const {
-    return ((action_id < m_actions.size() && action_id >= 0));
-}
+    // \param action_id1, actionid2 The ID of two actions to compare
+    virtual double action_similarity(
+        const int& action_id1,
+        const int& action_id2) const = 0;
 
-void GenericActionSpace::publish_action(const int& action_id) const {
-    libcozmo::ActionMsg msg;
-    auto action = get_action(action_id);
-    msg.speed = action->m_speed;
-    Eigen::Vector2d direction = action->m_direction;
-    msg.heading = atan(direction.y() / direction.x());
-    msg.duration = action->m_duration;
-    action_publisher.publish(msg);
-    ros::spinOnce();
-}
+    virtual Action* get_action(const int& action_id) const = 0;
+
+    virtual void publish_action(const int& action_id) const = 0;
+ private:
+    virtual bool is_valid_action_id(const int& action_id) const = 0;
+};
+
+class ActionSpace::Action
+{
+ protected:
+    // This is a base class that should only only be used in derived classes.
+    Action() = default;
+
+    ~Action() = default;
+};
+
 }  // namespace actionspace
 }  // namespace libcozmo
+
+#endif
