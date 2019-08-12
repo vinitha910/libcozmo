@@ -5,7 +5,7 @@ This file implements publishers for various states and sensors of the Cozmo robo
 These include forklift position, head position, robot pose, camera data, and inertia data.
 """
 import rospy
-from libcozmo.msg import ForkLift, OOAction
+from libcozmo.msg import ForkLift
 from std_msgs.msg import Float64
 from geometry_msgs.msg import Pose, Point, Quaternion
 from sensor_msgs.msg import Image, Imu
