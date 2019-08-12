@@ -98,49 +98,49 @@ class SE2 : public virtual StateSpace {
     ~SE2();
 
     /// Documentation inherited
-    int get_or_create_state(const StateSpace::State* _state) override;
+    int get_or_create_state(const StateSpace::State& _state) override;
 
     /// Documentation inherited
     int get_or_create_state(
-        const aikido::statespace::StateSpace::State* _state) override;
+        const aikido::statespace::StateSpace::State& _state) override;
     
     /// Documentation inherited    
     void discrete_state_to_continuous(
-        const StateSpace::State* _state,
+        const StateSpace::State& _state,
         aikido::statespace::StateSpace::State* _continuous_state) const override;
 
     /// Documentation inherited
     void continuous_state_to_discrete(
-        const aikido::statespace::StateSpace::State* _state, 
+        const aikido::statespace::StateSpace::State& _state, 
         StateSpace::State* _discrete_state) const override;
 
     /// Documentation inherited
     bool get_state_id(
-        const StateSpace::State* _state, int* _state_id) const override;
+        const StateSpace::State& _state, int* _state_id) const override;
 
     /// Documentation inherited
     StateSpace::State* get_state(const int& _state_id) const override;
 
     /// Documentation inherited
     /// State is valid if theta is in [0, num_theta_vals]
-    bool is_valid_state(const StateSpace::State* _state) const override;
+    bool is_valid_state(const StateSpace::State& _state) const override;
 
     /// Documentation inherited
     int size() const override;
 
     /// Documentation inherited
     double get_distance(
-        const StateSpace::State* _state_1,
-        const StateSpace::State* _state_2) const override;
+        const StateSpace::State& _state_1,
+        const StateSpace::State& _state_2) const override;
     
     /// Documentation inherited
     double get_distance(
-        const aikido::statespace::StateSpace::State* _state_1,
-        const aikido::statespace::StateSpace::State* _state_2) const override;
+        const aikido::statespace::StateSpace::State& _state_1,
+        const aikido::statespace::StateSpace::State& _state_2) const override;
     
     /// Documentation inherited
     void copy_state(
-        const StateSpace::State* _source, 
+        const StateSpace::State& _source, 
         StateSpace::State* _destination) const override;
 
  private:

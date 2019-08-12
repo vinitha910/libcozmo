@@ -40,11 +40,8 @@ class SE2StatespaceTest: public ::testing::Test {
         statespace(0.1, 8), resolution(0.1), num_theta_vals(8) {}
 
     void SetUp() {
-        SE2::State state_1(3, 2, 1);
-        statespace.get_or_create_state(&state_1);
-
-        SE2::State state_2(1, 3, 3);
-        statespace.get_or_create_state(&state_2);
+        statespace.get_or_create_state(SE2::State(3, 2, 1));
+        statespace.get_or_create_state(SE2::State(1, 3, 3));
     }
 
     void TearDown() {}
@@ -59,27 +56,23 @@ class SE2StatespaceTest: public ::testing::Test {
 
 TEST_F(SE2StatespaceTest, GetsOrCreatesDiscreteState) {
     // Cheking existing states IDs are returned correctly
-    SE2::State state_1(3, 2, 1);
-    EXPECT_EQ(0, statespace.get_or_create_state(&state_1));
-    SE2::State state_2(1, 3, 3);
-    EXPECT_EQ(1, statespace.get_or_create_state(&state_2));
+    EXPECT_EQ(0, statespace.get_or_create_state(SE2::State(3, 2, 1)));
+    EXPECT_EQ(1, statespace.get_or_create_state(SE2::State(1, 3, 3)));
 
     // Checking that new state is created and appropiate ID is returned
-    SE2::State state_3(1, 1, 1);
-    EXPECT_EQ(2, statespace.get_or_create_state(&state_3));
+    EXPECT_EQ(2, statespace.get_or_create_state(SE2::State(1, 1, 1)));
 }
 
 TEST_F(SE2StatespaceTest, GetsOrCreatesContinuousState) {
     // Checking that new state is created and appropiate ID is returned
     aikido::statespace::SE2::State state;
     continuous_statespace.expMap(Eigen::Vector3d(1, 1, 1), &state);
-    EXPECT_EQ(2, statespace.get_or_create_state(&state));
+    EXPECT_EQ(2, statespace.get_or_create_state(state));
 }
 
 TEST_F(SE2StatespaceTest, DiscreteToContinuousStateConversion) {
-    SE2::State in_state(1, 2, 1);
     aikido::statespace::SE2::State out_state;
-    statespace.discrete_state_to_continuous(&in_state, &out_state);
+    statespace.discrete_state_to_continuous(SE2::State(1, 2, 1), &out_state);
 
     Eigen::VectorXd log_state;
     continuous_statespace.logMap(&out_state, log_state);
@@ -94,7 +87,7 @@ TEST_F(SE2StatespaceTest, ContinuousToDiscreteStateConversion) {
         Eigen::Vector3d(0.17, 0.257, M_PI/5), &in_state);
     
     SE2::State out_state;
-    statespace.continuous_state_to_discrete(&in_state, &out_state);
+    statespace.continuous_state_to_discrete(in_state, &out_state);
 
     EXPECT_DOUBLE_EQ(out_state.getX(), 1);
     EXPECT_DOUBLE_EQ(out_state.getY(), 2);
@@ -103,16 +96,13 @@ TEST_F(SE2StatespaceTest, ContinuousToDiscreteStateConversion) {
 
 TEST_F(SE2StatespaceTest, GetsStateID) {
     int state_id;
-    SE2::State state_1(3, 2, 1);
-    EXPECT_TRUE(statespace.get_state_id(&state_1, &state_id));
+    EXPECT_TRUE(statespace.get_state_id(SE2::State(3, 2, 1), &state_id));
     EXPECT_EQ(state_id, 0);
 
-    SE2::State state_2(1, 3, 3);
-    EXPECT_TRUE(statespace.get_state_id(&state_2, &state_id));
+    EXPECT_TRUE(statespace.get_state_id(SE2::State(1, 3, 3), &state_id));
     EXPECT_EQ(state_id, 1);   
 
-    SE2::State state_3(1, 0, 3);
-    EXPECT_FALSE(statespace.get_state_id(&state_3, &state_id));       
+    EXPECT_FALSE(statespace.get_state_id(SE2::State(1, 0, 3), &state_id));       
 }
 
 TEST_F(SE2StatespaceTest, GetsState) {
@@ -130,14 +120,9 @@ TEST_F(SE2StatespaceTest, GetsState) {
 }
 
 TEST_F(SE2StatespaceTest, IsValidState) {
-    SE2::State state_1(1, 1, 0);
-    EXPECT_TRUE(statespace.is_valid_state(&state_1));
-
-    SE2::State state_2(1, 1, 7);
-    EXPECT_TRUE(statespace.is_valid_state(&state_2));
-
-    SE2::State state_3(1, 1, 8);
-    EXPECT_FALSE(statespace.is_valid_state(&state_3));
+    EXPECT_TRUE(statespace.is_valid_state(SE2::State(1, 1, 0)));
+    EXPECT_TRUE(statespace.is_valid_state(SE2::State(1, 1, 7)));
+    EXPECT_FALSE(statespace.is_valid_state(SE2::State(1, 1, 8)));
 }
 
 TEST_F(SE2StatespaceTest, StateSpaceSize) {
@@ -145,19 +130,19 @@ TEST_F(SE2StatespaceTest, StateSpaceSize) {
 }
 
 TEST_F(SE2StatespaceTest, GetsDistanceBetweenDiscreteStates) {
-    SE2::State s1(1, 1, 1);
-    SE2::State s2(2, 2, 1);
-    EXPECT_DOUBLE_EQ(sqrt(0.02), statespace.get_distance(&s1, &s2));
+    EXPECT_DOUBLE_EQ(
+        sqrt(0.02), 
+        statespace.get_distance(SE2::State(1, 1, 1), SE2::State(2, 2, 1)));
 
-    SE2::State s3(1, 1, 0);
-    SE2::State s4(2, 2, 1);
-    EXPECT_NEAR(0.7980, statespace.get_distance(&s3, &s4), 0.0001);
+    EXPECT_NEAR(
+        0.798, 
+        statespace.get_distance(SE2::State(1, 1, 0), SE2::State(2, 2, 1)),
+        0.0001);
 }
 
 TEST_F(SE2StatespaceTest, CopyState) {
-    SE2::State src(1, 1, 1);
     SE2::State dest;
-    statespace.copy_state(&src, &dest);
+    statespace.copy_state(SE2::State(1, 1, 1), &dest);
 
     EXPECT_EQ(1, dest.getX());
     EXPECT_EQ(1, dest.getY());

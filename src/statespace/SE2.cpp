@@ -42,56 +42,56 @@ SE2::~SE2() {
     m_state_map.clear();
 }
 
-int SE2::get_or_create_state(const StateSpace::State* _state) {
-    const auto state = static_cast<const State*>(_state);
-    const auto state_id = m_state_to_id_map.find(*state);
+int SE2::get_or_create_state(const StateSpace::State& _state) {
+    const State state = static_cast<const State&>(_state);
+    const auto state_id = m_state_to_id_map.find(state);
     if (state_id != m_state_to_id_map.end()) {
         return state_id->second;
-    } else {
-        auto new_state = create_state();
-        copy_state(state, new_state);
-        m_state_to_id_map[*state] = m_state_map.size() - 1;
-        return m_state_map.size() - 1;
     }
+
+    StateSpace::State* new_state = create_state();
+    copy_state(state, new_state);
+    m_state_to_id_map[state] = m_state_map.size() - 1;
+    return m_state_map.size() - 1;    
 }
 
 int SE2::get_or_create_state(
-    const aikido::statespace::StateSpace::State* _state) {
+    const aikido::statespace::StateSpace::State& _state) {
     State discrete_state;
     continuous_state_to_discrete(_state, &discrete_state);
-    return get_or_create_state(&discrete_state);
+    return get_or_create_state(discrete_state);
 }
 
 void SE2::discrete_state_to_continuous(
-    const StateSpace::State* _state,
+    const StateSpace::State& _state,
     aikido::statespace::StateSpace::State* _continuous_state) const {
-    const auto state = static_cast<const State*>(_state);
+    const State state = static_cast<const State&>(_state);
     
     Eigen::VectorXd state_log(3);
     state_log.head<2>() =
-        discrete_position_to_continuous(Eigen::Vector2i(state->x, state->y));
+        discrete_position_to_continuous(Eigen::Vector2i(state.x, state.y));
     state_log[2] =
-        discrete_angle_to_continuous(state->theta);
+        discrete_angle_to_continuous(state.theta);
     m_statespace->expMap(state_log, _continuous_state);
 }
 
 void SE2::continuous_state_to_discrete(
-    const aikido::statespace::StateSpace::State* _state, 
+    const aikido::statespace::StateSpace::State& _state, 
     StateSpace::State* _discrete_state) const {
     Eigen::VectorXd log_state;
-    m_statespace->logMap(_state, log_state);
+    m_statespace->logMap(&_state, log_state);
 
     const Eigen::Vector2i position = 
         continuous_position_to_discrete(log_state.head<2>());
     const int theta = continuous_angle_to_discrete(log_state[2]);
     
-    auto discrete_state = static_cast<State*>(_discrete_state);
+    State* discrete_state = static_cast<State*>(_discrete_state);
     *discrete_state = State(position.x(), position.y(), theta);
 }
 
-bool SE2::get_state_id(const StateSpace::State* _state, int* _state_id) const {
-    const auto state = static_cast<const State*>(_state);
-    const auto state_id_iter = m_state_to_id_map.find(*state);
+bool SE2::get_state_id(const StateSpace::State& _state, int* _state_id) const {
+    const State state = static_cast<const State&>(_state);
+    const auto state_id_iter = m_state_to_id_map.find(state);
     if (state_id_iter != m_state_to_id_map.end()) {
         *_state_id = state_id_iter->second;
         return true;
@@ -107,9 +107,9 @@ StateSpace::State* SE2::get_state(const int& _state_id) const {
     return m_state_map[_state_id];
 }
 
-bool SE2::is_valid_state(const StateSpace::State* _state) const {
-    const auto state = static_cast<const State*>(_state);
-    if (!(state->theta >= 0 && state->theta < m_num_theta_vals)) {
+bool SE2::is_valid_state(const StateSpace::State& _state) const {
+    const State& state = static_cast<const State&>(_state);
+    if (!(state.theta >= 0 && state.theta < m_num_theta_vals)) {
         return false;
     }
     return true;
@@ -120,8 +120,8 @@ int SE2::size() const {
 }
 
 double SE2::get_distance(
-    const StateSpace::State* _state_1,
-    const StateSpace::State* _state_2) const {
+    const StateSpace::State& _state_1,
+    const StateSpace::State& _state_2) const {
     aikido::statespace::SE2::State continuous_state_1;
     discrete_state_to_continuous(_state_1, &continuous_state_1);  
     aikido::statespace::SE2::State continuous_state_2;  
@@ -130,16 +130,16 @@ double SE2::get_distance(
 }
 
 double SE2::get_distance(
-    const aikido::statespace::StateSpace::State* _state_1,
-    const aikido::statespace::StateSpace::State* _state_2) const {
-    return m_distance_metric.distance(_state_1, _state_2);
+    const aikido::statespace::StateSpace::State& _state_1,
+    const aikido::statespace::StateSpace::State& _state_2) const {
+    return m_distance_metric.distance(&_state_1, &_state_2);
 }
 
 void SE2::copy_state(
-    const StateSpace::State* _source, StateSpace::State* _destination) const {
-    const State* source = static_cast<const State*>(_source);
+    const StateSpace::State& _source, StateSpace::State* _destination) const {
+    const State& source = static_cast<const State&>(_source);
     State* destination = static_cast<State*>(_destination);
-    *destination = State(source->x, source->y, source->theta);
+    *destination = State(source.x, source.y, source.theta);
 }
 
 StateSpace::State* SE2::create_state() {
