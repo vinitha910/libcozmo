@@ -59,7 +59,7 @@ class ActionSpace
 class ActionSpace::Action
 {
  protected:
-    // This is a base class that should only only be used in derived classes.
+    // This is a base class that should only be used in derived classes.
     Action() = default;
 
     ~Action() = default;
