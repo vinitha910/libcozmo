@@ -20,7 +20,7 @@ find_package(aikidopy REQUIRED COMPONENTS libaikidopy)
 add_message_files(
   FILES
   ForkLift.msg
-  OOAction.msg
+  ObjectOrientedAction.msg
 )
 
 generate_messages(
@@ -80,8 +80,8 @@ target_link_libraries(test_libcozmo
   ${aikido_LIBRARIES}
 )
 
-catkin_add_gtest(test_oo_action_space tests/actionspace/test_object_oriented_action_space.cpp)
-target_link_libraries(test_oo_action_space
+catkin_add_gtest(test_object_oriented_action_space tests/actionspace/test_object_oriented_action_space.cpp)
+target_link_libraries(test_object_oriented_action_space
     cozmo
 )
 

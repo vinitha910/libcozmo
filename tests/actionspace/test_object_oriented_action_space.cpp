@@ -36,11 +36,11 @@ public:
 };
 
 TEST_F(SimpleOOActionFixture, ActionSpaceSizeTest) {
-    EXPECT_EQ(36, m_actionspace.get_action_space_size());
+    EXPECT_EQ(36, m_actionspace.size());
 }
 
 TEST_F(SimpleOOActionFixture, ActionGenerationTest) {
-    libcozmo::actionspace::ObjectOrientedAction* action = m_actionspace.get_action(5);
+    libcozmo::actionspace::ObjectOrientedActionSpace::ObjectOrientedAction* action = m_actionspace.get_action(5);
     EXPECT_NEAR(124.969, action->start_pos.x(), 0.001);
     EXPECT_NEAR(145.442, action->start_pos.y(), 0.001);
     EXPECT_EQ(2, action->theta);
@@ -86,11 +86,11 @@ TEST_F(SimpleOOActionFixture, OORExceptionTest) {
 }
 
 TEST_F(ComplexOOActionFixture, ActionSpaceSizeTest) {
-    EXPECT_EQ(1540, m_actionspace.get_action_space_size());
+    EXPECT_EQ(1540, m_actionspace.size());
 }
 
 TEST_F(ComplexOOActionFixture, ActionGenerationTest) {
-    libcozmo::actionspace::ObjectOrientedAction* action = m_actionspace.get_action(75);
+    libcozmo::actionspace::ObjectOrientedActionSpace::ObjectOrientedAction* action = m_actionspace.get_action(75);
     EXPECT_NEAR(88.5969, action->start_pos.x(), 0.0001);
     EXPECT_NEAR(128.796, action->start_pos.y(), 0.001);
     EXPECT_EQ(2, action->theta);
