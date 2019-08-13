@@ -31,6 +31,7 @@
 #define COZMO_UTILS_HPP_
 
 #include <vector>
+#include <cmath>
 
 namespace libcozmo {
 namespace utils {
@@ -45,6 +46,14 @@ std::vector<T> linspace(T a, T b, std::size_t N) {
     for (x = xs.begin(), val = a; x != xs.end(); ++x, val += h)
         *x = val;
     return xs;
+}
+
+double euclidean(std::vector<T> a, std::vector<T> b) {
+    double distance = 0;
+    for (int i = 0; i < a.size(); i++) {
+        distance = distance + pow((a[i] - b[i]), 2)
+    }
+    return sqrt(distance);
 }
 
 }  //  namespace utils
