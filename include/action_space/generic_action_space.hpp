@@ -40,69 +40,64 @@
 namespace libcozmo {
 namespace actionspace {
 
-// Generic Actionspace for Cozmo
+/// This class represents the generic actionspace for Cozmo
+/// All actions are not planned specific to any object, but instead
+/// with respect to the Cozmo robot itself
 class GenericActionSpace : public virtual ActionSpace {
  public:
-        // Generic Action class
+        /// Generic Action class
     class Action : public ActionSpace::Action {
       public:
-        // Constructor
+        /// Constructor for identity state
+        /// Action(): m_speed(0), m_duration(0), m_direction(Eigen::Vector2d(0, 0)) {};
+        
+        /// ~Action() = default;
 
-        // \param speed The speed of action (m/s)
-        // \param duration The duration of action (s)
-        // \param direction The (x,y) direction vector of action (m)
-        Action(
+        /// Constructor
+
+        /// \param speed The speed of action (m/s)
+        /// \param duration The duration of action (s)
+        /// \param direction The (x,y) direction vector of action (m)
+        explicit Action(
             const double& speed,
             const double& duration,
-            const Eigen::Vector2d& direction) : \
+            const double& heading) : \
             m_speed(speed),
             m_duration(duration),
-            m_direction(direction) {}
-        ~Action() {}
+            m_heading(heading) {}
 
-        // Speed of action (m/s)
+        /// Speed of action (m/s)
         const double m_speed;
 
-        // Duration of action (s)
+        /// Duration of action (s)
         const double m_duration;
 
-        // (x,y) direction vector (m)
-        const Eigen::Vector2d m_direction;
-    };
-    // Constructor
+        /// Heading of action (radians)
+        const double m_heading;
 
-    // \param min_speed The minimum speed of action
-    // \param max_speed The maximum speed of action
-    // \param min_duration The minimum duration of action
-    // \param max_duration The maximum duration of action
-    // \param num_speed The number of speed values for the actions
-    // \param num_duration The number of duration values for the actions
-    // \param num_directions The number of direction values for the actions
-    // num_directions must be in powers of 2 and >= 4
+    };
+    /// Constructor
+
+    /// \param min_speed The minimum speed of action
+    /// \param max_speed The maximum speed of action
+    /// \param min_duration The minimum duration of action
+    /// \param max_duration The maximum duration of action
+    /// \param num_speed The number of speed values for the actions
+    /// \param num_duration The number of duration values for the actions
+    /// \param num_directions The number of direction values for the actions
+    /// num_directions must be in powers of 2 and >= 4
     GenericActionSpace(
-        const double& min_speed,
-        const double& max_speed,
+        const std::vector<double>& m_speeds,
+        std::vector<double> m_directions,
         const double& min_duration,
         const double& max_duration,
-        const int& num_speed,
-        const int& num_duration,
-        const int& num_directions) {
-            // cozmo_handle = node_handle;
-            std::vector<double> m_speeds = utils::linspace(
-                min_speed,
-                max_speed,
-                num_speed);
+        const int& num_duration) {
+            int num_speed = m_speeds.size();
+            int num_directions = m_directions.size();
             std::vector<double> m_durations = utils::linspace(
                 min_duration,
                 max_duration,
                 num_duration);
-            std::vector<Eigen::Vector2d> m_directions;
-            for (int i = 0; i < num_directions; i++) {
-                const double angle = i * 2.0 * M_PI /
-                    static_cast<double>(num_directions);
-                m_directions.push_back(
-                    Eigen::Vector2d(cos(angle), sin(angle)));
-            }
             m_actions = std::vector<Action*>(
                 num_speed *
                 num_duration *
@@ -120,7 +115,6 @@ class GenericActionSpace : public virtual ActionSpace {
                   }
                 }
             }
-            // action_publisher = cozmo_handle.advertise<libcozmo::ActionMsg>("Action", 1000);
         }
     ~GenericActionSpace() {
         for (int i = 0; i < m_actions.size(); ++i) {
@@ -129,34 +123,24 @@ class GenericActionSpace : public virtual ActionSpace {
         m_actions.clear();
     }
 
-    // Calculates and returns similarity with another action
-    // Similarity is defined by the euclidean distance based on
-    // their speed, duration, and direction (x,y calcualted separately)
-
-    // \param action_id1, actionid2 The ID of two actions to compare
-    double action_similarity(
+    /// Documentation inherited
+    bool action_similarity(
         const int& action_id1,
-        const int& action_id2) const override;
+        const int& action_id2,
+        double* similarity) const override;
 
-    // Returns pointer to action given action ID
+    /// Documentation inherited
+    bool get_action(const int& action_id, ActionSpace::Action* action) const override;
 
-    // \param action_id The action ID
-    Action* get_action(const int& action_id) const override;
-
-    // Publishes action to a listener given action ID
-
-    // \param action_id The action ID
     void publish_action(const int& action_id, const ros::Publisher& publisher) const override;
 
- private:
     bool is_valid_action_id(const int& action_id) const override;
-    // // Vector of actions
+
+ private:
+    /// Vector of actions
     std::vector<Action*> m_actions;
-    // Cozmo ROS node handle
-    // ros::NodeHandle cozmo_handle;
-    // ros::Publisher action_publisher;
 };
-}  // namespace actionspace
-}  // namespace libcozmo
+}  /// namespace actionspace
+}  /// namespace libcozmo
 
 #endif

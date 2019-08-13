@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2019, Vinitha Ranganeni
+// Copyright (c) 2019, Brian Lee, Vinitha Ranganeni
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,31 +33,49 @@
 namespace libcozmo {
 namespace actionspace {
 
-class ActionSpace
-{
+/// Base class for all ActionSpace
+/// Handles graph representation of different actions available?
+class ActionSpace {
  public:
 
     /// Base class for all Actions
     class Action;
 
-    // Calculates and returns similarity with another action
-    // Similarity is defined by the euclidean distance based on
-    // their speed, duration, and direction (x,y calcualted separately)
+    /// Calculates similarity with another action
+    /// Calculation may vary based on action definition
 
-    // \param action_id1, actionid2 The ID of two actions to compare
-    virtual double action_similarity(
+    /// \param action_id1, actionid2 The IDs of two actions to compare
+    /// \return similarity
+    virtual bool action_similarity(
         const int& action_id1,
-        const int& action_id2) const = 0;
+        const int& action_id2,
+        double* similarity) const = 0;
 
-    virtual Action* get_action(const int& action_id) const = 0;
+    /// Finds action if the action with given ID exists 
+    
+    /// \param action_id The action ID
+    /// \param action The pointer to action
+    /// \return boolean; whether action with given ID exists
+    virtual bool get_action(const int& action_id, Action* action) const = 0;
 
+    /// Publishes action via ROS given its action ID
+
+    /// \param action_id The ID of the action to publish
+    /// \param publisher The ROS publisher
     virtual void publish_action(const int& action_id, const ros::Publisher& publisher) const = 0;
- private:
+    
+    /// Returns true if given action ID is valid; false otherwise
+
+    /// \param action_id The ID of the action to validate
+    /// \param boolean; whether id is valid or not
     virtual bool is_valid_action_id(const int& action_id) const = 0;
+
+    /// Returns number of actions within the action space
+    virtual int size() const = 0;
+
 };
 
-class ActionSpace::Action
-{
+class ActionSpace::Action {
  protected:
     // This is a base class that should only be used in derived classes.
     Action() = default;
