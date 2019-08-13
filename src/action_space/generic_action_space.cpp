@@ -44,15 +44,26 @@ bool GenericActionSpace::action_similarity(
         is_valid_action_id(action_id2))) {
         return false;
     } else {
-        *similarity = sqrt(
-        pow((m_actions[action_id1]->m_speed -
-            m_actions[action_id2]->m_speed), 2) +
-        pow((m_actions[action_id1]->m_duration -
-            m_actions[action_id2]->m_duration), 2) +
-        pow((m_actions[action_id1]->m_heading -
-            m_actions[action_id2]->m_heading), 2));
+        
+        Action* action1 = m_actions[action_id1];
+        Action* action2 = m_actions[action_id2];
+        
+        std::vector<double> action1_vector;
+        action1_vector.push_back(action1->m_speed);
+        action1_vector.push_back(action1->m_duration);
+        action1_vector.push_back(action1->m_heading);
+        std::vector<double> action2_vector;
+        action2_vector.push_back(action2->m_speed);
+        action2_vector.push_back(action2->m_duration);
+        action2_vector.push_back(action2->m_heading);
+        
+        *similarity = utils::euclidean(action1_vector, action2_vector);
         return true;
     }
+}
+
+int GenericActionSpace::size() const {
+    return m_actions.size();
 }
 // boolean get_action(const int& action_id, Action* action)
 bool GenericActionSpace::get_action(const int& action_id,  ActionSpace::Action* action) const {
@@ -67,7 +78,7 @@ bool GenericActionSpace::get_action(const int& action_id,  ActionSpace::Action* 
 }
 
 bool GenericActionSpace::is_valid_action_id(const int& action_id) const {
-    // return ((action_id < m_actions.size() && action_id >= 0));
+    return ((action_id < m_actions.size() && action_id >= 0));
 }
 
 void GenericActionSpace::publish_action(const int& action_id, const ros::Publisher& publisher) const {

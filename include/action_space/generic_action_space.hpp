@@ -136,6 +136,8 @@ class GenericActionSpace : public virtual ActionSpace {
 
     bool is_valid_action_id(const int& action_id) const override;
 
+    int size() const override;
+
  private:
     /// Vector of actions
     std::vector<Action*> m_actions;
