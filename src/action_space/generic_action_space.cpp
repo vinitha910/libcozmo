@@ -65,15 +65,14 @@ bool GenericActionSpace::is_valid_action_id(const int& action_id) const {
     return ((action_id < m_actions.size() && action_id >= 0));
 }
 
-void GenericActionSpace::publish_action(const int& action_id) const {
+void GenericActionSpace::publish_action(const int& action_id, const ros::Publisher& publisher) const {
     libcozmo::ActionMsg msg;
     auto action = get_action(action_id);
     msg.speed = action->m_speed;
     Eigen::Vector2d direction = action->m_direction;
     msg.heading = atan(direction.y() / direction.x());
     msg.duration = action->m_duration;
-    action_publisher.publish(msg);
-    ros::spinOnce();
+    publisher.publish(msg);
 }
 }  // namespace actionspace
 }  // namespace libcozmo

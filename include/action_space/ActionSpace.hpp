@@ -51,7 +51,7 @@ class ActionSpace
 
     virtual Action* get_action(const int& action_id) const = 0;
 
-    virtual void publish_action(const int& action_id) const = 0;
+    virtual void publish_action(const int& action_id, const ros::Publisher& publisher) const = 0;
  private:
     virtual bool is_valid_action_id(const int& action_id) const = 0;
 };

@@ -34,18 +34,44 @@
 class GenericActionFixture: public ::testing::Test {
  public:
     GenericActionFixture() : \
+        m_handle(),
         m_actionspace(0, 1, 0, 1, 2, 2, 4),
-        m_action(1.5, 4.0, Eigen::Vector2d(0, 1)) {}
+        m_action(1.5, 4.0, Eigen::Vector2d(0, 1)),
+        m_action_publisher(m_handle.advertise<libcozmo::ActionMsg>("Action", 10)),
+        m_action_subscriber(m_handle.subscribe("Action", 10, &GenericActionFixture::Callback, this)) {}
 
     void SetUp() {
+        while(!IsReady()) {
+            ros::spinOnce();
+        }
     }
 
     void TearDown() {
     }
 
+    bool IsReady() {
+        return (m_action_publisher.getNumSubscribers() > 0) &&
+            (m_action_subscriber.getNumPublishers() > 0);
+    }
+
+    void Callback(const libcozmo::ActionMsg& event) {
+        msg = event;
+    }
+
+    void Publish(const int id) {
+        m_actionspace.publish_action(id, m_action_publisher);
+    }
+
+    libcozmo::ActionMsg get_action_msg() {
+        return msg;
+    }
     ~GenericActionFixture()  {}
     libcozmo::actionspace::GenericActionSpace::Action m_action;
     libcozmo::actionspace::GenericActionSpace m_actionspace;
+    ros::NodeHandle m_handle;
+    ros::Publisher m_action_publisher;
+    ros::Subscriber m_action_subscriber;
+    libcozmo::ActionMsg msg;
 };
 
 // Check action similarity works
@@ -77,8 +103,27 @@ TEST_F(GenericActionFixture, OORExceptionTest) {
     EXPECT_THROW(m_actionspace.get_action(-1), std::out_of_range);
 }
 
+// Action publisher
+TEST_F(GenericActionFixture, PublishActionTest) {
+    Publish(0);
+    libcozmo::ActionMsg msg = get_action_msg();
+    EXPECT_NEAR(0, msg.speed, 0.00001);
+    EXPECT_NEAR(0, msg.duration, 0.00001);
+    EXPECT_NEAR(0, msg.heading, 0.00001);
+
+    // Publish(15);
+    // msg = get_action_msg();
+    // EXPECT_NEAR(1, msg.speed, 0.00001);
+    // EXPECT_NEAR(1, msg.duration, 0.00001);
+    // EXPECT_NEAR(1, msg.heading, 0.00001);
+}
+
 int main(int argc, char **argv) {
     ros::init(argc, argv, "talker");
     testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+    ros::AsyncSpinner spinner(2);
+    spinner.start();
+    int ret =  RUN_ALL_TESTS();
+    spinner.stop();
+    return ret;
 }

@@ -87,6 +87,7 @@ class GenericActionSpace : public virtual ActionSpace {
         const int& num_speed,
         const int& num_duration,
         const int& num_directions) {
+            // cozmo_handle = node_handle;
             std::vector<double> m_speeds = utils::linspace(
                 min_speed,
                 max_speed,
@@ -119,7 +120,7 @@ class GenericActionSpace : public virtual ActionSpace {
                   }
                 }
             }
-            action_publisher = cozmo_handle.advertise<libcozmo::ActionMsg>("Action", 1000);
+            // action_publisher = cozmo_handle.advertise<libcozmo::ActionMsg>("Action", 1000);
         }
     ~GenericActionSpace() {
         for (int i = 0; i < m_actions.size(); ++i) {
@@ -145,15 +146,15 @@ class GenericActionSpace : public virtual ActionSpace {
     // Publishes action to a listener given action ID
 
     // \param action_id The action ID
-    void publish_action(const int& action_id) const override;
+    void publish_action(const int& action_id, const ros::Publisher& publisher) const override;
 
  private:
     bool is_valid_action_id(const int& action_id) const override;
     // // Vector of actions
     std::vector<Action*> m_actions;
     // Cozmo ROS node handle
-    ros::NodeHandle cozmo_handle;
-    ros::Publisher action_publisher;
+    // ros::NodeHandle cozmo_handle;
+    // ros::Publisher action_publisher;
 };
 }  // namespace actionspace
 }  // namespace libcozmo
