@@ -48,10 +48,11 @@ std::vector<T> linspace(T a, T b, std::size_t N) {
     return xs;
 }
 
+template <typename T>
 double euclidean(std::vector<T> a, std::vector<T> b) {
     double distance = 0;
     for (int i = 0; i < a.size(); i++) {
-        distance = distance + pow((a[i] - b[i]), 2)
+        distance = distance + pow((a[i] - b[i]), 2);
     }
     return sqrt(distance);
 }
