@@ -15,6 +15,7 @@
     <depend>eigen</depend>
     <depend>roscpp_initializer</depend>
     <depend>aikidopy</depend>
+    <depend>geometry_msgs</depend>
 
     <build_depend>pybind11_catkin</build_depend>
     <exec_depend>pybind11_catkin</exec_depend>
@@ -23,4 +24,5 @@
     <build_depend>std_msgs</build_depend>
     <build_export_depend>std_msgs</build_export_depend>
     <exec_depend>std_msgs</exec_depend>
+    <test_depend>rosunit</test_depend>
 </package>
