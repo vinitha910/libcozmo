@@ -31,10 +31,10 @@
 #define LIBCOZMO_ACTIONSPACE_GENERICACTIONSPACE_HPP
 
 #include <ros/ros.h>
+#include <libcozmo/ActionMsg.h>
 #include <Eigen/Dense>
 #include <cmath>
 #include "utils/utils.hpp"
-#include <libcozmo/ActionMsg.h>
 #include "ActionSpace.hpp"
 
 namespace libcozmo {
@@ -47,12 +47,12 @@ class GenericActionSpace : public virtual ActionSpace {
  public:
         /// Generic Action class
     class Action : public ActionSpace::Action {
-      public:
+     public:
         /// Constructor
 
         /// \param speed The speed of action (m/s)
         /// \param duration The duration of action (s)
-        /// \param direction The (x,y) direction vector of action (m)
+        /// \param heading The heading of action (rad)
         explicit Action(
             const double& speed,
             const double& duration,
@@ -67,16 +67,15 @@ class GenericActionSpace : public virtual ActionSpace {
         /// Duration of action (s)
         const double m_duration;
 
-        /// Heading of action (radians)
+        /// Heading of action (rad)
         const double m_heading;
-
     };
     /// Constructor
 
-    /// \param m_speeds
-    /// \param m_directions Vector of different directions;
-    /// must be a power of 2 and >= 4
-    /// \param num heading The number of options for heading/direction
+    /// \param m_speeds Vector of available speeds
+    /// \param m_durations Vector of available durations
+    /// \param num heading Number of options for heading/direction (assumption:
+    /// power of 2 and >= 4)
     GenericActionSpace(
         const std::vector<double>& m_speeds,
         std::vector<double> m_durations,
@@ -113,7 +112,11 @@ class GenericActionSpace : public virtual ActionSpace {
         m_actions.clear();
     }
 
-    /// Documentation inherited
+    /// Calculates similarity between two actions
+    /// Similarity based on the Euclidean distance between the actions
+
+    /// \param action_id1, actionid2 IDs of actions to compare
+    /// \return similarity
     bool action_similarity(
         const int& action_id1,
         const int& action_id2,
@@ -123,7 +126,9 @@ class GenericActionSpace : public virtual ActionSpace {
     ActionSpace::Action* get_action(const int& action_id) const override;
 
     /// Documentation inherited
-    void publish_action(const int& action_id, const ros::Publisher& publisher) const override;
+    void publish_action(
+        const int& action_id,
+        const ros::Publisher& publisher) const override;
 
     /// Documentation inherited
     bool is_valid_action_id(const int& action_id) const override;

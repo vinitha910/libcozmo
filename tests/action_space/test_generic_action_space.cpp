@@ -41,9 +41,17 @@ class GenericActionFixture: public ::testing::Test {
             std::vector<double>{0, 1},
             4),
         m_action(1.5, 4.0, M_PI),
-        m_action_publisher(m_handle.advertise<libcozmo::ActionMsg>("Action", 10)),
-        m_action_subscriber(m_handle.subscribe("Action", 10, &GenericActionFixture::Callback, this)) {}
+        m_action_publisher(m_handle.advertise<libcozmo::ActionMsg>(
+            "Action",
+            10)),
+        m_action_subscriber(m_handle.subscribe(
+            "Action",
+            10,
+            &GenericActionFixture::Callback,
+            this)) {}
     
+    /// Necessary step because it takes a while for the subscriber
+    /// and publisher to start up.
     void SetUp() {
         while(!IsReady()) {
             ros::spinOnce();
@@ -73,14 +81,17 @@ class GenericActionFixture: public ::testing::Test {
         return subscribe_count;
     }
 
-    boost::shared_ptr<const libcozmo::ActionMsg> WaitForMessage() {
-        return ros::topic::waitForMessage<libcozmo::ActionMsg>(
-            "Action", ros::Duration(1));
+    void WaitForMessage() {
+        boost::shared_ptr<const libcozmo::ActionMsg> msg = 
+            ros::topic::waitForMessage<libcozmo::ActionMsg>(
+                "Action",
+                ros::Duration(1));
     }
 
     libcozmo::ActionMsg* get_action_msg() {
         return &msg;
     }
+
     ~GenericActionFixture()  {}
     libcozmo::actionspace::GenericActionSpace::Action m_action;
     libcozmo::actionspace::GenericActionSpace m_actionspace;
@@ -91,14 +102,15 @@ class GenericActionFixture: public ::testing::Test {
     int subscribe_count;
 };
 
-// Check action similarity works
+/// Check action similarity works
 TEST_F(GenericActionFixture, ActionSimilarityTest) {
     double similarity = 0;
     ASSERT_TRUE(m_actionspace.action_similarity(0, 12, &similarity));
     EXPECT_NEAR(sqrt(2), similarity, 0.0001);
 }
 
-// Check actions generated, along with get_action
+/// Check actions generated, along with get_action
+/// Testing get_action also tests is_valid_action_id
 TEST_F(GenericActionFixture, ActionGenerationTest) {
     libcozmo::actionspace::GenericActionSpace::Action* action = 
         static_cast<libcozmo::actionspace::GenericActionSpace::Action*>(
@@ -115,23 +127,29 @@ TEST_F(GenericActionFixture, ActionGenerationTest) {
     EXPECT_NEAR(M_PI * 3.0 / 2.0, action->m_heading, 0.00001);
 }
 
-// Check out of range handling for action_similarity method
+/// Check out of range handling for action_similarity method
 TEST_F(GenericActionFixture, ActionSimilarityOOR) {
     double similarity = 0.0;
     EXPECT_FALSE(m_actionspace.action_similarity(0, 61, &similarity));
     EXPECT_FALSE(m_actionspace.action_similarity(0, -5, &similarity));
 }
 
-// Check out of range handling for get_action method
+/// Check out of range handling for get_action method
 TEST_F(GenericActionFixture, GetActionOOR) {
     EXPECT_TRUE(m_actionspace.get_action(61) == nullptr);
     EXPECT_TRUE(m_actionspace.get_action(-1) == nullptr);
 }
 
-// Action publisher
+/// Check size method
+TEST_F(GenericActionFixture, GetSize) {
+    EXPECT_TRUE(m_actionspace.size() == 16);
+}
+
+/// Action publisher
+/// Test first and last action generaeted
 TEST_F(GenericActionFixture, PublishActionTest) {
     Publish(0);
-    auto msg_ = WaitForMessage();
+    WaitForMessage();
     libcozmo::ActionMsg* msg = get_action_msg();
     ASSERT_EQ(1, get_subscribe_count());
     EXPECT_NEAR(0, msg->speed, 0.00001);
@@ -139,13 +157,12 @@ TEST_F(GenericActionFixture, PublishActionTest) {
     EXPECT_NEAR(0, msg->heading, 0.00001);
 
     Publish(15);
-    msg_ = WaitForMessage();
+    WaitForMessage();
     msg = get_action_msg();
     ASSERT_EQ(2, get_subscribe_count());
     EXPECT_NEAR(1, msg->speed, 0.00001);
     EXPECT_NEAR(1, msg->duration, 0.00001);
     EXPECT_NEAR(M_PI * 3.0 / 2.0, msg->heading, 0.00001);
-    
 }
 
 int main(int argc, char **argv) {

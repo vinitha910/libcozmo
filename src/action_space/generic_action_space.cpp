@@ -31,7 +31,6 @@
 #include <exception>
 #include <iostream>
 
-
 namespace libcozmo {
 namespace actionspace {
 
@@ -39,15 +38,12 @@ bool GenericActionSpace::action_similarity(
         const int& action_id1,
         const int& action_id2,
         double* similarity) const {
-
     if (!(is_valid_action_id(action_id1) &&
         is_valid_action_id(action_id2))) {
         return false;
     } else {
-        
         Action* action1 = m_actions[action_id1];
         Action* action2 = m_actions[action_id2];
-        
         std::vector<double> action1_vector{
             action1->m_speed,
             action1->m_duration,
@@ -66,12 +62,15 @@ int GenericActionSpace::size() const {
     return m_actions.size();
 }
 
-ActionSpace::Action* GenericActionSpace::get_action(const int& action_id) const {
+ActionSpace::Action* GenericActionSpace::get_action(
+    const int& action_id) const {
     if (!is_valid_action_id(action_id)) {
         return nullptr;
     } else {
         const auto action_val = m_actions[action_id];
-        return new Action(action_val->m_speed, action_val->m_duration, action_val->m_heading);
+        return new Action(action_val->m_speed,
+            action_val->m_duration,
+            action_val->m_heading);
     }
 }
 
@@ -79,7 +78,9 @@ bool GenericActionSpace::is_valid_action_id(const int& action_id) const {
     return ((action_id < m_actions.size() && action_id >= 0));
 }
 
-void GenericActionSpace::publish_action(const int& action_id, const ros::Publisher& publisher) const {
+void GenericActionSpace::publish_action(
+    const int& action_id,
+    const ros::Publisher& publisher) const {
     libcozmo::ActionMsg msg;
     Action* action = static_cast<Action*>(get_action(action_id));
     msg.speed = action->m_speed;

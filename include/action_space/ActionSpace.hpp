@@ -33,52 +33,55 @@
 namespace libcozmo {
 namespace actionspace {
 
-/// Base class for all ActionSpace, which represents actions for the agent
-class ActionSpace {
+/// Base class for all ActionSpace, which represent actions for the agent
+class ActionSpace
+{
  public:
-
     /// Base class for all Actions
     class Action;
 
-    /// Calculates similarity with another action
-    /// Calculation may vary based on action definition
+    /// Calculates similarity between two actions
+    /// Calculation varies based on action definition
 
-    /// \param action_id1, actionid2 The IDs of two actions to compare
+    /// \param action_id1, actionid2 IDs of actions to compare
     /// \return similarity
     virtual bool action_similarity(
         const int& action_id1,
         const int& action_id2,
         double* similarity) const = 0;
 
-    /// Finds action if the action with given ID exists 
-    
+    /// Finds pointer to wanted action if the action
+    /// with given ID exists; if not, returns null pointer
+
     /// \param action_id The action ID
-    /// \param action The pointer to action
-    /// \return boolean; whether action with given ID exists
+    /// \return Action pointer
     virtual Action* get_action(const int& action_id) const = 0;
-    
-    /// Publishes action via ROS given its action ID
 
-    /// \param action_id The ID of the action to publish
-    /// \param publisher The ROS publisher
-    virtual void publish_action(const int& action_id, const ros::Publisher& publisher) const = 0;
-    
-    /// Returns true if given action ID is valid; false otherwise
+    /// Publishes action via ROS given action ID
 
-    /// \param action_id The ID of the action to validate
-    /// \param boolean; whether id is valid or not
+    /// \param action_id Action ID
+    /// \param publisher ROS publisher
+    virtual void publish_action(
+        const int& action_id,
+        const ros::Publisher& publisher) const = 0;
+
+    /// Checks whether given action ID is valid
+
+    /// \param action_id Action ID
+    /// \return whether ID is valid or not
     virtual bool is_valid_action_id(const int& action_id) const = 0;
 
-    /// Returns number of actions within the action space
-    virtual int size() const = 0;
+    /// Finds the total number of actions in the action space
 
+    /// \return number of actions
+    virtual int size() const = 0;
 };
 
-class ActionSpace::Action {
+class ActionSpace::Action
+{
  protected:
     // This is a base class that should only be used in derived classes.
     Action() = default;
-
     ~Action() = default;
 };
 
