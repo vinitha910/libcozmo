@@ -33,13 +33,6 @@ public:
         m_actionspace.publish_action(id, m_action_publisher);
     }
 
-    void WaitForMessage() const {
-        boost::shared_ptr<const libcozmo::ObjectOrientedAction> msg =
-            ros::topic::waitForMessage<libcozmo::ObjectOrientedAction>(
-                "Action",
-                ros::Duration(0.01));
-    }
-
     ~SimpleOOActionFixture()  {}
 
     std::vector<double> speeds = libcozmo::utils::linspace(0.0, 5.0, 3.0);
@@ -176,7 +169,7 @@ TEST_F(SimpleOOActionFixture, OORExceptionTest) {
 
 TEST_F(SimpleOOActionFixture, PublishActionTest) {
     Publish(5);
-    WaitForMessage();
+    ros::Duration(0.001).sleep();
     libcozmo::ObjectOrientedAction* action = get_action_msg();
     ASSERT_EQ(1, subscribe_count);
     EXPECT_NEAR(124.969, action->x, 0.001);
@@ -186,7 +179,7 @@ TEST_F(SimpleOOActionFixture, PublishActionTest) {
     EXPECT_EQ(5, action->duration);
 
     Publish(10);
-    WaitForMessage();
+    ros::Duration(0.001).sleep();
     action = get_action_msg();
     ASSERT_EQ(2, subscribe_count);
     EXPECT_NEAR(45.4422, action->x, 0.0001);
