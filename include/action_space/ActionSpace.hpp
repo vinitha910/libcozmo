@@ -43,7 +43,8 @@ class ActionSpace
     /// Similarity metric varies based on action definition
     ///
     /// \param action_id1, actionid2 IDs of actions to compare
-    /// \return similarity value
+    /// \param[out] similarity value
+    /// \return True if calculation successful; false otherwise 
     virtual bool action_similarity(
         const int& action_id1,
         const int& action_id2,
