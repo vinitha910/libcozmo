@@ -1,10 +1,10 @@
 #include <gtest/gtest.h>
 #include "actionspace/object_oriented_action_space.hpp"
+#include "utils/utils.hpp"
 
 class SimpleOOActionFixture: public ::testing::Test {
 public:
-   SimpleOOActionFixture() : \
-       m_actionspace(0, 5, 3, 0, 5, 3, 1) {}
+   SimpleOOActionFixture() {}
 
    void SetUp( ) {
        m_actionspace.generate_actions(Eigen::Vector2d(100, 200), 2);
@@ -14,14 +14,51 @@ public:
 
    ~SimpleOOActionFixture( )  {}
 
-   libcozmo::actionspace::ObjectOrientedActionSpace m_actionspace;
+   std::vector<double> speeds = libcozmo::utils::linspace(0.0, 5.0, 3.0);
+   std::vector<double> durations = libcozmo::utils::linspace(0.0, 5.0, 3.0);
+   libcozmo::actionspace::ObjectOrientedActionSpace m_actionspace{speeds, durations, 1};
+
+};
+
+class SimpleOOActionFixture2: public ::testing::Test {
+public:
+   SimpleOOActionFixture2() {}
+
+   void SetUp( ) {
+       m_actionspace.generate_actions(Eigen::Vector2d(100, 200), 2 - (4 * M_PI));
+   }
+
+   void TearDown( ) {}
+
+   ~SimpleOOActionFixture2( )  {}
+
+   std::vector<double> speeds = libcozmo::utils::linspace(0.0, 5.0, 3.0);
+   std::vector<double> durations = libcozmo::utils::linspace(0.0, 5.0, 3.0);
+   libcozmo::actionspace::ObjectOrientedActionSpace m_actionspace{speeds, durations, 1};
+
+};
+
+class SimpleOOActionFixture3: public ::testing::Test {
+public:
+   SimpleOOActionFixture3() {}
+
+   void SetUp( ) {
+       m_actionspace.generate_actions(Eigen::Vector2d(100, 200), 2 + (4 * M_PI));
+   }
+
+   void TearDown( ) {}
+
+   ~SimpleOOActionFixture3( )  {}
+
+   std::vector<double> speeds = libcozmo::utils::linspace(0.0, 5.0, 3.0);
+   std::vector<double> durations = libcozmo::utils::linspace(0.0, 5.0, 3.0);
+   libcozmo::actionspace::ObjectOrientedActionSpace m_actionspace{speeds, durations, 1};
 
 };
 
 class ComplexOOActionFixture: public ::testing::Test {
 public:
-   ComplexOOActionFixture() : \
-       m_actionspace(-M_PI, M_PI, 7, 0, M_E, 11, 5) {}
+   ComplexOOActionFixture() {}
 
    void SetUp( ) {
        m_actionspace.generate_actions(Eigen::Vector2d(100, 200), 2);
@@ -31,7 +68,9 @@ public:
 
    ~ComplexOOActionFixture( )  {}
 
-   libcozmo::actionspace::ObjectOrientedActionSpace m_actionspace;
+   std::vector<double> speeds = libcozmo::utils::linspace(-M_PI, M_PI, 7.0);
+   std::vector<double> durations = libcozmo::utils::linspace(0.0, M_E, 11.0);
+   libcozmo::actionspace::ObjectOrientedActionSpace m_actionspace{speeds, durations, 5};
 
 };
 
@@ -57,14 +96,14 @@ TEST_F(SimpleOOActionFixture, ActionGenerationTest) {
     action = m_actionspace.get_action(20);
     EXPECT_NEAR(75.0312, action->start_pos.x(), 0.0001);
     EXPECT_NEAR(254.558, action->start_pos.y(), 0.001);
-    EXPECT_NEAR(-1.14159, action->theta, 0.00001);
+    EXPECT_NEAR(5.14159, action->theta, 0.00001);
     EXPECT_EQ(0, action->speed);
     EXPECT_EQ(5, action->duration);
 
     action = m_actionspace.get_action(30);
     EXPECT_NEAR(154.558, action->start_pos.x(), 0.001);
     EXPECT_NEAR(224.969, action->start_pos.y(), 0.001);
-    EXPECT_NEAR(-2.71239, action->theta, 0.00001);
+    EXPECT_NEAR(3.57079, action->theta, 0.00001);
     EXPECT_EQ(2.5, action->speed);
     EXPECT_EQ(0, action->duration);
 }
@@ -83,6 +122,66 @@ TEST_F(SimpleOOActionFixture, OORExceptionTest) {
     EXPECT_THROW(m_actionspace.action_similarity(36, 0), std::out_of_range);
     EXPECT_THROW(m_actionspace.get_action(-1), std::out_of_range);
     EXPECT_THROW(m_actionspace.get_action(36), std::out_of_range);
+}
+
+TEST_F(SimpleOOActionFixture2, ActionGenerationTest) {
+    libcozmo::actionspace::ObjectOrientedActionSpace::ObjectOrientedAction* action = m_actionspace.get_action(5);
+    EXPECT_NEAR(124.969, action->start_pos.x(), 0.001);
+    EXPECT_NEAR(145.442, action->start_pos.y(), 0.001);
+    EXPECT_EQ(2, action->theta);
+    EXPECT_EQ(2.5, action->speed);
+    EXPECT_EQ(5, action->duration);
+
+    action = m_actionspace.get_action(10);
+    EXPECT_NEAR(45.4422, action->start_pos.x(), 0.0001);
+    EXPECT_NEAR(175.031, action->start_pos.y(), 0.001);
+    EXPECT_NEAR(0.429204, action->theta, 0.000001);
+    EXPECT_EQ(0, action->speed);
+    EXPECT_EQ(2.5, action->duration);
+
+    action = m_actionspace.get_action(20);
+    EXPECT_NEAR(75.0312, action->start_pos.x(), 0.0001);
+    EXPECT_NEAR(254.558, action->start_pos.y(), 0.001);
+    EXPECT_NEAR(5.14159, action->theta, 0.00001);
+    EXPECT_EQ(0, action->speed);
+    EXPECT_EQ(5, action->duration);
+
+    action = m_actionspace.get_action(30);
+    EXPECT_NEAR(154.558, action->start_pos.x(), 0.001);
+    EXPECT_NEAR(224.969, action->start_pos.y(), 0.001);
+    EXPECT_NEAR(3.57079, action->theta, 0.00001);
+    EXPECT_EQ(2.5, action->speed);
+    EXPECT_EQ(0, action->duration);
+}
+
+TEST_F(SimpleOOActionFixture3, ActionGenerationTest) {
+    libcozmo::actionspace::ObjectOrientedActionSpace::ObjectOrientedAction* action = m_actionspace.get_action(5);
+    EXPECT_NEAR(124.969, action->start_pos.x(), 0.001);
+    EXPECT_NEAR(145.442, action->start_pos.y(), 0.001);
+    EXPECT_EQ(2, action->theta);
+    EXPECT_EQ(2.5, action->speed);
+    EXPECT_EQ(5, action->duration);
+
+    action = m_actionspace.get_action(10);
+    EXPECT_NEAR(45.4422, action->start_pos.x(), 0.0001);
+    EXPECT_NEAR(175.031, action->start_pos.y(), 0.001);
+    EXPECT_NEAR(0.429204, action->theta, 0.000001);
+    EXPECT_EQ(0, action->speed);
+    EXPECT_EQ(2.5, action->duration);
+
+    action = m_actionspace.get_action(20);
+    EXPECT_NEAR(75.0312, action->start_pos.x(), 0.0001);
+    EXPECT_NEAR(254.558, action->start_pos.y(), 0.001);
+    EXPECT_NEAR(5.14159, action->theta, 0.00001);
+    EXPECT_EQ(0, action->speed);
+    EXPECT_EQ(5, action->duration);
+
+    action = m_actionspace.get_action(30);
+    EXPECT_NEAR(154.558, action->start_pos.x(), 0.001);
+    EXPECT_NEAR(224.969, action->start_pos.y(), 0.001);
+    EXPECT_NEAR(3.57079, action->theta, 0.00001);
+    EXPECT_EQ(2.5, action->speed);
+    EXPECT_EQ(0, action->duration);
 }
 
 TEST_F(ComplexOOActionFixture, ActionSpaceSizeTest) {

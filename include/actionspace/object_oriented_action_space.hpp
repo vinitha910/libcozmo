@@ -10,6 +10,21 @@
 namespace libcozmo {
 namespace actionspace {
 
+/// An action space class that generates possible
+/// actions for Cozmo to execute relative to an object
+
+/// An Object Oriented Action Space is defined by
+/// the speed and duration of Cozmo at a location relative
+/// to an object as well as the number of offset positions
+/// that Cozmo can move to relative to an object
+
+/// \function action_similarity : finds the similarity between two actions in the action space
+/// \function generate_actions : generates possible actions for Cozmo given
+///                              another object's position and orientation
+/// \function get_action : gets a specific action from the actionspace given an action id
+/// \function size : gets the size of the action space
+/// \function view_action_space : prints out the every action in the action space with
+///                               their corresponding action id
 class ObjectOrientedActionSpace {
     public:
         /// An object oriented action consists of 2 parts:
@@ -40,43 +55,20 @@ class ObjectOrientedActionSpace {
                 const double theta;
         };
 
-        /// \param min_speed, minimum speed to be generated in the action space, (mm/s)
-        /// \param max_speed, maximum speed to be generated in the action space, (mm/s)
-        /// \param num_speed, the number of different speed choices to generate
-        ///                   between and including min and max speed
-        ///                   If num_speed = 1, only min speed will be used
-        /// \param min_duration, minimum duration to be generated in the action space, (seconds)
-        /// \param max_duration, maximum duration to be generated in the action space, (seconds)
-        /// \param num_duration, the number of different duration choices to generate
-        ///                      between and including min and max duration
-        ///                      if num_duration = 1, only min duration will be used
+        /// \param speeds, generates an action in the action space for each speed (mm/s)
+        ///                in speeds, will generate duplicates if list constains duplicates
+        ///                Will generate duplicates if list contains duplicate values
+        /// \param speeds, generates an action in the action space for each duration (seconds)
+        ///                in duration, will generate duplicates if list contains duplicates
         /// \param num_offset, number of horizontal offsets for each side of an object
         ///                    num_offsets must be odd and always includes the center of an edge
-        /// \throws invalid_argument exception if num_offset is even
-        /// \throws invalid argument exception if min or max duration is < 0
-        /// \throws invalid argument exception if num_speed, num_duration, or num_offset are < 0
         ObjectOrientedActionSpace(
-            const double& min_speed,
-            const double& max_speed,
-            const int& num_speed,
-            const double& min_duration,
-            const double& max_duration,
-            const int& num_duration,
+            const std::vector<double>& speeds,
+            const std::vector<double>& durations,
             const int& num_offset) : \
-            num_offset(num_offset)
-        {
-            if (num_offset % 2 == 0 || num_offset < 0) {
-                throw std::invalid_argument("Invalid num_offset");
-            }
-            if (min_duration < 0 || max_duration < 0) {
-                throw std::invalid_argument("Duration cannot be less than 0");
-            }
-            if (num_speed < 0 || num_duration < 0 || num_offset < 0) {
-                throw std::invalid_argument("num generated must be greater than 0");
-            }
-            speeds = utils::linspace(min_speed, max_speed, num_speed);
-            durations = utils::linspace(min_duration, max_duration, num_duration);
-        }
+            speeds(speeds),
+            durations(durations),
+            num_offset(num_offset) {}
 
         ~ObjectOrientedActionSpace() {
             clear_actions();
@@ -139,7 +131,7 @@ class ObjectOrientedActionSpace {
         ///     1 corresponds to left of cube
         ///     2 corresponds to back of cube
         ///     3 corresponds to right of cube
-        /// Angles are in radians and are in the range [-pi, pi]
+        /// Angles are in radians and are in the range [0, 2pi]
 
         /// \param headings, a place to store the headings found
         /// \param theta, angle of one of the sides of the cube

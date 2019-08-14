@@ -35,10 +35,18 @@ void ObjectOrientedActionSpace::clear_actions() {
 
 void ObjectOrientedActionSpace::find_headings(std::vector<double>* headings, const double& theta) const {
     double angle = theta;
+    // Force angle to be between [0, 2pi]
+    if (angle > 2 * M_PI || angle < 0) {
+        int cycles = angle / (2 * M_PI);
+        angle -= 2 * M_PI * cycles;
+        if (angle < 0) {
+            angle += 2 * M_PI;
+        }
+    }
     headings->push_back(angle);
     for (size_t i = 0; i < 3; ++i) {
         angle -= M_PI / 2;
-        if (angle < -M_PI) {
+        if (angle < 0) {
             angle = 2 * M_PI + angle;
         }
         headings->push_back(angle);
