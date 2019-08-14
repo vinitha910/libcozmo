@@ -48,15 +48,15 @@ bool GenericActionSpace::action_similarity(
         Action* action1 = m_actions[action_id1];
         Action* action2 = m_actions[action_id2];
         
-        std::vector<double> action1_vector;
-        action1_vector.push_back(action1->m_speed);
-        action1_vector.push_back(action1->m_duration);
-        action1_vector.push_back(action1->m_heading);
-        std::vector<double> action2_vector;
-        action2_vector.push_back(action2->m_speed);
-        action2_vector.push_back(action2->m_duration);
-        action2_vector.push_back(action2->m_heading);
-        
+        std::vector<double> action1_vector{
+            action1->m_speed,
+            action1->m_duration,
+            action1->m_heading};
+        std::vector<double> action2_vector{
+            action2->m_speed,
+            action2->m_duration,
+            action2->m_heading
+        };
         *similarity = utils::euclidean(action1_vector, action2_vector);
         return true;
     }
@@ -65,16 +65,14 @@ bool GenericActionSpace::action_similarity(
 int GenericActionSpace::size() const {
     return m_actions.size();
 }
-// boolean get_action(const int& action_id, Action* action)
-bool GenericActionSpace::get_action(const int& action_id,  ActionSpace::Action* action) const {
-    // if (!is_valid_action_id(action_id)) {
-    //     return false;    
-    // } else {
-    //     // auto action_val = *m_actions[action_id];
-    //     // Action* _action = static_cast<Action*>(action);
-    //     // *_action = Action(action_val.m_speed, action_val.m_duration, action_val.m_direction);
-    //     return true;
-    // }
+
+ActionSpace::Action* GenericActionSpace::get_action(const int& action_id) const {
+    if (!is_valid_action_id(action_id)) {
+        return nullptr;
+    } else {
+        const auto action_val = m_actions[action_id];
+        return new Action(action_val->m_speed, action_val->m_duration, action_val->m_heading);
+    }
 }
 
 bool GenericActionSpace::is_valid_action_id(const int& action_id) const {
@@ -82,14 +80,13 @@ bool GenericActionSpace::is_valid_action_id(const int& action_id) const {
 }
 
 void GenericActionSpace::publish_action(const int& action_id, const ros::Publisher& publisher) const {
-    // libcozmo::ActionMsg msg;
-    // Action* action;
-    // get_action(action_id, action);
-    // msg.speed = action->m_speed;
-    // Eigen::Vector2d direction = action->m_direction;
-    // msg.heading = atan(direction.y() / direction.x());
-    // msg.duration = action->m_duration;
-    // publisher.publish(msg);
+    libcozmo::ActionMsg msg;
+    Action* action = static_cast<Action*>(get_action(action_id));
+    msg.speed = action->m_speed;
+    msg.heading = action->m_heading;
+    msg.duration = action->m_duration;
+    publisher.publish(msg);
+    // ros::spinOnce();
 }
 }  // namespace actionspace
 }  // namespace libcozmo

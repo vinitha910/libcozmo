@@ -42,17 +42,12 @@ namespace actionspace {
 
 /// This class represents the generic actionspace for Cozmo
 /// All actions are not planned specific to any object, but instead
-/// with respect to the Cozmo robot itself
+/// with respect to the Cozmo itself
 class GenericActionSpace : public virtual ActionSpace {
  public:
         /// Generic Action class
     class Action : public ActionSpace::Action {
       public:
-        /// Constructor for identity state
-        /// Action(): m_speed(0), m_duration(0), m_direction(Eigen::Vector2d(0, 0)) {};
-        
-        /// ~Action() = default;
-
         /// Constructor
 
         /// \param speed The speed of action (m/s)
@@ -78,40 +73,35 @@ class GenericActionSpace : public virtual ActionSpace {
     };
     /// Constructor
 
-    /// \param min_speed The minimum speed of action
-    /// \param max_speed The maximum speed of action
-    /// \param min_duration The minimum duration of action
-    /// \param max_duration The maximum duration of action
-    /// \param num_speed The number of speed values for the actions
-    /// \param num_duration The number of duration values for the actions
-    /// \param num_directions The number of direction values for the actions
-    /// num_directions must be in powers of 2 and >= 4
+    /// \param m_speeds
+    /// \param m_directions Vector of different directions;
+    /// must be a power of 2 and >= 4
+    /// \param num heading The number of options for heading/direction
     GenericActionSpace(
         const std::vector<double>& m_speeds,
-        std::vector<double> m_directions,
-        const double& min_duration,
-        const double& max_duration,
-        const int& num_duration) {
+        std::vector<double> m_durations,
+        const int& num_heading) {
             int num_speed = m_speeds.size();
-            int num_directions = m_directions.size();
-            std::vector<double> m_durations = utils::linspace(
-                min_duration,
-                max_duration,
-                num_duration);
+            int num_duration = m_durations.size();
+            std::vector<double> m_headings = utils::linspace(
+                0.0,
+                2.0 * M_PI - 2.0 * M_PI / num_heading,
+                num_heading);
             m_actions = std::vector<Action*>(
                 num_speed *
                 num_duration *
-                num_directions,
+                num_heading,
                 nullptr);
             for (int j = 0; j < num_speed; j++) {
                 for (int k = 0; k < num_duration; k++) {
-                    for (int l = 0; l < num_directions; l++) {
-                        const int id = j * num_duration * num_directions +
-                            k * num_directions + l;
+                    for (int l = 0; l < num_heading; l++) {
+                        const int id =
+                            j * num_duration * num_heading +
+                            k * num_heading + l;
                         m_actions[id] = new Action(
                             m_speeds[j],
                             m_durations[k],
-                            m_directions[l]);
+                            m_headings[l]);
                   }
                 }
             }
@@ -130,12 +120,15 @@ class GenericActionSpace : public virtual ActionSpace {
         double* similarity) const override;
 
     /// Documentation inherited
-    bool get_action(const int& action_id, ActionSpace::Action* action) const override;
+    ActionSpace::Action* get_action(const int& action_id) const override;
 
+    /// Documentation inherited
     void publish_action(const int& action_id, const ros::Publisher& publisher) const override;
 
+    /// Documentation inherited
     bool is_valid_action_id(const int& action_id) const override;
 
+    /// Documentation inherited
     int size() const override;
 
  private:

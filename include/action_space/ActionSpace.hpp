@@ -56,8 +56,8 @@ class ActionSpace {
     /// \param action_id The action ID
     /// \param action The pointer to action
     /// \return boolean; whether action with given ID exists
-    virtual bool get_action(const int& action_id, Action* action) const = 0;
-
+    virtual Action* get_action(const int& action_id) const = 0;
+    
     /// Publishes action via ROS given its action ID
 
     /// \param action_id The ID of the action to publish
