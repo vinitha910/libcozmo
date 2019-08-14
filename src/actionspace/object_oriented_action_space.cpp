@@ -56,7 +56,6 @@ void ObjectOrientedActionSpace::find_headings(std::vector<double>* headings, con
 void ObjectOrientedActionSpace::find_start_pos(
     const Eigen::Vector2d& obj_pos,
     Eigen::Vector2d* start_pos,
-    const double& v_offset,
     const double& cube_offset,
     const double& theta) const
 {
@@ -67,8 +66,7 @@ void ObjectOrientedActionSpace::find_start_pos(
 void ObjectOrientedActionSpace::generate_actions(
     const Eigen::Vector2d& obj_pos,
     const double& theta,
-    const double& h_offset,
-    const double& v_offset)
+    const double& h_offset)
 {
     clear_actions();
     std::vector<double> cube_offsets;
@@ -86,7 +84,7 @@ void ObjectOrientedActionSpace::generate_actions(
             for (const auto& speed : speeds) {
                 for (const auto& duration : durations) {
                     Eigen::Vector2d start_pos;
-                    find_start_pos(obj_pos, &start_pos, v_offset, cube_offset, heading);
+                    find_start_pos(obj_pos, &start_pos, cube_offset, heading);
                     actions.push_back(new ObjectOrientedAction(speed, duration, start_pos, heading));
                 }
             }
@@ -101,24 +99,43 @@ ObjectOrientedActionSpace::ObjectOrientedAction* ObjectOrientedActionSpace::get_
     return actions[action_id];
 }
 
-int ObjectOrientedActionSpace::size() const {
-    return actions.size();
-}
-
 bool ObjectOrientedActionSpace::is_valid_action_id(const int& action_id) const {
     return action_id < actions.size() && action_id >= 0;
+}
+
+void ObjectOrientedActionSpace::publish_action(
+    const int& action_id,
+    const ros::Publisher& publisher) const
+{
+    if (!is_valid_action_id(action_id)) {
+        throw std::out_of_range("Action ID invalid");
+    }
+    libcozmo::ObjectOrientedAction msg;
+    const auto action = get_action(action_id);
+    msg.speed = action->speed;
+    msg.duration = action->duration;
+    msg.x = action->start_pos.x();
+    msg.y = action->start_pos.y();
+    msg.theta = action->theta;
+
+    publisher.publish(msg);
+}
+
+int ObjectOrientedActionSpace::size() const {
+    return actions.size();
 }
 
 void ObjectOrientedActionSpace::view_action_space() const {
     for (size_t i = 0; i < actions.size(); ++i) {
         if (i % 5 == 0) {
-            ObjectOrientedAction* a = actions[i];
-            std::cout << i << " : ";
-            std::cout << "Position: (" << a->start_pos(0) << ", " << a->start_pos(1) << "), ";
-            std::cout << "Angle: "<< a->theta << ", ";
-            std::cout << "Speed: " << a->speed << ", ";
-            std::cout << "Duration: " << a->duration << "\n";
+            std::cout << "\n";
         }
+        ObjectOrientedAction* a = actions[i];
+        std::cout << i << " : ";
+        std::cout << "Position: (" << a->start_pos(0) << ", " << a->start_pos(1) << "), ";
+        std::cout << "Angle: "<< a->theta << ", ";
+        std::cout << "Speed: " << a->speed << ", ";
+        std::cout << "Duration: " << a->duration << "\n";
     }
 }
 

@@ -22,6 +22,7 @@ namespace actionspace {
 /// \function generate_actions : generates possible actions for Cozmo given
 ///                              another object's position and orientation
 /// \function get_action : gets a specific action from the actionspace given an action id
+/// \function publish_action : publishes an action msg using a ROS publisher
 /// \function size : gets the size of the action space
 /// \function view_action_space : prints out the every action in the action space with
 ///                               their corresponding action id
@@ -62,13 +63,16 @@ class ObjectOrientedActionSpace {
         ///                in duration, will generate duplicates if list contains duplicates
         /// \param num_offset, number of horizontal offsets for each side of an object
         ///                    num_offsets must be odd and always includes the center of an edge
+        /// \param v_offset (optional), minimum distance away from center of object
         ObjectOrientedActionSpace(
             const std::vector<double>& speeds,
             const std::vector<double>& durations,
-            const int& num_offset) : \
+            const int& num_offset,
+            const double& v_offset=60) : \
             speeds(speeds),
             durations(durations),
-            num_offset(num_offset) {}
+            num_offset(num_offset),
+            v_offset(v_offset) {}
 
         ~ObjectOrientedActionSpace() {
             clear_actions();
@@ -103,10 +107,11 @@ class ObjectOrientedActionSpace {
         void generate_actions(
             const Eigen::Vector2d& obj_pos,
             const double& theta,
-            const double& h_offset=40,
-            const double& v_offset=60);
+            const double& h_offset=40);
 
         ObjectOrientedAction* get_action(const int& action_id) const;
+
+        void publish_action(const int& action_id, const ros::Publisher& publisher) const;
 
         int size() const;
 
@@ -117,6 +122,7 @@ class ObjectOrientedActionSpace {
         std::vector<double> speeds;
         std::vector<double> durations;
         int num_offset;
+        double v_offset;
         std::vector<ObjectOrientedAction*> actions;
 
         ros::Publisher action_publisher;
@@ -138,21 +144,17 @@ class ObjectOrientedActionSpace {
         void find_headings(std::vector<double>* headings, const double& theta) const;
 
         /// Finds the start position given some other object's position,
-        /// its theta, and the vertical (v_offset) and horizontal (cube_offset)
-        /// distances away from said object
+        /// its theta, and horizontal (cube_offset) distances away from said object
 
-        /// Vertical means perpendicular to the edge of an object
         /// Horizontal means parallel to the edge of an object
 
         /// \param obj_pos, the (x, y) position of the object we are moving relative to
         /// \param start_pos, a place to store cozmo's calculated initial position
-        /// \param v_offset, the vertical distance away from center of object
         /// \param cube_offset, the horizontal distance away from center of edge of object
         /// \param theta, the orientation of the object
         void find_start_pos(
             const Eigen::Vector2d& obj_pos,
             Eigen::Vector2d* start_pos,
-            const double& v_offset,
             const double& cube_offset,
             const double& theta) const;
 
