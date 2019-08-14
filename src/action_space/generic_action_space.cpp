@@ -86,7 +86,6 @@ void GenericActionSpace::publish_action(const int& action_id, const ros::Publish
     msg.heading = action->m_heading;
     msg.duration = action->m_duration;
     publisher.publish(msg);
-    // ros::spinOnce();
 }
 }  // namespace actionspace
 }  // namespace libcozmo

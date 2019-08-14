@@ -78,8 +78,8 @@ class GenericActionFixture: public ::testing::Test {
             "Action", ros::Duration(1));
     }
 
-    libcozmo::ActionMsg get_action_msg() {
-        return msg;
+    libcozmo::ActionMsg* get_action_msg() {
+        return &msg;
     }
     ~GenericActionFixture()  {}
     libcozmo::actionspace::GenericActionSpace::Action m_action;
@@ -130,25 +130,21 @@ TEST_F(GenericActionFixture, GetActionOOR) {
 
 // Action publisher
 TEST_F(GenericActionFixture, PublishActionTest) {
-    std::cout<<"SEG FAULT HERE?? 0000";
     Publish(0);
-    std::cout<<"SEG FAULT HERE?? 1111";
-    libcozmo::ActionMsg msg = *WaitForMessage();
-    std::cout<<"SEG FAULT HERE?? 2222";
-    // libcozmo::ActionMsg msg = get_action_msg();
+    auto msg_ = WaitForMessage();
+    libcozmo::ActionMsg* msg = get_action_msg();
     ASSERT_EQ(1, get_subscribe_count());
-    EXPECT_NEAR(0, msg.speed, 0.00001);
-    EXPECT_NEAR(0, msg.duration, 0.00001);
-    EXPECT_NEAR(0, msg.heading, 0.00001);
-    
+    EXPECT_NEAR(0, msg->speed, 0.00001);
+    EXPECT_NEAR(0, msg->duration, 0.00001);
+    EXPECT_NEAR(0, msg->heading, 0.00001);
 
     Publish(15);
-    msg = *WaitForMessage();
-    // msg = get_action_msg();
+    msg_ = WaitForMessage();
+    msg = get_action_msg();
     ASSERT_EQ(2, get_subscribe_count());
-    EXPECT_NEAR(1, msg.speed, 0.00001);
-    EXPECT_NEAR(1, msg.duration, 0.00001);
-    EXPECT_NEAR(M_PI * 3.0 / 2.0, msg.heading, 0.00001);
+    EXPECT_NEAR(1, msg->speed, 0.00001);
+    EXPECT_NEAR(1, msg->duration, 0.00001);
+    EXPECT_NEAR(M_PI * 3.0 / 2.0, msg->heading, 0.00001);
     
 }
 

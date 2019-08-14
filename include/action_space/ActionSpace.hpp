@@ -33,8 +33,7 @@
 namespace libcozmo {
 namespace actionspace {
 
-/// Base class for all ActionSpace
-/// Handles graph representation of different actions available?
+/// Base class for all ActionSpace, which represents actions for the agent
 class ActionSpace {
  public:
 
