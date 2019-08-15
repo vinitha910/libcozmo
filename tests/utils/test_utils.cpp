@@ -38,24 +38,24 @@ namespace test {
 TEST(TestSuite, EuclideanDoubleTest) {
     std::vector<double> vector1{10.0, 16.4, 5.7};
     std::vector<double> vector2{100.0, 15.2, 0.0};
-    double result = utils::euclidean(vector1, vector2);
+    double result = utils::euclidean_distance(vector1, vector2);
     EXPECT_NEAR(90.1883, result, 0.0001);
     vector1[0] = -5.5;
     vector1[1] = -6.6;
     vector1[2] = 0;
-    result = utils::euclidean(vector1, vector2);
+    result = utils::euclidean_distance(vector1, vector2);
     EXPECT_NEAR(107.7287, result, 0.0001);
 }
 
 TEST(TestSuite, EuclideanIntTest) {
     std::vector<int> vector1{10, 16, 5};
     std::vector<int> vector2{100, 15, 0};
-    double result = utils::euclidean(vector1, vector2);
+    double result = utils::euclidean_distance(vector1, vector2);
     EXPECT_NEAR(90.1443, result, 0.0001);
     vector1[0] = -10;
     vector1[1] = -9;
     vector1[2] = 1;
-    result = utils::euclidean(vector1, vector2);
+    result = utils::euclidean_distance(vector1, vector2);
     EXPECT_NEAR(112.5921, result, 0.0001);
 }
 
@@ -63,7 +63,7 @@ TEST(TestSuite, EuclideanIntTest) {
 TEST(TestSuite, EuclideanFloatTest) {
     std::vector<float> vector1{-16.75, 5.51, 0.49};
     std::vector<float> vector2{100.0, 15.2, 0.00};
-    double result = utils::euclidean(vector1, vector2);
+    double result = utils::euclidean_distance(vector1, vector2);
     EXPECT_NEAR(117.1525, result, 0.0001);
 }
 
