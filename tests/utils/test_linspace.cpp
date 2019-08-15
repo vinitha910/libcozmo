@@ -52,7 +52,7 @@ TEST(TestSuite, LinSpaceIntTest) {
     EXPECT_EQ(12, result[3]);
 }
 
-/// Test usecse for heading in generic action space, also try float
+/// Test usecase for heading in generic action space, also try float
 TEST(TestSuite, LinSpaceFloatTest) {
     double num_heading = 4;
     std::vector<float> result = utils::linspace(static_cast<float>(0.0),static_cast<float>(3.0 * M_PI / 2.0), 4);
