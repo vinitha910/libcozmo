@@ -78,7 +78,7 @@ target_link_libraries(test_libcozmo
   ${aikido_LIBRARIES}
 )
 
-catkin_add_gtest(test_euclidean tests/utils/test_utils.cpp)
+catkin_add_gtest(test_euclidean tests/utils/test_euclidean_distance.cpp)
 target_link_libraries(test_euclidean 
   cozmo 
   ${catkin_LIBRARIES}
