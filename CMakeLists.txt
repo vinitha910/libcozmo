@@ -85,6 +85,13 @@ target_link_libraries(test_euclidean
   ${aikido_LIBRARIES}
 )
 
+catkin_add_gtest(test_linspace tests/utils/test_linspace.cpp)
+target_link_libraries(test_linspace 
+  cozmo 
+  ${catkin_LIBRARIES}
+  ${aikido_LIBRARIES}
+)
+
 ################################################################################
 # EXECUTABLES       
 ################################################################################
