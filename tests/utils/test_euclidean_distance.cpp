@@ -40,11 +40,6 @@ TEST(TestSuite, EuclideanDoubleTest) {
     std::vector<double> vector2{100.0, 15.2, 0.0};
     double result = utils::euclidean_distance(vector1, vector2);
     EXPECT_NEAR(90.1883, result, 0.0001);
-    vector1[0] = -5.5;
-    vector1[1] = -6.6;
-    vector1[2] = 0;
-    result = utils::euclidean_distance(vector1, vector2);
-    EXPECT_NEAR(107.7287, result, 0.0001);
 }
 
 /// Check that Euclidean distance with int is correct
@@ -53,11 +48,6 @@ TEST(TestSuite, EuclideanIntTest) {
     std::vector<int> vector2{100, 15, 0};
     double result = utils::euclidean_distance(vector1, vector2);
     EXPECT_NEAR(90.1443, result, 0.0001);
-    vector1[0] = -10;
-    vector1[1] = -9;
-    vector1[2] = 1;
-    result = utils::euclidean_distance(vector1, vector2);
-    EXPECT_NEAR(112.5921, result, 0.0001);
 }
 
 /// Check that Euclidean distance with float is correct
@@ -69,7 +59,7 @@ TEST(TestSuite, EuclideanFloatTest) {
 }
 
 }  // namespace test
-}  // namspace utils
+}  // namespace utils
 }  // namespace libcozmo
 
 int main(int argc, char **argv) {
