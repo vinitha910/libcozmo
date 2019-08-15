@@ -11,16 +11,13 @@
 class SimpleOOActionFixture: public ::testing::Test {
 public:
     SimpleOOActionFixture() : \
-         subscribe_count(0),
          m_handle(),
          m_action_publisher(m_handle.advertise<libcozmo::ObjectOrientedAction>("Action", 10)),
-         m_action_subscriber(m_handle.subscribe("Action", 10, &SimpleOOActionFixture::Callback, this)){}
+         m_action_subscriber(m_handle.subscribe("Action", 10, &SimpleOOActionFixture::Callback, this)),
+         msg_recieved(false){}
 
     void SetUp() {
         m_actionspace.generate_actions(Eigen::Vector2d(100, 200), 2);
-        while (!IsReady()) {
-            ros::spinOnce();
-        }
     }
 
     void TearDown() {}
@@ -29,8 +26,15 @@ public:
         return &msg;
     }
 
-    void Publish(const int& id) const {
+    void Publish(const int& id) {
         m_actionspace.publish_action(id, m_action_publisher);
+        msg_recieved = false;
+    }
+
+    void WaitForMessage() const {
+        while (!msg_recieved) {
+            ros::spinOnce();
+        }
     }
 
     ~SimpleOOActionFixture()  {}
@@ -42,7 +46,7 @@ public:
     ros::Publisher m_action_publisher;
     ros::Subscriber m_action_subscriber;
     libcozmo::ObjectOrientedAction msg;
-    int subscribe_count;
+    bool msg_recieved;
 
 private:
     void Callback(const libcozmo::ObjectOrientedAction& event) {
@@ -51,14 +55,8 @@ private:
         msg.x = event.x;
         msg.y = event.y;
         msg.theta = event.theta;
-        subscribe_count++;
+        msg_recieved = true;
     }
-
-    bool IsReady() const {
-         return (m_action_publisher.getNumSubscribers() > 0) &&
-             (m_action_subscriber.getNumPublishers() > 0);
-    }
-
 };
 
 // Tests for object orientation < 0
@@ -169,9 +167,8 @@ TEST_F(SimpleOOActionFixture, OORExceptionTest) {
 
 TEST_F(SimpleOOActionFixture, PublishActionTest) {
     Publish(5);
-    ros::Duration(0.001).sleep();
+    WaitForMessage();
     libcozmo::ObjectOrientedAction* action = get_action_msg();
-    ASSERT_EQ(1, subscribe_count);
     EXPECT_NEAR(124.969, action->x, 0.001);
     EXPECT_NEAR(145.442, action->y, 0.001);
     EXPECT_EQ(2, action->theta);
@@ -179,9 +176,8 @@ TEST_F(SimpleOOActionFixture, PublishActionTest) {
     EXPECT_EQ(5, action->duration);
 
     Publish(10);
-    ros::Duration(0.001).sleep();
+    WaitForMessage();
     action = get_action_msg();
-    ASSERT_EQ(2, subscribe_count);
     EXPECT_NEAR(45.4422, action->x, 0.0001);
     EXPECT_NEAR(175.031, action->y, 0.001);
     EXPECT_NEAR(0.429204, action->theta, 0.000001);
