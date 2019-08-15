@@ -78,6 +78,13 @@ target_link_libraries(test_libcozmo
   ${aikido_LIBRARIES}
 )
 
+catkin_add_gtest(test_euclidean tests/utils/test_utils.cpp)
+target_link_libraries(test_euclidean 
+  cozmo 
+  ${catkin_LIBRARIES}
+  ${aikido_LIBRARIES}
+)
+
 ################################################################################
 # EXECUTABLES       
 ################################################################################
