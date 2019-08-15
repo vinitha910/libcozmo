@@ -61,7 +61,8 @@ class ActionSpace
     /// 
     /// \param action_id Action ID
     /// \param publisher ROS publisher
-    virtual void publish_action(
+    /// \return True if publish successful; false otherwise;
+    virtual bool publish_action(
         const int& action_id,
         const ros::Publisher& publisher) const = 0;
 

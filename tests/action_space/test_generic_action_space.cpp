@@ -36,6 +36,7 @@ class GenericActionFixture: public ::testing::Test {
     GenericActionFixture() : \
         subscribe_count(0),
         m_handle(),
+        msg_received(false),
         m_actionspace(
             std::vector<double>{0, 1},
             std::vector<double>{0, 1},
@@ -71,10 +72,11 @@ class GenericActionFixture: public ::testing::Test {
         msg.duration = event.duration;
         msg.heading = event.heading;
         subscribe_count++;
+        msg_received = true;
     }
 
-    void Publish(const int id) {
-        m_actionspace.publish_action(id, m_action_publisher);
+    bool Publish(const int id) {
+        return m_actionspace.publish_action(id, m_action_publisher);
     }
 
     int get_subscribe_count() {
@@ -82,10 +84,14 @@ class GenericActionFixture: public ::testing::Test {
     }
 
     void WaitForMessage() {
-        boost::shared_ptr<const libcozmo::ActionMsg> msg = 
-            ros::topic::waitForMessage<libcozmo::ActionMsg>(
-                "Action",
-                ros::Duration(1));
+        // boost::shared_ptr<const libcozmo::ActionMsg> msg = 
+        //     ros::topic::waitForMessage<libcozmo::ActionMsg>(
+        //         "Action",
+        //         ros::Duration(1));
+        while (msg_received == false) {
+            ros::spinOnce();
+        }
+        msg_received = false;
     }
 
     libcozmo::ActionMsg* get_action_msg() {
@@ -100,6 +106,7 @@ class GenericActionFixture: public ::testing::Test {
     ros::Subscriber m_action_subscriber;
     libcozmo::ActionMsg msg;
     int subscribe_count;
+    bool msg_received;
 };
 
 /// Check action similarity works
@@ -163,6 +170,8 @@ TEST_F(GenericActionFixture, PublishActionTest) {
     EXPECT_NEAR(1, msg->speed, 0.00001);
     EXPECT_NEAR(1, msg->duration, 0.00001);
     EXPECT_NEAR(M_PI * 3.0 / 2.0, msg->heading, 0.00001);
+
+    EXPECT_TRUE(false == Publish(16));
 }
 
 int main(int argc, char **argv) {

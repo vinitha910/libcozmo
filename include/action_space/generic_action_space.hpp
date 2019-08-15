@@ -42,7 +42,11 @@ namespace actionspace {
 
 /// This class represents the generic actionspace for Cozmo
 /// All actions are not planned specific to any object, but instead
-/// with respect to the Cozmo itself
+/// with respect to Cozmo's position at given time
+/// Heading is calculated with respect to cozmo's current pose, where
+/// 0 indicated by north of cozmo
+/// The total number of actions possible in a generic action space equals to
+/// speed options available * offset options * heading options
 class GenericActionSpace : public virtual ActionSpace {
  public:
         /// Generic Action class
@@ -74,7 +78,7 @@ class GenericActionSpace : public virtual ActionSpace {
 
     /// \param m_speeds Vector of available speeds
     /// \param m_durations Vector of available durations
-    /// \param num heading Number of options for heading/direction (assumption:
+    /// \param num heading Number of options for heading/direction (required:
     /// power of 2 and >= 4)
     GenericActionSpace(
         const std::vector<double>& m_speeds,
@@ -126,7 +130,7 @@ class GenericActionSpace : public virtual ActionSpace {
     ActionSpace::Action* get_action(const int& action_id) const override;
 
     /// Documentation inherited
-    void publish_action(
+    bool publish_action(
         const int& action_id,
         const ros::Publisher& publisher) const override;
 

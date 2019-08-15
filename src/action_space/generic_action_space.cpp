@@ -66,27 +66,29 @@ ActionSpace::Action* GenericActionSpace::get_action(
     const int& action_id) const {
     if (!is_valid_action_id(action_id)) {
         return nullptr;
-    } else {
-        const auto action_val = m_actions[action_id];
-        return new Action(action_val->m_speed,
-            action_val->m_duration,
-            action_val->m_heading);
     }
+    return m_actions[action_id];
 }
 
 bool GenericActionSpace::is_valid_action_id(const int& action_id) const {
     return ((action_id < m_actions.size() && action_id >= 0));
 }
 
-void GenericActionSpace::publish_action(
+//needs to be bool, change the abstract class type too
+// only publish if not null (deref) 
+bool GenericActionSpace::publish_action(
     const int& action_id,
     const ros::Publisher& publisher) const {
     libcozmo::ActionMsg msg;
     Action* action = static_cast<Action*>(get_action(action_id));
+    if (action == nullptr) {
+        return false;
+    }
     msg.speed = action->m_speed;
     msg.heading = action->m_heading;
     msg.duration = action->m_duration;
     publisher.publish(msg);
+    return true;
 }
 }  // namespace actionspace
 }  // namespace libcozmo
