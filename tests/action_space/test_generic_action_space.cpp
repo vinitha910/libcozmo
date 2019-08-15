@@ -84,10 +84,6 @@ class GenericActionFixture: public ::testing::Test {
     }
 
     void WaitForMessage() {
-        // boost::shared_ptr<const libcozmo::ActionMsg> msg = 
-        //     ros::topic::waitForMessage<libcozmo::ActionMsg>(
-        //         "Action",
-        //         ros::Duration(1));
         while (msg_received == false) {
             ros::spinOnce();
         }
