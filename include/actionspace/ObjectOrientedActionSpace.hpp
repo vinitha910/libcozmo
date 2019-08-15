@@ -4,6 +4,7 @@
 #include <Eigen/Dense>
 #include <ros/ros.h>
 #include <vector>
+#include "ActionSpace.hpp"
 #include "utils/utils.hpp"
 #include <libcozmo/ObjectOrientedAction.h>
 
@@ -22,16 +23,17 @@ namespace actionspace {
 /// \function generate_actions : generates possible actions for Cozmo given
 ///                              another object's position and orientation
 /// \function get_action : gets a specific action from the actionspace given an action id
+/// \function is_valid_action_id : checks if an action id is valid
 /// \function publish_action : publishes an action msg using a ROS publisher
 /// \function size : gets the size of the action space
 /// \function view_action_space : prints out the every action in the action space with
 ///                               their corresponding action id
-class ObjectOrientedActionSpace {
+class ObjectOrientedActionSpace : public virtual ActionSpace {
     public:
         /// An object oriented action consists of 2 parts:
         ///     1) The initial position and initial heading in the world to go to
         ///     2) Move at a certain speed for a certain duration once at the starting position
-        class ObjectOrientedAction {
+        class Action : public ActionSpace::Action {
             public:
                 /// \param speed : the speed of cozmo in part 2), in mm / s
                 ///     negative speed refers to backward movement
@@ -39,7 +41,7 @@ class ObjectOrientedActionSpace {
                 ///     should be >= 0
                 /// \param start_pos, Cozmo's inital (x, y) position, in mm
                 /// \param theta, Cozmo's initial heading, in radians
-                ObjectOrientedAction (
+                explicit Action (
                     const double& speed,
                     const double& duration,
                     const Eigen::Vector2d& start_pos,
@@ -48,7 +50,6 @@ class ObjectOrientedActionSpace {
                     duration(duration),
                     start_pos(start_pos),
                     theta(theta) {}
-                ~ObjectOrientedAction() {}
 
                 const double speed;
                 const double duration;
@@ -83,12 +84,13 @@ class ObjectOrientedActionSpace {
         /// between all attributes of an ObjectOrientedAction
 
         /// \param action_id1, action_id2 : The action id of two actions to compare
-        /// \throws out_of_range exception if either id's are invalid
-        /// \returns a value of how close the two actions are,
-        ///          value of 0 means they are identical
-        double action_similarity(
+        /// \param similarty : a place to store the calculated simliarity value
+        ///                    value of 0 means they are identical
+        /// \returns 1 if successful, 0 otherwise
+        bool action_similarity(
             const int& action_id1,
-            const int& action_id2) const;
+            const int& action_id2,
+            double* similarity) const;
 
         /// Generates actions given another object's position and theta
 
@@ -109,7 +111,9 @@ class ObjectOrientedActionSpace {
             const double& theta,
             const double& h_offset=40);
 
-        ObjectOrientedAction* get_action(const int& action_id) const;
+        ActionSpace::Action* get_action(const int& action_id) const;
+
+        bool is_valid_action_id(const int& action_id) const;
 
         void publish_action(const int& action_id, const ros::Publisher& publisher) const;
 
@@ -123,7 +127,7 @@ class ObjectOrientedActionSpace {
         std::vector<double> durations;
         int num_offset;
         double v_offset;
-        std::vector<ObjectOrientedAction*> actions;
+        std::vector<Action*> actions;
 
         ros::Publisher action_publisher;
 
@@ -157,8 +161,6 @@ class ObjectOrientedActionSpace {
             Eigen::Vector2d* start_pos,
             const double& cube_offset,
             const double& theta) const;
-
-        bool is_valid_action_id(const int& action_id) const;
 };
 
 } // namespace actionspace

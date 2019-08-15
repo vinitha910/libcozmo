@@ -46,7 +46,7 @@ include_directories(
 
 add_library(cozmo SHARED
   src/cozmo_description/cozmo.cpp
-  src/actionspace/object_oriented_action_space.cpp
+  src/actionspace/ObjectOrientedActionSpace.cpp
   src/statespace/SE2.cpp
 )
 

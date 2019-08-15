@@ -1,4 +1,4 @@
-#include "actionspace/object_oriented_action_space.hpp"
+#include "actionspace/ObjectOrientedActionSpace.hpp"
 #include <algorithm>
 #include <iostream>
 #include <iterator>
@@ -6,14 +6,17 @@
 namespace libcozmo {
 namespace actionspace {
 
-double ObjectOrientedActionSpace::action_similarity(
+bool ObjectOrientedActionSpace::action_similarity(
     const int& action_id1,
-    const int& action_id2) const
+    const int& action_id2,
+    double* similarity) const
 {
-    if (!(is_valid_action_id(action_id1) && is_valid_action_id(action_id2))) {
-        throw std::out_of_range("Action ID invalid");
+    if (!(is_valid_action_id(action_id1) &&
+          is_valid_action_id(action_id2))) {
+        return false;
     }
-    return sqrt(
+
+    *similarity = sqrt(
         pow((actions[action_id1]->speed -
             actions[action_id2]->speed), 2) +
         pow((actions[action_id1]->duration -
@@ -24,6 +27,7 @@ double ObjectOrientedActionSpace::action_similarity(
             actions[action_id2]->start_pos(1)), 2) +
         pow((actions[action_id1]->theta -
             actions[action_id2]->theta), 2));
+    return true;
 }
 
 void ObjectOrientedActionSpace::clear_actions() {
@@ -85,14 +89,14 @@ void ObjectOrientedActionSpace::generate_actions(
                 for (const auto& duration : durations) {
                     Eigen::Vector2d start_pos;
                     find_start_pos(obj_pos, &start_pos, cube_offset, heading);
-                    actions.push_back(new ObjectOrientedAction(speed, duration, start_pos, heading));
+                    actions.push_back(new Action(speed, duration, start_pos, heading));
                 }
             }
         }
     }
 }
 
-ObjectOrientedActionSpace::ObjectOrientedAction* ObjectOrientedActionSpace::get_action(const int& action_id) const {
+ActionSpace::Action* ObjectOrientedActionSpace::get_action(const int& action_id) const {
     if (!is_valid_action_id(action_id)) {
         throw std::out_of_range("Action ID invalid");
     }
@@ -111,7 +115,7 @@ void ObjectOrientedActionSpace::publish_action(
         throw std::out_of_range("Action ID invalid");
     }
     libcozmo::ObjectOrientedAction msg;
-    const auto action = get_action(action_id);
+    const Action* action = static_cast<Action*>(get_action(action_id));
     msg.speed = action->speed;
     msg.duration = action->duration;
     msg.x = action->start_pos.x();
@@ -130,7 +134,7 @@ void ObjectOrientedActionSpace::view_action_space() const {
         if (i % 5 == 0) {
             std::cout << "\n";
         }
-        ObjectOrientedAction* a = actions[i];
+        Action* a = actions[i];
         std::cout << i << " : ";
         std::cout << "Position: (" << a->start_pos(0) << ", " << a->start_pos(1) << "), ";
         std::cout << "Angle: "<< a->theta << ", ";
