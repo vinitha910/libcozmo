@@ -41,17 +41,19 @@ namespace libcozmo {
 namespace actionspace {
 
 /// This class represents the generic actionspace for Cozmo
-/// All actions are generated with respect to Cozmo's position at any given time
-/// Heading is calculated with respect to cozmo's current pose, where
-/// 0 indicated by north of cozmo
-/// heading generated give(how heading was calcaulted, and once set it is as is)
-/// (ASCII art?)
-/// heading wrt to axis
-/// The total number of actions possible in a generic action space equals to
-/// speed options available * offset options * heading options
+/// Actions are generated with respect to Cozmo's position at any given time
+/// Possible actions are generated from given options for speed, and duration
+/// Possible headings are calculated by defining division of 2PI angle into 
+/// given number of headings to generate. e.g. number of headings defined as 4
+/// generate 4 possible headings: 0, 90, 180, 270 (degrees), otherwise seen as
+/// "right, front, left, back" when plotted
+/// Hence heading is calculated with respect of x,y axis on 2D representation.
+/// The total number of possible actions then equals to
+/// = number of possible speed * number of possible duration * number of
+/// possible heading.
 class GenericActionSpace : public virtual ActionSpace {
  public:
-        /// Generic Action class
+    /// Generic Action class
     class Action : public ActionSpace::Action {
      public:
         /// Constructor
