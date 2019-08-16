@@ -30,14 +30,10 @@ bool ObjectOrientedActionSpace::action_similarity(
     return true;
 }
 
-void ObjectOrientedActionSpace::clear_actions() {
-    for (size_t i = 0; i < actions.size(); ++i) {
-        delete(actions[i]);
-    }
-    actions.clear();
-}
-
-void ObjectOrientedActionSpace::find_headings(std::vector<double>* headings, const double& theta) const {
+void ObjectOrientedActionSpace::find_headings(
+    const double& theta,
+    std::vector<double>* headings) const
+{
     double angle = theta;
     // Force angle to be between [0, 2pi]
     if (angle > 2 * M_PI || angle < 0) {
@@ -59,12 +55,14 @@ void ObjectOrientedActionSpace::find_headings(std::vector<double>* headings, con
 
 void ObjectOrientedActionSpace::find_start_pos(
     const Eigen::Vector2d& obj_pos,
-    Eigen::Vector2d* start_pos,
     const double& cube_offset,
-    const double& theta) const
+    const double& theta,
+    Eigen::Vector2d* start_pos) const
 {
-    start_pos->x() = obj_pos.x() - v_offset * cos(theta) + cube_offset * sin(theta);
-    start_pos->y() = obj_pos.y() - v_offset * sin(theta) - cube_offset * cos(theta);
+    start_pos->x() = obj_pos.x() - v_offset * cos(theta) +
+                                cube_offset * sin(theta);
+    start_pos->y() = obj_pos.y() - v_offset * sin(theta) -
+                                cube_offset * cos(theta);
 }
 
 void ObjectOrientedActionSpace::generate_actions(
@@ -72,38 +70,59 @@ void ObjectOrientedActionSpace::generate_actions(
     const double& theta,
     const double& h_offset)
 {
-    clear_actions();
     std::vector<double> cube_offsets;
-    if (num_offset == 1) { // if only one offset, just use center of side of object
-        cube_offsets.push_back(0);
+    if (num_offset == 1) { // if only one offset, use center of side of object
+        cube_offsets = {0};
     } else {
         cube_offsets = utils::linspace(-h_offset, h_offset, num_offset);
     }
-    std::vector<double> headings;
-    find_headings(&headings, theta);
 
+    std::vector<double> headings;
+    find_headings(theta, &headings);
+
+    int action_id = 0;
     for (size_t i = 0; i < headings.size(); ++i) {
         double heading = headings[i];
         for (const auto& cube_offset : cube_offsets) {
             for (const auto& speed : speeds) {
                 for (const auto& duration : durations) {
                     Eigen::Vector2d start_pos;
-                    find_start_pos(obj_pos, &start_pos, cube_offset, heading);
-                    actions.push_back(new Action(speed, duration, start_pos, heading));
+                    find_start_pos(obj_pos, cube_offset, heading, &start_pos);
+                    if (is_valid_action_id(action_id)) {
+                        ObjectOrientedActionSpace::Action* action =
+                            static_cast<ObjectOrientedActionSpace::Action*>(
+                                get_action(action_id));
+                        action->update_action(
+                            speed,
+                            duration,
+                            start_pos,
+                            heading);
+                    } else {
+                        actions.push_back(new Action(
+                            speed,
+                            duration,
+                            start_pos,
+                            heading));
+                    }
+                    action_id++;
                 }
             }
         }
     }
 }
 
-ActionSpace::Action* ObjectOrientedActionSpace::get_action(const int& action_id) const {
+ActionSpace::Action* ObjectOrientedActionSpace::get_action(
+    const int& action_id) const
+{
     if (!is_valid_action_id(action_id)) {
         throw std::out_of_range("Action ID invalid");
     }
     return actions[action_id];
 }
 
-bool ObjectOrientedActionSpace::is_valid_action_id(const int& action_id) const {
+bool ObjectOrientedActionSpace::is_valid_action_id(
+    const int& action_id) const
+{
     return action_id < actions.size() && action_id >= 0;
 }
 
@@ -127,20 +146,6 @@ void ObjectOrientedActionSpace::publish_action(
 
 int ObjectOrientedActionSpace::size() const {
     return actions.size();
-}
-
-void ObjectOrientedActionSpace::view_action_space() const {
-    for (size_t i = 0; i < actions.size(); ++i) {
-        if (i % 5 == 0) {
-            std::cout << "\n";
-        }
-        Action* a = actions[i];
-        std::cout << i << " : ";
-        std::cout << "Position: (" << a->start_pos(0) << ", " << a->start_pos(1) << "), ";
-        std::cout << "Angle: "<< a->theta << ", ";
-        std::cout << "Speed: " << a->speed << ", ";
-        std::cout << "Duration: " << a->duration << "\n";
-    }
 }
 
 } // namespace actionspace
