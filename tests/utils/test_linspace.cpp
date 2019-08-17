@@ -52,10 +52,13 @@ TEST(TestSuite, LinSpaceIntTest) {
     EXPECT_EQ(12, result[3]);
 }
 
-/// Test usecase for heading in generic action space, also try float
+/// Simple linspace check for scale (float)
 TEST(TestSuite, LinSpaceFloatTest) {
     double num_heading = 4;
-    std::vector<float> result = utils::linspace(static_cast<float>(0.0),static_cast<float>(3.0 * M_PI / 2.0), 4);
+    std::vector<float> result = utils::linspace(
+        static_cast<float>(0.0),
+        static_cast<float>(3.0 * M_PI / 2.0),
+        4);
     EXPECT_NEAR(0, result[0], 0.0001);
     EXPECT_NEAR(M_PI / 2, result[1], 0.0001);
     EXPECT_NEAR(M_PI, result[2], 0.0001);
