@@ -35,7 +35,7 @@ class GenericActionFixture: public ::testing::Test {
  public:
     GenericActionFixture() : \
         m_handle(),
-        msg_received(false),
+        m_msg_received(false),
         m_actionspace(std::vector<double>{0, 1}, std::vector<double>{0, 1}, 4),
         m_action(1.5, 4.0, M_PI),
         m_action_publisher(m_handle.advertise<libcozmo::ActionMsg>(
@@ -57,10 +57,10 @@ class GenericActionFixture: public ::testing::Test {
     }
 
     void Callback(const libcozmo::ActionMsg& event) {
-        msg.speed = event.speed;
-        msg.duration = event.duration;
-        msg.heading = event.heading;
-        msg_received = true;
+        m_msg.speed = event.speed;
+        m_msg.duration = event.duration;
+        m_msg.heading = event.heading;
+        m_msg_received = true;
     }
 
     bool Publish(const int id) {
@@ -68,14 +68,14 @@ class GenericActionFixture: public ::testing::Test {
     }
 
     void WaitForMessage() {
-        while (msg_received == false) {
+        while (m_msg_received == false) {
             ros::spinOnce();
         }
-        msg_received = false;
+        m_msg_received = false;
     }
 
     libcozmo::ActionMsg* GetActionMsg() {
-        return &msg;
+        return &m_msg;
     }
 
     ~GenericActionFixture()  {}
@@ -84,8 +84,8 @@ class GenericActionFixture: public ::testing::Test {
     ros::NodeHandle m_handle;
     ros::Publisher m_action_publisher;
     ros::Subscriber m_action_subscriber;
-    libcozmo::ActionMsg msg;
-    bool msg_received;
+    libcozmo::ActionMsg m_msg;
+    bool m_msg_received;
 };
 
 /// Tests action similarity 
