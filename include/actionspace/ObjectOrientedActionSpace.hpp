@@ -38,42 +38,35 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
                 ///                negative speed refers to backward movement
                 /// \param duration : the amount of time to move in part 2),
                 ///                   in seconds, should be >= 0
-                /// \param start_pos : Cozmo's inital (x, y) position, in mm
-                /// \param theta : Cozmo's initial heading, in radians
+                /// \param start_pos : Cozmo's inital (x, y, theta) position,
+                ///                               in (mm, mm, radians)
                 explicit Action (
                     const double& speed,
                     const double& duration,
-                    const Eigen::Vector2d& start_pos,
-                    const double& theta) : \
+                    const Eigen::Vector3d& start_pos) : \
                     speed(speed),
                     duration(duration),
-                    start_pos(start_pos),
-                    theta(theta) {}
+                    start_pos(start_pos) {}
 
                 double getSpeed() const { return speed; }
 
                 double getDuration() const { return duration; }
 
-                Eigen::Vector2d getStartPos() const { return start_pos; }
-
-                double getTheta() const { return theta; }
+                Eigen::Vector3d getStartPos() const { return start_pos; }
 
             private:
                 double speed;
                 double duration;
-                Eigen::Vector2d start_pos;
-                double theta;
+                Eigen::Vector3d start_pos;
 
                 void update_action(
                     const double& speed,
                     const double& duration,
-                    const Eigen::Vector2d& start_pos,
-                    const double& theta)
+                    const Eigen::Vector3d& start_pos)
                 {
                     this->speed = speed;
                     this->duration = duration;
                     this->start_pos = start_pos;
-                    this->theta = theta;
                 }
 
                 friend class ObjectOrientedActionSpace;
@@ -119,8 +112,8 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
 
         /// Generates actions given another object's position and theta
 
-        /// \param obj_pos : An (x, y) coordinate in millimeters
-        /// \param theta : An orientation angle in radians, should be [0, 2pi]
+        /// \param obj_pos : An (x, y, theta) coordinate in (mm, mm, radians)
+        ///                  theta should be [0, 2pi]
         /// \param h_offset (optional) : The max horizontal distance from
         ///                              the center of the edge of the object
 
@@ -129,8 +122,7 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
         /// This function will overwrite any previously
         /// generated actions in the action space
         void generate_actions(
-            const Eigen::Vector2d& obj_pos,
-            const double& theta,
+            const Eigen::Vector3d& obj_pos,
             const double& h_offset=40);
 
         ActionSpace::Action* get_action(const int& action_id) const;
@@ -173,16 +165,18 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
 
         /// Horizontal means parallel to the edge of an object
 
-        /// \param obj_pos : (x, y) position of the object
-        ///                  we are moving relative to
+        /// \param obj_pos : (x, y, theta) position of the object
+        ///                  we are moving relative to, in (mm, mm, radians)
         /// \param cube_offset : The horizontal distance away
-        ///                      from center of edge of object
-        /// \param theta : The orientation of the object
-        /// \param[out] start_pos : Cozmo's calculated initial position
+        ///                      from center of edge of object, in mm
+        /// \param heading : An orientation relative to the obj_pos theta,
+        ///                  in radians
+        /// \param[out] start_pos : Cozmo's calculated initial position,
+        ///                         (x, y) in (mm, mm)
         void find_start_pos(
-            const Eigen::Vector2d& obj_pos,
+            const Eigen::Vector3d& obj_pos,
             const double& cube_offset,
-            const double& theta,
+            const double& heading,
             Eigen::Vector2d* start_pos) const;
 };
 
