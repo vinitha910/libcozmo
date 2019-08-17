@@ -15,18 +15,21 @@ bool ObjectOrientedActionSpace::action_similarity(
           is_valid_action_id(action_id2))) {
         return false;
     }
-
-    *similarity = sqrt(
-        pow((actions[action_id1]->speed -
-            actions[action_id2]->speed), 2) +
-        pow((actions[action_id1]->duration -
-            actions[action_id2]->duration), 2) +
-        pow((actions[action_id1]->start_pos(0) -
-            actions[action_id2]->start_pos(0)), 2) +
-        pow((actions[action_id1]->start_pos(1) -
-            actions[action_id2]->start_pos(1)), 2) +
-        pow((actions[action_id1]->theta -
-            actions[action_id2]->theta), 2));
+    Action* action1 = actions[action_id1];
+    Action* action2 = actions[action_id2];
+    std::vector<double> action1_vector{
+        action1->speed,
+        action1->duration,
+        action1->start_pos(0),
+        action1->start_pos(1),
+        action1->theta};
+    std::vector<double> action2_vector{
+        action2->speed,
+        action2->duration,
+        action2->start_pos(0),
+        action2->start_pos(1),
+        action2->theta};
+    *similarity = utils::euclidean_distance(action1_vector, action2_vector);
     return true;
 }
 

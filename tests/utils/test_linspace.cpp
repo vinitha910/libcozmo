@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2019, Vinitha Ranganeni, Brian Lee
+// Copyright (c) 2019,  Brian Lee, Vinitha Ranganeni
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -27,37 +27,49 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef COZMO_UTILS_HPP_
-#define COZMO_UTILS_HPP_
-
-#include <vector>
-#include <cmath>
+#include <gtest/gtest.h>
+#include "utils/utils.hpp"
 
 namespace libcozmo {
 namespace utils {
+namespace test {
 
-// https://gist.github.com/lorenzoriano/5414671
-template <typename T>
-std::vector<T> linspace(T a, T b, std::size_t N) {
-    T h = (b - a) / static_cast<T>(N-1);
-    std::vector<T> xs(N);
-    typename std::vector<T>::iterator x;
-    T val;
-    for (x = xs.begin(), val = a; x != xs.end(); ++x, val += h)
-        *x = val;
-    return xs;
+/// Simple linspace check for scale (double)
+TEST(TestSuite, LinSpaceDoubleTest) {
+    std::vector<double> result = utils::linspace(0.0, 75.0, 4);
+    EXPECT_NEAR(0, result[0], 0.0001);
+    EXPECT_NEAR(25, result[1], 0.0001);
+    EXPECT_NEAR(50, result[2], 0.0001);
+    EXPECT_NEAR(75, result[3], 0.0001);
 }
 
-template <typename T>
-double euclidean_distance(std::vector<T> a, std::vector<T> b) {
-    double distance = 0;
-    for (int i = 0; i < a.size(); i++) {
-        distance = distance + pow((a[i] - b[i]), 2);
-    }
-    return sqrt(distance);
+/// Simple linspace check for scale (int)
+TEST(TestSuite, LinSpaceIntTest) {
+    std::vector<int> result = utils::linspace(0, 12, 4);
+    EXPECT_EQ(0, result[0]);
+    EXPECT_EQ(4, result[1]);
+    EXPECT_EQ(8, result[2]);
+    EXPECT_EQ(12, result[3]);
 }
 
-}  //  namespace utils
-}  //  namespace libcozmo
+/// Simple linspace check for scale (float)
+TEST(TestSuite, LinSpaceFloatTest) {
+    double num_heading = 4;
+    std::vector<float> result = utils::linspace(
+        static_cast<float>(0.0),
+        static_cast<float>(3.0 * M_PI / 2.0),
+        4);
+    EXPECT_NEAR(0, result[0], 0.0001);
+    EXPECT_NEAR(M_PI / 2, result[1], 0.0001);
+    EXPECT_NEAR(M_PI, result[2], 0.0001);
+    EXPECT_NEAR(M_PI * 3.0 / 2.0, result[3], 0.0001);
+}
 
-#endif  // COZMO_UTILS_HPP_
+}  // namespace test
+}  // namespace utils
+}  // namespace libcozmo
+
+int main(int argc, char **argv) {
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
+}
