@@ -70,12 +70,9 @@ void ObjectOrientedActionSpace::generate_actions(
     const double& theta,
     const double& h_offset)
 {
-    std::vector<double> cube_offsets;
-    if (num_offset == 1) { // if only one offset, use center of side of object
-        cube_offsets = {0};
-    } else {
-        cube_offsets = utils::linspace(-h_offset, h_offset, num_offset);
-    }
+    std::vector<double> cube_offsets = num_offset == 1 ?
+        std::vector<double>{0} :
+        utils::linspace(-h_offset, h_offset, num_offset);
 
     std::vector<double> headings;
     find_headings(theta, &headings);
