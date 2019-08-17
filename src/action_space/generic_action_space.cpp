@@ -50,7 +50,7 @@ bool GenericActionSpace::action_similarity(
         action2->m_speed,
         action2->m_duration,
         action2->m_heading};
-    *similarity = utils::euclidean(action1_vector, action2_vector);
+    *similarity = utils::euclidean_distance(action1_vector, action2_vector);
     return true;
 }
 

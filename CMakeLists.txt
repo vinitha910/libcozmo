@@ -74,19 +74,21 @@ target_link_libraries(
 ################################################################################
 # TESTS       
 ################################################################################
+set(TEST_LIBS cozmo ${catkin_LIBRARIES} ${aikido_LIBRARIES})
+
 catkin_add_gtest(test_libcozmo tests/statespace/test_statespace.cpp)
-target_link_libraries(test_libcozmo 
-  cozmo 
-  ${catkin_LIBRARIES}
-  ${aikido_LIBRARIES}
-)
+target_link_libraries(test_libcozmo ${TEST_LIBS})
 
 catkin_add_gtest(test_generic_action_space tests/action_space/test_generic_action_space.cpp )
-target_link_libraries(test_generic_action_space
-  cozmo 
-  ${catkin_LIBRARIES}
-  ${aikido_LIBRARIES}
-)
+target_link_libraries(test_generic_action_space ${TEST_LIBS})
+
+
+catkin_add_gtest(test_euclidean tests/utils/test_euclidean_distance.cpp)
+target_link_libraries(test_euclidean ${TEST_LIBS})
+
+catkin_add_gtest(test_linspace tests/utils/test_linspace.cpp)
+target_link_libraries(test_linspace ${TEST_LIBS})
+
 ################################################################################
 # EXECUTABLES       
 ################################################################################

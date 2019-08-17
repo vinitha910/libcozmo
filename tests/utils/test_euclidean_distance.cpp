@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2019, Vinitha Ranganeni, Brian Lee
+// Copyright (c) 2019,  Brian Lee, Vinitha Ranganeni
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -27,37 +27,42 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef COZMO_UTILS_HPP_
-#define COZMO_UTILS_HPP_
-
-#include <vector>
-#include <cmath>
+#include <gtest/gtest.h>
+#include "utils/utils.hpp"
 
 namespace libcozmo {
 namespace utils {
+namespace test {
 
-// https://gist.github.com/lorenzoriano/5414671
-template <typename T>
-std::vector<T> linspace(T a, T b, std::size_t N) {
-    T h = (b - a) / static_cast<T>(N-1);
-    std::vector<T> xs(N);
-    typename std::vector<T>::iterator x;
-    T val;
-    for (x = xs.begin(), val = a; x != xs.end(); ++x, val += h)
-        *x = val;
-    return xs;
+/// Check that Euclidean distance with double is correct
+TEST(TestSuite, EuclideanDoubleTest) {
+    std::vector<double> vector1{10.0, 16.4, 5.7};
+    std::vector<double> vector2{100.0, 15.2, 0.0};
+    double result = utils::euclidean_distance(vector1, vector2);
+    EXPECT_NEAR(90.1883, result, 0.0001);
 }
 
-template <typename T>
-double euclidean_distance(std::vector<T> a, std::vector<T> b) {
-    double distance = 0;
-    for (int i = 0; i < a.size(); i++) {
-        distance = distance + pow((a[i] - b[i]), 2);
-    }
-    return sqrt(distance);
+/// Check that Euclidean distance with int is correct
+TEST(TestSuite, EuclideanIntTest) {
+    std::vector<int> vector1{10, 16, 5};
+    std::vector<int> vector2{100, 15, 0};
+    double result = utils::euclidean_distance(vector1, vector2);
+    EXPECT_NEAR(90.1443, result, 0.0001);
 }
 
-}  //  namespace utils
-}  //  namespace libcozmo
+/// Check that Euclidean distance with float is correct
+TEST(TestSuite, EuclideanFloatTest) {
+    std::vector<float> vector1{-16.75, 5.51, 0.49};
+    std::vector<float> vector2{100.0, 15.2, 0.00};
+    double result = utils::euclidean_distance(vector1, vector2);
+    EXPECT_NEAR(117.1525, result, 0.0001);
+}
 
-#endif  // COZMO_UTILS_HPP_
+}  // namespace test
+}  // namespace utils
+}  // namespace libcozmo
+
+int main(int argc, char **argv) {
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
+}
