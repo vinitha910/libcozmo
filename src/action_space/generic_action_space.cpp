@@ -35,35 +35,30 @@ namespace libcozmo {
 namespace actionspace {
 
 bool GenericActionSpace::action_similarity(
-        const int& action_id1,
-        const int& action_id2,
-        double* similarity) const {
-    if (!(is_valid_action_id(action_id1) &&
-        is_valid_action_id(action_id2))) {
+    const int& action_id1, const int& action_id2, double* similarity) const {
+    if (!(is_valid_action_id(action_id1) && is_valid_action_id(action_id2))) {
         return false;
-    } else {
-        Action* action1 = m_actions[action_id1];
-        Action* action2 = m_actions[action_id2];
-        std::vector<double> action1_vector{
-            action1->m_speed,
-            action1->m_duration,
-            action1->m_heading};
-        std::vector<double> action2_vector{
-            action2->m_speed,
-            action2->m_duration,
-            action2->m_heading
-        };
-        *similarity = utils::euclidean(action1_vector, action2_vector);
-        return true;
     }
+
+    Action* action1 = m_actions[action_id1];
+    Action* action2 = m_actions[action_id2];
+    std::vector<double> action1_vector{
+        action1->m_speed,
+        action1->m_duration,
+        action1->m_heading};
+    std::vector<double> action2_vector{
+        action2->m_speed,
+        action2->m_duration,
+        action2->m_heading};
+    *similarity = utils::euclidean(action1_vector, action2_vector);
+    return true;
 }
 
 int GenericActionSpace::size() const {
     return m_actions.size();
 }
 
-ActionSpace::Action* GenericActionSpace::get_action(
-    const int& action_id) const {
+ActionSpace::Action* GenericActionSpace::get_action(const int& action_id) const {
     if (!is_valid_action_id(action_id)) {
         return nullptr;
     }
@@ -74,11 +69,8 @@ bool GenericActionSpace::is_valid_action_id(const int& action_id) const {
     return ((action_id < m_actions.size() && action_id >= 0));
 }
 
-//needs to be bool, change the abstract class type too
-// only publish if not null (deref) 
 bool GenericActionSpace::publish_action(
-    const int& action_id,
-    const ros::Publisher& publisher) const {
+    const int& action_id, const ros::Publisher& publisher) const {
     libcozmo::ActionMsg msg;
     Action* action = static_cast<Action*>(get_action(action_id));
     if (action == nullptr) {

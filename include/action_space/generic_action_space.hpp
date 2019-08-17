@@ -40,17 +40,14 @@
 namespace libcozmo {
 namespace actionspace {
 
-/// This class represents the generic actionspace for Cozmo
-/// Actions are generated with respect to Cozmo's position at any given time
-/// Possible actions are generated from given options for speed, and duration
-/// Possible headings are calculated by defining division of 2PI angle into 
-/// given number of headings to generate. e.g. number of headings defined as 4
-/// generate 4 possible headings: 0, 90, 180, 270 (degrees), otherwise seen as
-/// "right, front, left, back" when plotted
-/// Hence heading is calculated with respect of x,y axis on 2D representation.
-/// The total number of possible actions then equals to
-/// = number of possible speed * number of possible duration * number of
-/// possible heading.
+/// Actions are applicable regardless of Cozmo's state in the world
+///
+/// Actions consist of speed, duration and heading
+/// The total number of possible actions = 
+/// number of speeds * number of durations * number of headings
+///
+/// Headings are represented as angles from [0, 2pi]. The difference between
+/// two headings is 2pi/number_of_headings.
 class GenericActionSpace : public virtual ActionSpace {
  public:
     /// Generic Action class
@@ -60,7 +57,7 @@ class GenericActionSpace : public virtual ActionSpace {
 
         /// \param speed The speed of action (m/s)
         /// \param duration The duration of action (s)
-        /// \param heading The heading of action (rad)
+        /// \param heading The heading of action (radians)
         explicit Action(
             const double& speed,
             const double& duration,
@@ -87,29 +84,22 @@ class GenericActionSpace : public virtual ActionSpace {
     GenericActionSpace(
         const std::vector<double>& m_speeds,
         std::vector<double> m_durations,
-        const int& num_heading) {
+        const int& num_headings) {
             int num_speed = m_speeds.size();
             int num_duration = m_durations.size();
             std::vector<double> m_headings = utils::linspace(
-                0.0,
-                2.0 * M_PI - 2.0 * M_PI / num_heading,
-                num_heading);
+                0.0, 2.0 * M_PI - 2.0 * M_PI / num_headings, num_headings);
             m_actions = std::vector<Action*>(
-                num_speed *
-                num_duration *
-                num_heading,
-                nullptr);
+                num_speed * num_duration * num_headings, nullptr);
+
             for (int j = 0; j < num_speed; j++) {
                 for (int k = 0; k < num_duration; k++) {
-                    for (int l = 0; l < num_heading; l++) {
-                        const int id =
-                            j * num_duration * num_heading +
-                            k * num_heading + l;
+                    for (int l = 0; l < num_headings; l++) {
+                        const int id = 
+                            (((j * num_duration) + k) * num_headings) + l;
                         m_actions[id] = new Action(
-                            m_speeds[j],
-                            m_durations[k],
-                            m_headings[l]);
-                  }
+                            m_speeds[j], m_durations[k], m_headings[l]);
+                    }
                 }
             }
         }
@@ -122,9 +112,9 @@ class GenericActionSpace : public virtual ActionSpace {
 
     /// Calculates similarity between two actions
     /// Similarity based on the Euclidean distance between the actions
-
+    ///
     /// \param action_id1, actionid2 IDs of actions to compare
-    /// \return similarity
+    /// \return similarity value
     bool action_similarity(
         const int& action_id1,
         const int& action_id2,
