@@ -47,7 +47,7 @@ include_directories(
 
 add_library(cozmo SHARED
   src/cozmo_description/cozmo.cpp
-  src/action_space/generic_action_space.cpp
+  src/actionspace/generic_action_space.cpp
   src/statespace/SE2.cpp
 )
 
@@ -79,7 +79,7 @@ set(TEST_LIBS cozmo ${catkin_LIBRARIES} ${aikido_LIBRARIES})
 catkin_add_gtest(test_libcozmo tests/statespace/test_statespace.cpp)
 target_link_libraries(test_libcozmo ${TEST_LIBS})
 
-catkin_add_gtest(test_generic_action_space tests/action_space/test_generic_action_space.cpp )
+catkin_add_gtest(test_generic_action_space tests/actionspace/test_generic_action_space.cpp )
 target_link_libraries(test_generic_action_space ${TEST_LIBS})
 
 
