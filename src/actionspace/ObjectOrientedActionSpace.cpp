@@ -34,73 +34,63 @@ bool ObjectOrientedActionSpace::action_similarity(
 }
 
 void ObjectOrientedActionSpace::find_headings(
-    const double& theta,
+    const double& theta_rad,
     std::vector<double>* headings) const
 {
-    double angle = theta;
+    double normalized_theta_rad = theta_rad;
     // Force angle to be between [0, 2pi]
-    if (angle > 2 * M_PI || angle < 0) {
-        int cycles = angle / (2 * M_PI);
-        angle -= 2 * M_PI * cycles;
-        if (angle < 0) {
-            angle += 2 * M_PI;
-        }
+    if (abs(theta_rad) > 2.0 * M_PI) {
+        normalized_theta_rad = normalized_theta_rad -
+            static_cast<int>(normalized_theta_rad / (2.0 * M_PI)) * 2.0 * M_PI;
     }
-    headings->push_back(angle);
+    if (theta_rad < 0) {
+        normalized_theta_rad += 2.0 * M_PI;
+    }
+    headings->push_back(normalized_theta_rad);
     for (size_t i = 0; i < 3; ++i) {
-        angle -= M_PI / 2;
-        if (angle < 0) {
-            angle = 2 * M_PI + angle;
+        normalized_theta_rad -= M_PI / 2;
+        if (normalized_theta_rad < 0) {
+            normalized_theta_rad = 2 * M_PI + normalized_theta_rad;
         }
-        headings->push_back(angle);
+        headings->push_back(normalized_theta_rad);
     }
 }
 
 void ObjectOrientedActionSpace::find_start_pos(
     const Eigen::Vector3d& obj_pos,
-    const double& cube_offset,
+    const double& edge_offset,
     const double& heading,
     Eigen::Vector2d* start_pos) const
 {
     start_pos->x() = obj_pos.x() - v_offset * cos(heading) +
-                                cube_offset * sin(heading);
+                                edge_offset * sin(heading);
     start_pos->y() = obj_pos.y() - v_offset * sin(heading) -
-                                cube_offset * cos(heading);
+                                edge_offset * cos(heading);
 }
 
 void ObjectOrientedActionSpace::generate_actions(
     const Eigen::Vector3d& obj_pos,
-    const double& h_offset)
+    const double& edge_offset)
 {
     std::vector<double> cube_offsets = num_offset == 1 ?
         std::vector<double>{0} :
-        utils::linspace(-h_offset, h_offset, num_offset);
+        utils::linspace(-edge_offset, edge_offset, num_offset);
 
     std::vector<double> headings;
     find_headings(obj_pos(2), &headings);
 
     int action_id = 0;
-    for (size_t i = 0; i < headings.size(); ++i) {
-        double heading = headings[i];
+    for (const auto& heading : headings) {
         for (const auto& cube_offset : cube_offsets) {
             for (const auto& speed : speeds) {
                 for (const auto& duration : durations) {
                     Eigen::Vector2d start_pos;
                     find_start_pos(obj_pos, cube_offset, heading, &start_pos);
 
-                    if (is_valid_action_id(action_id)) {
-                        ObjectOrientedActionSpace::Action* action =
-                            static_cast<ObjectOrientedActionSpace::Action*>(
-                                get_action(action_id));
-                        action->update_action(
-                            speed,
-                            duration,
-                            Eigen::Vector3d(
-                                start_pos(0),
-                                start_pos(1),
-                                heading)
-                            );
-                    } else {
+                    ObjectOrientedActionSpace::Action* action =
+                        static_cast<ObjectOrientedActionSpace::Action*>(
+                            get_action(action_id));
+                    if (action == nullptr) {
                         actions.push_back(new Action(
                             speed,
                             duration,
@@ -109,6 +99,15 @@ void ObjectOrientedActionSpace::generate_actions(
                                 start_pos(1),
                                 heading)
                             ));
+                    } else {
+                        action->update_action(
+                            speed,
+                            duration,
+                            Eigen::Vector3d(
+                                start_pos(0),
+                                start_pos(1),
+                                heading)
+                            );
                     }
                     action_id++;
                 }
@@ -121,7 +120,7 @@ ActionSpace::Action* ObjectOrientedActionSpace::get_action(
     const int& action_id) const
 {
     if (!is_valid_action_id(action_id)) {
-        throw std::out_of_range("Action ID invalid");
+        return nullptr;
     }
     return actions[action_id];
 }
@@ -132,15 +131,15 @@ bool ObjectOrientedActionSpace::is_valid_action_id(
     return action_id < actions.size() && action_id >= 0;
 }
 
-void ObjectOrientedActionSpace::publish_action(
+bool ObjectOrientedActionSpace::publish_action(
     const int& action_id,
     const ros::Publisher& publisher) const
 {
-    if (!is_valid_action_id(action_id)) {
-        throw std::out_of_range("Action ID invalid");
-    }
     libcozmo::ObjectOrientedAction msg;
     const Action* action = static_cast<Action*>(get_action(action_id));
+    if (action == nullptr) {
+        return false;
+    }
     msg.speed = action->speed;
     msg.duration = action->duration;
     msg.x = action->start_pos(0);
@@ -148,6 +147,7 @@ void ObjectOrientedActionSpace::publish_action(
     msg.theta = action->start_pos(2);
 
     publisher.publish(msg);
+    return true;
 }
 
 int ObjectOrientedActionSpace::size() const {

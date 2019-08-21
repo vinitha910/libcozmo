@@ -18,9 +18,11 @@ find_package(aikido REQUIRED COMPONENTS statespace trajectory distance control r
 find_package(aikidopy REQUIRED COMPONENTS libaikidopy)
 
 add_message_files(
+  DIRECTORY msg
   FILES
   ForkLift.msg
   ObjectOrientedAction.msg
+  ActionMsg.msg
 )
 
 generate_messages(
@@ -47,6 +49,7 @@ include_directories(
 add_library(cozmo SHARED
   src/cozmo_description/cozmo.cpp
   src/actionspace/ObjectOrientedActionSpace.cpp
+  src/actionspace/generic_action_space.cpp
   src/statespace/SE2.cpp
 )
 
@@ -73,12 +76,14 @@ target_link_libraries(
 ################################################################################
 # TESTS       
 ################################################################################
+set(TEST_LIBS cozmo ${catkin_LIBRARIES} ${aikido_LIBRARIES})
+
 catkin_add_gtest(test_libcozmo tests/statespace/test_statespace.cpp)
-target_link_libraries(test_libcozmo 
-  cozmo 
-  ${catkin_LIBRARIES}
-  ${aikido_LIBRARIES}
-)
+target_link_libraries(test_libcozmo ${TEST_LIBS})
+
+catkin_add_gtest(test_generic_action_space tests/actionspace/test_generic_action_space.cpp )
+target_link_libraries(test_generic_action_space ${TEST_LIBS})
+
 
 catkin_add_gtest(test_object_oriented_action_space tests/actionspace/test_object_oriented_action_space.cpp)
 target_link_libraries(test_object_oriented_action_space
@@ -86,22 +91,15 @@ target_link_libraries(test_object_oriented_action_space
 )
 
 catkin_add_gtest(test_euclidean tests/utils/test_euclidean_distance.cpp)
-target_link_libraries(test_euclidean 
-  cozmo 
-  ${catkin_LIBRARIES}
-  ${aikido_LIBRARIES}
-)
+target_link_libraries(test_euclidean ${TEST_LIBS})
 
 catkin_add_gtest(test_linspace tests/utils/test_linspace.cpp)
-target_link_libraries(test_linspace 
-  cozmo 
-  ${catkin_LIBRARIES}
-  ${aikido_LIBRARIES}
-)
+target_link_libraries(test_linspace ${TEST_LIBS})
 
 ################################################################################
 # EXECUTABLES       
 ################################################################################
+
 
 add_executable(rviz_example src/examples/rviz_example.cpp)
 target_include_directories(rviz_example PRIVATE
