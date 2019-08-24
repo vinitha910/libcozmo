@@ -36,6 +36,7 @@ def cozmo_program(robot: cozmo.robot.Robot):
     plt.plot(corners_x[2:4], corners_y[2:4], 'b')
     plt.plot(a, b, 'b')
     plt.plot(c, d, 'b')
+    plt.savefig('edge.png')
     plt.show()
 
 cozmo.run_program(cozmo_program)
