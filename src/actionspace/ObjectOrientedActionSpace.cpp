@@ -126,7 +126,8 @@ void ObjectOrientedActionSpace::generate_actions(
                             Eigen::Vector3d(
                                 start_pos(0),
                                 start_pos(1),
-                                heading)
+                                heading),
+                            cube_offset
                             ));
                     } else {
                         action->update_action(
@@ -135,7 +136,8 @@ void ObjectOrientedActionSpace::generate_actions(
                             Eigen::Vector3d(
                                 start_pos(0),
                                 start_pos(1),
-                                heading)
+                                heading),
+                            cube_offset
                             );
                     }
                     action_id++;
@@ -181,6 +183,21 @@ bool ObjectOrientedActionSpace::publish_action(
 
 int ObjectOrientedActionSpace::size() const {
     return actions.size();
+}
+
+void ObjectOrientedActionSpace::view_action_space() const {
+    for (size_t i = 0; i < actions.size(); ++i) {
+        if (i % 5 == 0) {
+            std::cout << "\n";
+        }
+    	const Action* a = static_cast<Action*>(get_action(i));
+        std::cout << i << " : ";
+        std::cout << "Position: (" << a->start_pos(0) << ", " << a->start_pos(1) << "), ";
+        std::cout << "Angle: "<< a->start_pos(2) << ", ";
+        std::cout << "Speed: " << a->speed << ", ";
+        std::cout << "Duration: " << a->duration << "\n";
+        std::cout << "Offset: " << a->offset << "\n";
+    }
 }
 
 } // namespace actionspace

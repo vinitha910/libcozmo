@@ -66,13 +66,16 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
                 ///                   in seconds, should be >= 0
                 /// \param start_pos : Cozmo's inital (x, y, theta) position,
                 ///                               in (mm, mm, radians)
+                /// \param offset : offset ratio from center of edge, [-1, 1]
                 explicit Action (
                     const double& speed,
                     const double& duration,
-                    const Eigen::Vector3d& start_pos) : \
+                    const Eigen::Vector3d& start_pos,
+                    const double& offset) : \
                     speed(speed),
                     duration(duration),
-                    start_pos(start_pos) {}
+                    start_pos(start_pos),
+                    offset(offset) {}
 
                 double getSpeed() const { return speed; }
 
@@ -80,19 +83,24 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
 
                 Eigen::Vector3d getStartPos() const { return start_pos; }
 
+                double getOffset() const { return offset; }
+
             private:
                 double speed;
                 double duration;
                 Eigen::Vector3d start_pos;
+                double offset;
 
                 void update_action(
                     const double& speed,
                     const double& duration,
-                    const Eigen::Vector3d& start_pos)
+                    const Eigen::Vector3d& start_pos,
+                    const double& offset)
                 {
                     this->speed = speed;
                     this->duration = duration;
                     this->start_pos = start_pos;
+                    this->offset = offset;
                 }
 
                 friend class ObjectOrientedActionSpace;
@@ -146,7 +154,7 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
         /// generated actions in the action space
         void generate_actions(
             const Eigen::Vector3d& obj_pos,
-            const double& edge_offset=40);
+            const double& edge_offset=1);
 
         ActionSpace::Action* get_action(const int& action_id) const;
 
@@ -157,6 +165,8 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
             const ros::Publisher& publisher) const;
 
         int size() const;
+		
+		void view_action_space() const;
 
     private:
         std::vector<double> speeds;
