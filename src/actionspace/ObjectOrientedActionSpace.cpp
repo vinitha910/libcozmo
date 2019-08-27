@@ -92,9 +92,9 @@ void ObjectOrientedActionSpace::find_start_pos(
     Eigen::Vector2d* start_pos) const
 {
     start_pos->x() = obj_pos.x() - v_offset * cos(heading) +
-                                edge_offset * sin(heading);
+                                40 * edge_offset * sin(heading);
     start_pos->y() = obj_pos.y() - v_offset * sin(heading) -
-                                edge_offset * cos(heading);
+                                40 * edge_offset * cos(heading);
 }
 
 void ObjectOrientedActionSpace::generate_actions(
@@ -127,7 +127,7 @@ void ObjectOrientedActionSpace::generate_actions(
                                 start_pos(0),
                                 start_pos(1),
                                 heading),
-                            cube_offset
+                            -cube_offset
                             ));
                     } else {
                         action->update_action(
@@ -137,7 +137,7 @@ void ObjectOrientedActionSpace::generate_actions(
                                 start_pos(0),
                                 start_pos(1),
                                 heading),
-                            cube_offset
+                            -cube_offset
                             );
                     }
                     action_id++;
