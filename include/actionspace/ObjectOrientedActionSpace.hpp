@@ -154,7 +154,7 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
         /// generated actions in the action space
         void generate_actions(
             const Eigen::Vector3d& obj_pos,
-            const double& edge_offset=1);
+            const double& edge_offset=40);
 
         ActionSpace::Action* get_action(const int& action_id) const;
 
@@ -165,7 +165,7 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
             const ros::Publisher& publisher) const;
 
         int size() const;
-		
+
 		void view_action_space() const;
 
     private:
