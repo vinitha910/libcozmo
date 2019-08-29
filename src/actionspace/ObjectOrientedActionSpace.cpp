@@ -49,15 +49,15 @@ bool ObjectOrientedActionSpace::action_similarity(
     std::vector<double> action1_vector{
         action1->speed,
         action1->duration,
-        action1->start_pos(0),
-        action1->start_pos(1),
-        action1->start_pos(2)};
+        action1->start_pose(0),
+        action1->start_pose(1),
+        action1->start_pose(2)};
     std::vector<double> action2_vector{
         action2->speed,
         action2->duration,
-        action2->start_pos(0),
-        action2->start_pos(1),
-        action2->start_pos(2)};
+        action2->start_pose(0),
+        action2->start_pose(1),
+        action2->start_pose(2)};
     *similarity = utils::euclidean_distance(action1_vector, action2_vector);
     return true;
 }
@@ -86,19 +86,19 @@ void ObjectOrientedActionSpace::find_headings(
 }
 
 void ObjectOrientedActionSpace::find_start_pos(
-    const Eigen::Vector3d& obj_pos,
+    const Eigen::Vector3d& obj_pose,
     const double& edge_offset,
     const double& heading,
     Eigen::Vector2d* start_pos) const
 {
-    start_pos->x() = obj_pos.x() - v_offset * cos(heading) +
-                                edge_offset * sin(heading);
-    start_pos->y() = obj_pos.y() - v_offset * sin(heading) -
-                                edge_offset * cos(heading);
+    start_pos->x() = obj_pose.x() - center_offset * cos(heading) +
+                     edge_offset * sin(heading);
+    start_pos->y() = obj_pose.y() - center_offset * sin(heading) -
+                     edge_offset * cos(heading);
 }
 
 void ObjectOrientedActionSpace::generate_actions(
-    const Eigen::Vector3d& obj_pos,
+    const Eigen::Vector3d& obj_pose,
     const double& edge_offset)
 {
     std::vector<double> cube_offsets = num_offset == 1 ?
@@ -106,7 +106,7 @@ void ObjectOrientedActionSpace::generate_actions(
         utils::linspace(-edge_offset, edge_offset, num_offset);
 
     std::vector<double> headings;
-    find_headings(obj_pos(2), &headings);
+    find_headings(obj_pose(2), &headings);
 
     int action_id = 0;
     for (const auto& heading : headings) {
@@ -114,7 +114,7 @@ void ObjectOrientedActionSpace::generate_actions(
             for (const auto& speed : speeds) {
                 for (const auto& duration : durations) {
                     Eigen::Vector2d start_pos;
-                    find_start_pos(obj_pos, cube_offset, heading, &start_pos);
+                    find_start_pos(obj_pose, cube_offset, heading, &start_pos);
 
                     ObjectOrientedActionSpace::Action* action =
                         static_cast<ObjectOrientedActionSpace::Action*>(
@@ -173,9 +173,9 @@ bool ObjectOrientedActionSpace::publish_action(
     }
     msg.speed = action->speed;
     msg.duration = action->duration;
-    msg.x = action->start_pos(0);
-    msg.y = action->start_pos(1);
-    msg.theta = action->start_pos(2);
+    msg.x = action->start_pose(0);
+    msg.y = action->start_pose(1);
+    msg.theta = action->start_pose(2);
 
     publisher.publish(msg);
     return true;
@@ -192,11 +192,11 @@ void ObjectOrientedActionSpace::view_action_space() const {
         }
     	const Action* a = static_cast<Action*>(get_action(i));
         std::cout << i << " : ";
-        std::cout << "Position: (" << a->start_pos(0) << ", " << a->start_pos(1) << "), ";
-        std::cout << "Angle: "<< a->start_pos(2) << ", ";
+        std::cout << "Position: (" << a->start_pose(0) << ", " << a->start_pose(1) << "), ";
+        std::cout << "Angle: "<< a->start_pose(2) << ", ";
         std::cout << "Speed: " << a->speed << ", ";
         std::cout << "Duration: " << a->duration << "\n";
-        std::cout << "Offset: " << a->offset << "\n";
+        std::cout << "Offset: " << a->edge_offset << "\n";
     }
 }
 

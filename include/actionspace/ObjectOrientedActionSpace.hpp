@@ -54,10 +54,6 @@ namespace actionspace {
 
 class ObjectOrientedActionSpace : public virtual ActionSpace {
     public:
-        /// An object oriented action consists of 2 parts:
-        ///     1) The initial pose (x, y, theta) from
-        ///        which the action will be executed
-        ///     2) Speed and duration of action
         class Action : public ActionSpace::Action {
             public:
                 /// \param speed : the speed of cozmo, in mm / s
@@ -65,53 +61,54 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
                 /// \param duration : the amount of time to move,
                 ///                   in seconds, should be >= 0
                 /// \param start_pos : Cozmo's inital (x, y, theta) position,
-                ///                               in (mm, mm, radians)
-                /// \param offset : offset ratio from center of edge, [-1, 1]
+                ///                    in (mm, mm, radians)
+                /// \param edge_offset : distance from center of edge,
+                ///                      normalized [-1, 1], negative values
+                ///                      are left of center, positive values
+                ///                      are right of center
                 explicit Action (
                     const double& speed,
                     const double& duration,
-                    const Eigen::Vector3d& start_pos,
+                    const Eigen::Vector3d& start_pose,
                     const double& offset) : \
                     speed(speed),
                     duration(duration),
-                    start_pos(start_pos),
-                    offset(offset) {}
+                    start_pose(start_pose),
+                    edge_offset(edge_offset) {}
 
                 double getSpeed() const { return speed; }
 
                 double getDuration() const { return duration; }
 
-                Eigen::Vector3d getStartPos() const { return start_pos; }
+                Eigen::Vector3d getStartPose() const { return start_pose; }
 
-                double getOffset() const { return offset; }
+                double getEdgeOffset() const { return edge_offset; }
 
             private:
                 double speed;
                 double duration;
-                Eigen::Vector3d start_pos;
-                double offset;
+                Eigen::Vector3d start_pose;
+                double edge_offset;
 
                 void update_action(
                     const double& speed,
                     const double& duration,
-                    const Eigen::Vector3d& start_pos,
-                    const double& offset)
+                    const Eigen::Vector3d& start_pose,
+                    const double& edge_offset)
                 {
                     this->speed = speed;
                     this->duration = duration;
-                    this->start_pos = start_pos;
-                    this->offset = offset;
+                    this->start_pose = start_pose;
+                    this->edge_offset = edge_offset;
                 }
 
                 friend class ObjectOrientedActionSpace;
         };
 
-        /// \param speeds : generates an action in the action space for each
-        ///                 speed (mm/s) in speeds, will generate duplicates
-        ///                 if list contains duplicates
-        /// \param durations : generates an action in the action space for each
-        ///                    duration (seconds) in durations, will generate
-        ///                    duplicates if list contains duplicates
+        /// \param speeds : all possible speeds (mm/s) for the actions
+        ///                 (duplicates persist)
+        /// \param durations : all possible durations (seconds) for the actions
+        ///                    (duplicates persist)
         /// \param num_offset : number of starting position offsets on each
         ///                     side of the cube; this value must always be odd
         ObjectOrientedActionSpace(
@@ -121,7 +118,7 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
             speeds(speeds),
             durations(durations),
             num_offset(num_offset),
-            v_offset(60) {}
+            center_offset(60) {}
 
         ~ObjectOrientedActionSpace() {
             for (size_t i = 0; i < actions.size(); ++i) {
@@ -135,35 +132,40 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
         /// between all attributes of an ObjectOrientedAction
         ///
         /// \param action_id1, action_id2 : The id's of the actions to compare
-        /// \param[out] similarty : The similarity value between two actions
-        ///                         value of 0 means they are identical
+        /// \param[out] similarity : The similarity value between two actions
+        ///                          value of 0 means they are identical
         /// \returns true if successful, false otherwise
         bool action_similarity(
             const int& action_id1,
             const int& action_id2,
             double* similarity) const;
 
-        /// Generates actions given another object's position and theta
+        /// Generates actions given another object's pose
         ///
-        /// \param obj_pos : An (x, y, theta) coordinate in (mm, mm, radians)
+        /// \param obj_pose : An (x, y, theta) coordinate in (mm, mm, radians)
         ///                  theta should be [0, 2pi]
-        /// \param edge_offset (optional) : The max horizontal distance from
-        ///                              the center of the edge of the object
+        /// \param edge_offset (optional) : The max distance, along the edge of
+        ///                                 the object, from the center of that
+        ///                                 edge
         ///
         /// This function will overwrite any previously
         /// generated actions in the action space
         void generate_actions(
-            const Eigen::Vector3d& obj_pos,
+            const Eigen::Vector3d& obj_pose,
             const double& edge_offset=40);
 
+        /// Documentation inherited
         ActionSpace::Action* get_action(const int& action_id) const;
 
+        /// Documentation inherited
         bool is_valid_action_id(const int& action_id) const;
 
+        /// Documentation inherited
         bool publish_action(
             const int& action_id,
             const ros::Publisher& publisher) const;
 
+        /// Documentation inherited
         int size() const;
 
 		void view_action_space() const;
@@ -172,7 +174,7 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
         std::vector<double> speeds;
         std::vector<double> durations;
         int num_offset;
-        double v_offset;
+        double center_offset;
         std::vector<Action*> actions;
 
         ros::Publisher action_publisher;
@@ -180,11 +182,8 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
         /// Finds the headings for cozmo, relative to a cartesian plane,
         /// to all 4 sides of the cube given the orientation of the cube
         ///
-        /// The angles are found in clockwise order where index
-        ///     0 corresponds to front of cube
-        ///     1 corresponds to left of cube
-        ///     2 corresponds to back of cube
-        ///     3 corresponds to right of cube
+        /// The angles are found in clockwise order where indices correspond to
+        /// (in order) the front, left, back, right of the cube respectively
         /// Angles are in radians and are in the range [0, 2pi]
         ///
         /// \param theta_rad : Orientation of cube
@@ -194,21 +193,18 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
             const double& theta_rad,
             std::vector<double>* headings) const;
 
-        /// Finds Cozmo's start position given an object's position,
-        /// theta, and horizontal (cube_offset) distances away from said object
+        /// Finds Cozmo's start position given an object's pose and edge offsets
         ///
-        /// Horizontal means parallel to the edge of an object
-        ///
-        /// \param obj_pos : (x, y, theta) position of the object
+        /// \param obj_pose : (x, y, theta) position of the object
         ///                  we are moving relative to, in (mm, mm, radians)
-        /// \param edge_offset : The horizontal distance away
-        ///                      from center of edge of object, in mm
-        /// \param heading : An orientation relative to the obj_pos theta,
-        ///                  in radians
+        /// \param edge_offset : The max distance, along the edge of the object,
+        ///                      from the center of that edge (mm)
+        /// \param heading : An orientation relative the orientation specified 
+        ///                  by obj_pose, (radians)
         /// \param[out] start_pos : Cozmo's calculated initial position,
         ///                         (x, y) in (mm, mm)
         void find_start_pos(
-            const Eigen::Vector3d& obj_pos,
+            const Eigen::Vector3d& obj_pose,
             const double& edge_offset,
             const double& heading,
             Eigen::Vector2d* start_pos) const;
