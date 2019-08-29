@@ -66,15 +66,8 @@ void ObjectOrientedActionSpace::find_headings(
     const double& theta_rad,
     std::vector<double>* headings) const
 {
-    double normalized_theta_rad = theta_rad;
+    double normalized_theta_rad = theta_rad - 2.0 * M_PI * floor(theta_rad / (2 * M_PI));
     // Force angle to be between [0, 2pi]
-    if (abs(theta_rad) > 2.0 * M_PI) {
-        normalized_theta_rad = normalized_theta_rad -
-            static_cast<int>(normalized_theta_rad / (2.0 * M_PI)) * 2.0 * M_PI;
-    }
-    if (theta_rad < 0) {
-        normalized_theta_rad += 2.0 * M_PI;
-    }
     headings->push_back(normalized_theta_rad);
     for (size_t i = 0; i < 3; ++i) {
         normalized_theta_rad -= M_PI / 2;
