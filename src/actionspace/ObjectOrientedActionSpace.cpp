@@ -28,9 +28,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "actionspace/ObjectOrientedActionSpace.hpp"
-#include <algorithm>
-#include <iostream>
-#include <iterator>
 
 namespace libcozmo {
 namespace actionspace {
@@ -177,21 +174,6 @@ bool ObjectOrientedActionSpace::publish_action(
 
 int ObjectOrientedActionSpace::size() const {
     return actions.size();
-}
-
-void ObjectOrientedActionSpace::view_action_space() const {
-    for (size_t i = 0; i < actions.size(); ++i) {
-        if (i % 5 == 0) {
-            std::cout << "\n";
-        }
-    	const Action* a = static_cast<Action*>(get_action(i));
-        std::cout << i << " : ";
-        std::cout << "Position: (" << a->start_pose(0) << ", " << a->start_pose(1) << "), ";
-        std::cout << "Angle: "<< a->start_pose(2) << ", ";
-        std::cout << "Speed: " << a->speed << ", ";
-        std::cout << "Duration: " << a->duration << "\n";
-        std::cout << "Offset: " << a->edge_offset << "\n";
-    }
 }
 
 } // namespace actionspace

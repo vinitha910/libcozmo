@@ -134,7 +134,7 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
         /// \param action_id1, action_id2 : The id's of the actions to compare
         /// \param[out] similarity : The similarity value between two actions
         ///                          value of 0 means they are identical
-        /// \returns true if successful, false otherwise
+        /// \return true if successful, false otherwise
         bool action_similarity(
             const int& action_id1,
             const int& action_id2,
@@ -168,8 +168,6 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
         /// Documentation inherited
         int size() const;
 
-		void view_action_space() const;
-
     private:
         std::vector<double> speeds;
         std::vector<double> durations;
@@ -199,7 +197,7 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
         ///                  we are moving relative to, in (mm, mm, radians)
         /// \param edge_offset : The max distance, along the edge of the object,
         ///                      from the center of that edge (mm)
-        /// \param heading : An orientation relative the orientation specified 
+        /// \param heading : An orientation relative the orientation specified
         ///                  by obj_pose, (radians)
         /// \param[out] start_pos : Cozmo's calculated initial position,
         ///                         (x, y) in (mm, mm)
