@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2019, Vinitha Ranganeni, Brian Lee
+// Copyright (c) 2019, Vinitha Ranganeni, Brian Lee, Eric Pan
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -55,6 +55,11 @@ double euclidean_distance(std::vector<T> a, std::vector<T> b) {
         distance = distance + pow((a[i] - b[i]), 2);
     }
     return sqrt(distance);
+}
+
+double angle_normalization(double angle) {
+    double twoPi = 2.0 * M_PI;
+    return angle - twoPi * floor(angle / twoPi);
 }
 
 }  //  namespace utils
