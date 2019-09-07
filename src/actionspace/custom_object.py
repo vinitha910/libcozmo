@@ -67,7 +67,7 @@ def cozmo_run(robot: cozmo.robot):
         #robot.go_to_pose(pose_z_angle(custom_obj.pose[0], custom_obj.pose[1], 0, radians(custom_obj.pose[2]))).wait_for_completed()
 
         print(custom_obj)
-        visualize()
+        visualize(robot, custom_obj)
 
 def handle_viz_input(input):
     if (input.event_type == InteractiveMarkerFeedback.BUTTON_CLICK):
@@ -75,21 +75,27 @@ def handle_viz_input(input):
     else:
         rospy.loginfo('Cannot handle this InteractiveMarker event')
 
-def visualize():
+def visualize(cozmo, custom_obj):
     server = InteractiveMarkerServer("simple_marker")
     int_marker = InteractiveMarker()
     int_marker.header.frame_id = "base_link"
     int_marker.name = "my_marker"
-    int_marker.description = "Simple Click control"
-    int_marker.pose.position.x = 1
-    int_marker.pose.orientation.w = 1
+    int_marker.description = "Custom Object"
+
+    cozmo_marker = Marker()
+    cozmo_marker.type = Marker.CUBE
+    cozmo_marker.pose.orientation.w = 1
 
     box_marker = Marker()
     box_marker.type = Marker.CUBE
-    box_marker.pose.orientation.w = 1
-    box_marker.scale.x = 0.45
-    box_marker.scale.y = 0.45
-    box_marker.scale.z = 0.45
+
+    box_marker.pose.orientation.x = math.cos(custom_obj.pose[2])
+    box_marker.pose.orientation.y = math.sin(custom_obj.pose[2])
+    print(box_marker.pose.orientation.x)
+    print(box_marker.pose.orientation.y)
+    box_marker.scale.x = custom_obj.length / 100.0
+    box_marker.scale.y = custom_obj.width / 100.0
+    box_marker.scale.z = custom_obj.width / 100.0
     box_marker.color.r = 0.0
     box_marker.color.g = 0.5
     box_marker.color.b = 0.5
@@ -107,7 +113,6 @@ def visualize():
 
 if __name__ == '__main__':
     rospy.init_node('edge_detection')
-    visualize()
     try:
         cozmo.run_program(cozmo_run)
     except rospy.ROSInterruptException:
