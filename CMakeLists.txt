@@ -49,6 +49,7 @@ add_library(cozmo SHARED
   src/cozmo_description/cozmo.cpp
   src/actionspace/generic_action_space.cpp
   src/statespace/SE2.cpp
+  src/model/DeterministicModel.cpp
 )
 
 target_include_directories(cozmo PUBLIC
@@ -88,6 +89,9 @@ target_link_libraries(test_euclidean ${TEST_LIBS})
 
 catkin_add_gtest(test_linspace tests/utils/test_linspace.cpp)
 target_link_libraries(test_linspace ${TEST_LIBS})
+
+catkin_add_gtest(test_deterministic_model tests/model/test_DeterministicModel.cpp)
+target_link_libraries(test_deterministic_model ${TEST_LIBS})
 
 ################################################################################
 # EXECUTABLES       
