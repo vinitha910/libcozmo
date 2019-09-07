@@ -142,9 +142,7 @@ void SE2::copy_state(
     *destination = State(source.x, source.y, source.theta);
 }
 
-double SE2::get_resolution() const {
-    return m_resolution;
-}
+double SE2::get_resolution() const { return m_resolution; }
 
 StateSpace::State* SE2::create_state() {
     m_state_map.push_back(new State());
