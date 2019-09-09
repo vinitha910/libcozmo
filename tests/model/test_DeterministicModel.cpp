@@ -29,7 +29,6 @@
 
 #include <gtest/gtest.h>
 #include "model/DeterministicModel.hpp"
-#include <iostream>
 
 namespace AS = libcozmo::actionspace;
 
@@ -49,6 +48,10 @@ class DeterministicModelTest: public ::testing::Test {
 
     ~DeterministicModelTest() {}
 
+    bool load_model() {
+    	return m_model.load_model(&m_type);
+    }
+
     DeterministicModel m_model;
     DeterministicModel::ModelType m_type;
 };
@@ -59,12 +62,12 @@ TEST_F(DeterministicModelTest, LoadModelTest) {
 	DeterministicModel::ModelInput input = DeterministicModel::ModelInput(
 		AS::GenericActionSpace::Action(0, 0, 0));
 	EXPECT_TRUE(m_model.get_prediction(input) == nullptr);
-	EXPECT_TRUE(m_model.load_model(&m_type));
+	EXPECT_TRUE(load_model());
 }
 
 /// Check that model outputs correct delta values for each action
 TEST_F(DeterministicModelTest, GetPredictionTest) {
-	m_model.load_model(&m_type);
+	load_model();
 	DeterministicModel::ModelInput input1 = DeterministicModel::ModelInput(
 		AS::GenericActionSpace::Action(0, 0, 0));
 	DeterministicModel::ModelInput input2 = DeterministicModel::ModelInput(
@@ -93,7 +96,6 @@ TEST_F(DeterministicModelTest, GetPredictionTest) {
 	EXPECT_NEAR(output3.getX(), 5, 0.001);
 	EXPECT_NEAR(output3.getY(), 0, 0.001);
 	EXPECT_NEAR(output3.getTheta(), M_PI, 0.001);
-
 }
 
 }  // namespace test

@@ -46,7 +46,7 @@ class DeterministicModel : public virtual Model {
     class ModelType : public Model::ModelType {
      public:
      	/// Constructs weight and bias term with given parameters
-     	ModelType(const double& resolution) : \
+     	explicit ModelType(const double& resolution) : \
             m_resolution(resolution) {}
 
      	~ModelType() = default;
@@ -60,7 +60,7 @@ class DeterministicModel : public virtual Model {
 	class ModelInput : public Model::ModelInput {
 	 public:
 	 	/// Constructs input with given parameters
-	 	ModelInput(const AS::GenericActionSpace::Action& action) : \
+	 	explicit ModelInput(const AS::GenericActionSpace::Action& action) : \
 	 		m_action(action) {}
 
 	 	~ModelInput() = default;
@@ -109,6 +109,7 @@ class DeterministicModel : public virtual Model {
  private:
 	Model::ModelType* m_regressor;
 };
+
 }  // namespace model
 }  // namespace libcozmo
 
