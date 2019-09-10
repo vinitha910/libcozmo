@@ -84,6 +84,8 @@ target_link_libraries(test_libcozmo ${TEST_LIBS})
 catkin_add_gtest(test_generic_action_space tests/actionspace/test_generic_action_space.cpp )
 target_link_libraries(test_generic_action_space ${TEST_LIBS})
 
+catkin_add_gtest(test_angle_normalization tests/utils/test_angle_normalization.cpp)
+target_link_libraries(test_angle_normalization ${TEST_LIBS})
 
 catkin_add_gtest(test_object_oriented_action_space tests/actionspace/test_object_oriented_action_space.cpp)
 target_link_libraries(test_object_oriented_action_space
