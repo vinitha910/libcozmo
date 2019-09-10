@@ -74,9 +74,7 @@ namespace planner {
             	extract_path(child_to_parent_map, m_start_id, m_goal_id, actions);
                 return true;
         	}
-        	// std::vector<int> succesor_ids;
-         //    std::vector<int> successor_actions;
-        	// std::vector<double> costs;
+
             stat::StateSpace::State* state = m_state_space->get_state(curr_state);
             for (int i = 0; i < m_action_space->size(); i++) {
                 act::ActionSpace::Action* action = m_action_space->get_action(i);
@@ -89,19 +87,22 @@ namespace planner {
                     static_cast<mod::DeterministicModel::ModelOutput*>(
                         m_model->get_prediction(input));
 
-                aikido::statespace::SE2::State s;
-                m_state_space->discrete_state_to_continuous(*state_, &s);
-                auto curr_state_isometry = s.getIsometry();
-                double x = curr_state_isometry.translation()[0] +
-                    output->getX();
-                double y = curr_state_isometry.translation()[1] +
-                    output->getY();   
 
-                Eigen::Isometry2d t = Eigen::Isometry2d::Identity();
-                const Eigen::Rotation2D<double> rot(output->getTheta());
-                t.linear() = rot.toRotationMatrix();
-                t.translation() = Eigen::Vector2d(x, y);
-                s.setIsometry(t);
+// m_state_space->discrete_state_to_continuous(*state_, s);
+//         auto curr_state_isometry = s.getIsometry();
+//         double x = curr_state_isometry.translation()[0] +
+//             output->getX();
+//         double y = curr_state_isometry.translation()[1] +
+//             output->getY();   
+
+//         Eigen::Isometry2d t = Eigen::Isometry2d::Identity();
+//         const Eigen::Rotation2D<double> rot(output->getTheta());
+//         t.linear() = rot.toRotationMatrix();
+//         t.translation() = Eigen::Vector2d(x, y);
+//         s->setIsometry(t);
+
+                aikido::statespace::SE2::State s;
+                Dijkstra::get_succ(state_, &s, output->getX(), output->getY(), output->getTheta());
                 stat::SE2::State succ_state; 
                 m_state_space->continuous_state_to_discrete(s, &succ_state);
                 if (m_state_space->is_valid_state(succ_state)) {
@@ -121,6 +122,24 @@ namespace planner {
     	}
     	return false;
 	}
+
+    void Dijkstra::get_succ(
+        stat::SE2::State* state_,
+        aikido::statespace::SE2::State* s,
+        const double& x,
+        const double& y,
+        const double& theta) {
+        m_state_space->discrete_state_to_continuous(*state_, s);
+        auto curr_state_isometry = s.getIsometry();
+        double x = curr_state_isometry.translation()[0] + x;
+        double y = curr_state_isometry.translation()[1] + y;
+
+        Eigen::Isometry2d t = Eigen::Isometry2d::Identity();
+        const Eigen::Rotation2D<double> rot(output->getTheta());
+        t.linear() = rot.toRotationMatrix();
+        t.translation() = Eigen::Vector2d(x, y);
+        s->setIsometry(t);
+    }
 
 	void Dijkstra::extract_path(
 		const ChildToParentMap& child_to_parent_map,
