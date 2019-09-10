@@ -158,31 +158,6 @@ TEST_F(SimpleOOActionFixture, OverwriteActionSpaceTest) {
     EXPECT_EQ(2.5, action->getDuration());
 }
 
-TEST_F(SimpleOOActionFixture, OORObjectOrientationTest) {
-    // Tests for Object Orientation < 0
-    m_actionspace.generate_actions(
-            Eigen::Vector3d(100, 200, 2 - (4 * M_PI)));
-
-    as::ObjectOrientedActionSpace::Action* action =
-        static_cast<as::ObjectOrientedActionSpace::Action*>(m_actionspace.get_action(5));
-    EXPECT_NEAR(124.969, action->getStartPose().x(), 0.001);
-    EXPECT_NEAR(145.442, action->getStartPose().y(), 0.001);
-    EXPECT_EQ(2, action->getStartPose()(2));
-    EXPECT_EQ(2.5, action->getSpeed());
-    EXPECT_EQ(5, action->getDuration());
-
-    // Tests for Object Orientation > 2pi
-    m_actionspace.generate_actions(
-        Eigen::Vector3d(100, 200, 2 + (4 * M_PI)));
-
-    action = static_cast<as::ObjectOrientedActionSpace::Action*>(m_actionspace.get_action(5));
-    EXPECT_NEAR(124.969, action->getStartPose().x(), 0.001);
-    EXPECT_NEAR(145.442, action->getStartPose().y(), 0.001);
-    EXPECT_EQ(2, action->getStartPose()(2));
-    EXPECT_EQ(2.5, action->getSpeed());
-    EXPECT_EQ(5, action->getDuration());
-}
-
 TEST_F(ComplexOOActionFixture, ActionSpaceSizeTest) {
     EXPECT_EQ(1540, m_actionspace.size());
 }
