@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0)
 project(libcozmo)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_BUILD_TYPE Debug)
 
 find_package(catkin REQUIRED COMPONENTS 
   roscpp 
@@ -38,6 +38,11 @@ catkin_package(
       geometry_msgs 
 )
 
+### FOR PROFILING (need to set after catkin_package)
+add_compile_options(-pg)
+set(catkin_LIBRARIES ${catkin_LIBRARIES} -pg)
+###
+
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
@@ -50,6 +55,7 @@ add_library(cozmo SHARED
   src/actionspace/generic_action_space.cpp
   src/statespace/SE2.cpp
   src/model/DeterministicModel.cpp
+  src/planner/Dijkstra.cpp
 )
 
 target_include_directories(cozmo PUBLIC
@@ -93,6 +99,9 @@ target_link_libraries(test_linspace ${TEST_LIBS})
 catkin_add_gtest(test_deterministic_model tests/model/test_DeterministicModel.cpp)
 target_link_libraries(test_deterministic_model ${TEST_LIBS})
 
+catkin_add_gtest(test_dijkstra tests/planner/test_Dijkstra.cpp)
+target_link_libraries(test_dijkstra ${TEST_LIBS})
+
 ################################################################################
 # EXECUTABLES       
 ################################################################################
@@ -123,6 +132,17 @@ target_include_directories(execute_traj PRIVATE
 target_link_libraries(execute_traj
   cozmo
   ${aikido_LIBRARIES}
+)
+
+add_executable(run_dijkstra tests/planner/run_dijkstra.cpp)
+target_include_directories(run_dijkstra PRIVATE
+  ${aikido_INCLUDE_DIRS}
+  ${roscpp_INCLUDE_DIRS}
+)
+target_link_libraries(run_dijkstra
+  cozmo
+  ${aikido_LIBRARIES}
+  ${roscpp_LIBRARIES}
 )
 
 ################################################################################
