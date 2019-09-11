@@ -1,32 +1,49 @@
-# libcozmo
-libcozmo is a C++ library for simulating and running [Cozmo](https://anki.com/en-us/cozmo) based on DART and AIKIDO.
-Current tools allow you simulate the forklift movement, execute few functions from the Cozmo SDK and execute an interpolated trajectory in simulation.
+# libcozmo [![Build Status](https://travis-ci.com/vinitha910/libcozmo.svg?branch=master)](https://travis-ci.com/vinitha910/libcozmo)
+
+libcozmo is a C++ library for simulating and running [Cozmo](https://anki.com/en-us/cozmo) based on DART and AIKIDO. Additionally, this library has python bindings (cozmopy) for easier use with the [Cozmo SDK](http://cozmosdk.anki.com/docs/). Current tools allow you simulate the forklift movement. libcozmo currently only supports **Ubuntu 16.04** and is under heavy development. 
 
 ## Installation
-Checkout and build this package, [aikido](https://github.com/personalrobotics/aikido.git) from source, and install [DART](http://dartsim.github.io/) (version 6.0 or above). You
-can automate the checkout and build by following [development environment]
-(https://www.personalrobotics.ri.cmu.edu/software/development-environment)
-instructions with this `.rosinstall` file if you are using Ubuntu 14.04:
-```yaml
-- git:
-    local-name: aikido
-    uri: https://github.com/personalrobotics/aikido.git
-    version: master
-- git:
-    local-name: libcozmo
-    uri: https://github.com/personalrobotics/libcozmo.git
-    version: master
+
+Install [ROS Kinetic](http://wiki.ros.org/kinetic/Installation/Ubuntu) and then install the following dependencies:
+```shell
+$ sudo add-apt-repository ppa:personalrobotics/ppa
+$ sudo apt-get update
+$ sudo apt-get install cmake build-essential libboost-filesystem-dev libmicrohttpd-dev libompl-dev libtinyxml2-dev libyaml-cpp-dev pr-control-msgs
+$ sudo apt-get install libnlopt-dev coinor-libipopt-dev libbullet-dev libode-dev
+$ sudo apt-get install ros-kinetic-rospy ros-kinetic-pybind11-catkin ros-kinetic-octomap-ros libeigen3-dev python-catkin-tools python-catkin-pkg
+$ sudo apt-get install libassimp-dev libccd-dev libfcl-dev libboost-regex-dev libboost-system-dev doxygen
 ```
 
-If you are using Ubuntu 16.04, use this `.rosinstall` file:
+Install [DART](https://dartsim.github.io/install_dart_on_ubuntu.html#build-and-install-dart) from source:
+```shell
+$ git clone git://github.com/dartsim/dart.git
+$ cd dart
+$ git checkout tags/v6.8.2
+$ mkdir build
+$ cd build
+$ cmake ..
+$ make -j4
+$ sudo make install
+```
+
+Checkout and build [aikido](https://github.com/personalrobotics/aikido.git) from source. You can automate the checkout and build by following [development environment](https://personalrobotics.cs.washington.edu/software/development-environment)
+instructions with this `.rosinstall` file:
 ```yaml
 - git:
     local-name: aikido
     uri: https://github.com/personalrobotics/aikido.git
-    version: xenial_fixes
+    version: master
+- git:
+    local-name: aikidopy
+    uri: https://github.com/vinitha910/aikidopy.git
+    version: master
+- git:
+    local-name: roscpp_initializer
+    uri: https://github.com/vinitha910/roscpp_initializer.git
+    version: master
 - git:
     local-name: libcozmo
-    uri: https://github.com/personalrobotics/libcozmo.git
+    uri: https://github.com/vinitha910/libcozmo
     version: master
 ```
 
@@ -43,26 +60,15 @@ $ screen -S rviz
 $ . devel/setup.bash
 $ rviz
 $ <CTRL><A>+<D>
-$ `catkin locate -b libcozmo`/rviz_example `catkin locate -s libcozmo`/meshes
+$ rosrun libcozmo rviz_example `catkin locate -s libcozmo`/src/cozmo_description/meshes
 ```
-After all the commands are run, subscribe to the InteractiveMarker `dart_markers` topic in Rviz. Cozmo should now appear in the viewer.
+After all the commands are run, subscribe to the InteractiveMarker topic in Rviz. Cozmo should now appear in the viewer.
 
 This script allows you to enter angles (in radians) for the forklift position; the movement will be reflected by the robot in the viewer.
 
-Similarily, to run the script that moves Cozmo to the specified pose, run the following command: 
+To load Cozmo in the DART viewer in a non-catkin/ros environment, run:
 ```shell
-$ `catkin locate -b libcozmo`/go_to_pose_example `catkin locate -s libcozmo`/meshes
-```
-NOTE: You must be connected to Cozmo in SDK Mode to run this script; the script does not simulate the movement in the viewer. For instructions on how to connect to Cozmo in SDK Mode [click here](http://cozmosdk.anki.com/docs/initial.html).
-
-To load Cozmo in the DART viewer in a non-catkin/ros environment, run the following commands:
-```shell
-$ cd libcozmo
-$ mkdir build
-$ cd build
-$ cmake .. -DCOZMO_BUILD_RVIZ_EXAMPLE=OFF # e.g. if ros/aikido not available 
-$ make
-$ ./dart_example `pwd`/../meshes
+$ rosrun libcozmo dart_example `catkin locate -s libcozmo`/src/cozmo_description/meshes`
 ```
 
 ## Trajectory Execution in Simulation
@@ -76,8 +82,9 @@ $ screen -S rviz
 $ . devel/setup.bash
 $ rviz
 $ <CTRL><A>+<D>
-$ `catkin locate -b libcozmo`/execute_traj `catkin locate -s libcozmo`/meshes
+$ rosrun libcozmo execute_traj `catkin locate -s libcozmo`/src/cozmo_description/meshes
 ```
+You should see Cozmo moving in the shape of a square. 
 
 A trajectory is defined by a set of waypoints. First, define waypoints at specific times:
 ```shell
@@ -90,8 +97,32 @@ w1.t = TIME;
 
 Pass in an `std::vector` of waypoints to the `createInterpolatedTraj` function to create an interpolated trajectory. Pass this trajectory and a period into the `executeTrajectory` function to execute the trajectory.
 
+## cozmopy 
+
+`libcozmo` additionally comes with python bindings. After the package is built you should be able to load `cozmopy` in python:
+
+```shell
+$ python
+>>> import cozmopy
+```
+`cozmopy` depends on `aikidopy` and `roscpp_initializer`; you should make sure you can load both packages in python as well.
+
+A python sample script for trajectory execution in similation has been provided as well. Follow the instructions in the previous section but replace the last command with
+
+```shell
+$ rosrun libcozmo execute_traj.py `catkin locate -s libcozmo`/src/cozmo_description/meshes` 
+```
+
+Similarily, to run the forklift simulation, run:
+
+```shell
+rosrun libcozmo rviz_example.py `catkin locate -s libcozmo`/src/cozmo_description/meshes` 
+```
+
+Before running the commands, make sure the python script is executable. If it is not, run `chmod +x <SCRIPT_NAME>` in the appropiate directory. 
+
 ## License
-libcozmo is licensed under a BSD license. See [LICENSE](https://github.com/personalrobotics/libcozmo/blob/master/LICENSE) for more information.
+libcozmo is licensed under a BSD license. See [LICENSE](https://github.com/vinitha910/libcozmo/blob/master/LICENSE) for more information.
 
 ## Author/Acknowledgements
-libcozmo is developed by Vinitha Ranganeni ([**@vinitha910**](https://github.com/vinitha910)) at the [Personal Robotics Lab](https://personalrobotics.ri.cmu.edu/) in the [Robotics Institute](http://ri.cmu.edu/) at [Carnegie Mellon University](http://www.cmu.edu/). I would like to thank Clint Liddick ([**@ClintLiddick**](https://github.com/ClintLiddick)) and J.S. Lee ([**@jslee02**](https://github.com/jslee02)) for their assistance in developing libcozmo and Ariana Keeling for her assistance in developing the SolidWorks model of Cozmo. 
+libcozmo is developed by Vinitha Ranganeni ([**@vinitha910**](https://github.com/vinitha910)) at the [Human-Centered Robotics Lab](https://hcrlab.cs.washington.edu/) in [University of Washington](https://www.cs.washington.edu/). Initial development began at the [Personal Robotics Lab](https://personalrobotics.ri.cmu.edu/) in the [Robotics Institute](http://ri.cmu.edu/) at [Carnegie Mellon University](http://www.cmu.edu/). I would like to thank Clint Liddick ([**@ClintLiddick**](https://github.com/ClintLiddick)) and J.S. Lee ([**@jslee02**](https://github.com/jslee02)) for their assistance in developing libcozmo and Ariana Keeling for her assistance in developing the SolidWorks model of Cozmo.

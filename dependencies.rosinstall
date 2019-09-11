@@ -1,0 +1,16 @@
+- git:
+    local-name: pr_control_msgs
+    uri: https://github.com/personalrobotics/pr_control_msgs.git
+    version: master
+- git:
+    local-name: aikido
+    uri: https://github.com/personalrobotics/aikido.git
+    version: master
+- git:
+    local-name: aikidopy
+    uri: https://github.com/vinitha910/aikidopy.git
+    version: master
+- git:
+    local-name: roscpp_initializer
+    uri: https://github.com/vinitha910/roscpp_initializer.git
+    version: master
