@@ -123,6 +123,11 @@ class StateSpace
     /// \param[out] _destination Output state
     virtual void copy_state(const State& _source, State* _destination) const = 0;
 
+    /// Gets the resolution of statespace
+    ///
+    /// \return Resolution
+    virtual double get_resolution() const = 0;
+
  private:
     virtual State* create_state() = 0;
 };
