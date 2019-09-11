@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2019, Vinitha Ranganeni, Brian Lee
+// Copyright (c) 2019, Brian Lee, Vinitha Ranganeni
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -42,8 +42,10 @@ class DistanceTest: public ::testing::Test {
     DistanceTest() : \
         m_statespace(statespace::SE2(0.1, 8)),
         m_se2(distance::SE2(std::make_shared<statespace::SE2>(0.1, 8))),
-        m_trans(distance::Translation(std::make_shared<statespace::SE2>(0.1, 8))),
-        m_orient(distance::Orientation(std::make_shared<statespace::SE2>(0.1, 8))) {}
+        m_trans(distance::Translation(
+            std::make_shared<statespace::SE2>(0.1, 8))),
+        m_orient(distance::Orientation(
+            std::make_shared<statespace::SE2>(0.1, 8))) {}
 
     void SetUp() {
         m_id_1 =
@@ -58,7 +60,6 @@ class DistanceTest: public ::testing::Test {
     distance::Translation m_trans;
     distance::Orientation m_orient;
     statespace::SE2 m_statespace;
-    // const std::shared_ptr<statespace::SE2> m_statespace;
     int m_id_1;
     int m_id_2;
 };

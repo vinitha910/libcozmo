@@ -40,12 +40,12 @@ namespace distance {
 /// The definition of distance depends on the derived class.
 class Distance {
  public:
-	/// Calculates distance between two states
-	///
-	/// \return The distance
-	virtual double get_distance(
-		const libcozmo::statespace::StateSpace::State& _state_1,
-		const libcozmo::statespace::StateSpace::State& _state_2) const = 0;
+    /// Calculates distance between two states
+    ///
+    /// \return The distance
+    virtual double get_distance(
+        const libcozmo::statespace::StateSpace::State& _state_1,
+        const libcozmo::statespace::StateSpace::State& _state_2) const = 0;
 };
 
 }  // namespace distance

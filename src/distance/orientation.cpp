@@ -51,7 +51,8 @@ namespace distance {
         m_statespace->
             discrete_state_to_continuous(_state_2, &continuous_state_2);
         Eigen::Rotation2Dd rotation = Eigen::Rotation2Dd::Identity();
-        auto isometry = continuous_state_1.getIsometry() * continuous_state_2.getIsometry();
+        auto isometry = continuous_state_1.getIsometry() *
+            continuous_state_2.getIsometry();
         rotation.fromRotationMatrix(isometry.rotation());
         return std::abs(rotation.angle());
     }

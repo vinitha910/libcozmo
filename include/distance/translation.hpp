@@ -48,8 +48,6 @@ class Translation : public virtual Distance {
     ///
     /// \param statespace The statespace the metric operates in
     explicit Translation(const std::shared_ptr<statespace::SE2> statespace);
-        // std::shared_ptr<libcozmo::statespace::StateSpace> statespace) : \
-        // m_statespace(statespace) {}
     ~Translation() {}
 
     /// Documentation inherited

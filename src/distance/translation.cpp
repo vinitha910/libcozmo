@@ -34,29 +34,33 @@
 namespace libcozmo {
 namespace distance {
 
-	Translation::Translation(const std::shared_ptr<statespace::SE2> statespace)
+    Translation::Translation(const std::shared_ptr<statespace::SE2> statespace)
         : m_statespace(statespace) {
         if (m_statespace == nullptr) {
             throw std::invalid_argument("statespace is a nullptr.");
         }
     }
 
-	double Translation::get_distance(
-		const libcozmo::statespace::StateSpace::State& _state_1,
-    	const libcozmo::statespace::StateSpace::State& _state_2) const {
-		aikido::statespace::SE2::State continuous_state_1;
-		m_statespace->
-			discrete_state_to_continuous(_state_1, &continuous_state_1);
-		aikido::statespace::SE2::State continuous_state_2;
-		m_statespace->
-			discrete_state_to_continuous(_state_2, &continuous_state_2);
-		Eigen::Vector2d position_1(
-			continuous_state_1.getIsometry().translation());
-		Eigen::Vector2d position_2(
-			continuous_state_2.getIsometry().translation());
-		return sqrt(pow(position_1[0] - position_2[0], 2)
-			+ pow(position_1[1] - position_2[1], 2));
-	}
+    double Translation::get_distance(
+        const libcozmo::statespace::StateSpace::State& _state_1,
+        const libcozmo::statespace::StateSpace::State& _state_2) const {
+        aikido::statespace::SE2::State continuous_state_1;
+        m_statespace->
+            discrete_state_to_continuous(_state_1, &continuous_state_1);
+        aikido::statespace::SE2::State continuous_state_2;
+        m_statespace->
+            discrete_state_to_continuous(_state_2, &continuous_state_2);
+        auto isometry = continuous_state_1.getIsometry() * continuous_state_2.getIsometry();
+        Eigen::Vector2d position(isometry.translation());
+
+        // Eigen::Vector2d position_1(
+        //     continuous_state_1.getIsometry().translation());
+        // Eigen::Vector2d position_2(
+        //     continuous_state_2.getIsometry().translation());
+        // return sqrt(pow(position_1[0] - position_2[0], 2)
+        //     + pow(position_1[1] - position_2[1], 2));
+        return sqrt(pow(position[0], 2) + pow(position[1], 2));
+    }
 
 }  // namespace distance
 }  // namespace libcozmo
