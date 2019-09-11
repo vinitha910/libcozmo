@@ -35,29 +35,26 @@
 namespace libcozmo {
 namespace distance {
 
-/// Distance Metric class
+/// SE2 Distance Metric
 ///
-/// This class implements a distace metric of a continuous two-dimensional
-/// Special Euclidean group SE(2), i.e. the space of planar rigid body
-/// transformations.
+/// This class implements a distace metric between SE2 transformations.
 class SE2 : public virtual Distance {
  public:
 
  	/// Constructs metric with given statespace
  	///
- 	/// \param statespace The statespace that states to calculate the distance
- 	/// 				  belongs to
- 	SE2(libcozmo::statespace::StateSpace* statespace) : \
+ 	/// \param statespace The statespace the metric operates in
+ 	SE2(std::shared_ptr<libcozmo::statespace::StateSpace> statespace) : \
  		m_statespace(statespace) {}
  	~SE2() {}
 
- 	/// Document inherited
+ 	/// Documentation inherited
     double get_distance(
     	const libcozmo::statespace::StateSpace::State& _state_1,
     	const libcozmo::statespace::StateSpace::State& _state_2) const override;
  
  private:
- 	const libcozmo::statespace::StateSpace* m_statespace;
+ 	const std::shared_ptr<libcozmo::statespace::StateSpace> m_statespace;
 };
 
 }  // namespace distance
