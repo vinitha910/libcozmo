@@ -35,7 +35,6 @@
 namespace libcozmo {
 namespace distance {
 
-
 /// Distance metric class
 ///
 /// This class implements a distace metric of a continuous orientation i.e.
@@ -59,7 +58,6 @@ class Orientation : public virtual Distance {
  private:
  	const libcozmo::statespace::StateSpace* m_statespace;
 };
-
 
 }  // namespace distance
 }  // namespace libcozmo

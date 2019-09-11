@@ -60,7 +60,6 @@ class Translation : public virtual Distance {
  	const libcozmo::statespace::StateSpace* m_statespace;
 };
 
-
 }  // namespace distance
 }  // namespace libcozmo
 

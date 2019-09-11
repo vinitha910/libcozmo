@@ -31,7 +31,6 @@
 #define LIBCOZMO_DISTANCE_SE2_HPP_
 
 #include "distance/distance.hpp"
-#include "statespace/SE2.hpp"
 
 namespace libcozmo {
 namespace distance {
