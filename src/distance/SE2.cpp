@@ -28,15 +28,23 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "distance/SE2.hpp"
+#include <iostream>
 
 namespace libcozmo {
 namespace distance {
 
-	double SE2::get_distance(
-		const libcozmo::statespace::StateSpace::State& _state_1,
-    	const libcozmo::statespace::StateSpace::State& _state_2) const {
-		return m_statespace->get_distance(_state_1, _state_2);
-	}
+    SE2::SE2(const std::shared_ptr<statespace::SE2> statespace)
+        : m_statespace(statespace) {
+        if (m_statespace == nullptr) {
+            throw std::invalid_argument("statespace is a nullptr.");
+        }
+    }
+
+    double SE2::get_distance(
+        const statespace::StateSpace::State& _state_1,
+        const statespace::StateSpace::State& _state_2) const {
+        return m_statespace->get_distance(_state_1, _state_2);
+    }
 
 }  // namespace distance
 }  // namespace libcozmo

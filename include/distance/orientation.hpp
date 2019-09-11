@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2019, Vinitha Ranganeni
+// Copyright (c) 2019, Brian Lee, Vinitha Ranganeni
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -31,6 +31,7 @@
 #define LIBCOZMO_DISTANCE_ORIENTATION_HPP_
 
 #include <memory>
+#include "statespace/SE2.hpp"
 #include "distance/distance.hpp"
 
 namespace libcozmo {
@@ -39,25 +40,23 @@ namespace distance {
 /// Distance metric class
 ///
 /// This class implements a distace metric of a continuous orientation i.e.
-/// distance of two states are defined by the difference of their orientation.
+/// distance of two states are defined by the difference of their orientation
+/// in range [0, 2pi].
 class Orientation : public virtual Distance {
  public:
-	/// Constructs metric with given statespace
-	///
-	/// \param statespace The statespace that states to calculate the distance
-	/// 				  belongs to
-	explicit Orientation(
-		std::shared_ptr<libcozmo::statespace::StateSpace> statespace) : \
-		m_statespace(statespace) {}
-	~Orientation() {}
+    /// Constructs metric with given statespace
+    ///
+    /// \param statespace The statespace the metric operates in
+    explicit Orientation(const std::shared_ptr<statespace::SE2> statespace);
+    ~Orientation() {}
 
-	/// Document inherited
-	double get_distance(
-		const libcozmo::statespace::StateSpace::State& _state_1,
-		const libcozmo::statespace::StateSpace::State& _state_2) const override;
+    /// Documentation inherited
+    double get_distance(
+        const libcozmo::statespace::StateSpace::State& _state_1,
+        const libcozmo::statespace::StateSpace::State& _state_2) const override;
 
  private:
-	const std::shared_ptr<libcozmo::statespace::StateSpace> m_statespace;
+    const std::shared_ptr<statespace::SE2> m_statespace;
 };
 
 }  // namespace distance

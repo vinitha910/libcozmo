@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2019, Vinitha Ranganeni
+// Copyright (c) 2019, Brian Lee, Vinitha Ranganeni
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -31,6 +31,7 @@
 #define LIBCOZMO_DISTANCE_TRANSLATION_HPP_
 
 #include <memory>
+#include "statespace/SE2.hpp"
 #include "distance/distance.hpp"
 
 namespace libcozmo {
@@ -38,27 +39,26 @@ namespace distance {
 
 /// Distance metric class based on translation
 ///
-/// This class implements a distace metric of a continuous translation i.e.
+/// This class implements distace of a continuous translation i.e.
 /// distance of two states are defined by the euclidean distance between
-/// them w.r.t to the translational x,y axis.
+/// them w.r.t to the translational x,y axis (meters).
 class Translation : public virtual Distance {
  public:
-	/// Constructs metric with given statespace
-	///
-	/// \param statespace The statespace that states to calculate the distance
-	/// 				  belongs to
-	explicit Translation(
-		std::shared_ptr<libcozmo::statespace::StateSpace> statespace) : \
-		m_statespace(statespace) {}
-	~Translation() {}
+    /// Constructs metric with given statespace
+    ///
+    /// \param statespace The statespace the metric operates in
+    explicit Translation(const std::shared_ptr<statespace::SE2> statespace);
+        // std::shared_ptr<libcozmo::statespace::StateSpace> statespace) : \
+        // m_statespace(statespace) {}
+    ~Translation() {}
 
-	/// Document inherited
-	double get_distance(
-		const libcozmo::statespace::StateSpace::State& _state_1,
-		const libcozmo::statespace::StateSpace::State& _state_2) const override;
+    /// Documentation inherited
+    double get_distance(
+        const libcozmo::statespace::StateSpace::State& _state_1,
+        const libcozmo::statespace::StateSpace::State& _state_2) const override;
 
  private:
-	const std::shared_ptr<libcozmo::statespace::StateSpace> m_statespace;
+    const std::shared_ptr<libcozmo::statespace::StateSpace> m_statespace;
 };
 
 }  // namespace distance

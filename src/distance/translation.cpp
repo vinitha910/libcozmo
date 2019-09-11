@@ -34,6 +34,13 @@
 namespace libcozmo {
 namespace distance {
 
+	Translation::Translation(const std::shared_ptr<statespace::SE2> statespace)
+        : m_statespace(statespace) {
+        if (m_statespace == nullptr) {
+            throw std::invalid_argument("statespace is a nullptr.");
+        }
+    }
+
 	double Translation::get_distance(
 		const libcozmo::statespace::StateSpace::State& _state_1,
     	const libcozmo::statespace::StateSpace::State& _state_2) const {

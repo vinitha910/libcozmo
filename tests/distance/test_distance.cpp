@@ -41,11 +41,9 @@ class DistanceTest: public ::testing::Test {
  public:
     DistanceTest() : \
         m_statespace(statespace::SE2(0.1, 8)),
-        m_statespace_shared(
-            std::make_shared<statespace::SE2>(std::move(m_statespace))),
-        m_se2(distance::SE2(m_statespace_shared)),
-        m_trans(distance::Translation(m_statespace_shared)),
-        m_orient(distance::Orientation(m_statespace_shared)) {}
+        m_se2(distance::SE2(std::make_shared<statespace::SE2>(0.1, 8))),
+        m_trans(distance::Translation(std::make_shared<statespace::SE2>(0.1, 8))),
+        m_orient(distance::Orientation(std::make_shared<statespace::SE2>(0.1, 8))) {}
 
     void SetUp() {
         m_id_1 =
@@ -56,17 +54,21 @@ class DistanceTest: public ::testing::Test {
 
     ~DistanceTest() {}
 
-    statespace::SE2 m_statespace;
     distance::SE2 m_se2;
     distance::Translation m_trans;
     distance::Orientation m_orient;
-    std::shared_ptr<statespace::SE2> m_statespace_shared;
+    statespace::SE2 m_statespace;
+    // const std::shared_ptr<statespace::SE2> m_statespace;
     int m_id_1;
     int m_id_2;
 };
 
 TEST_F(DistanceTest, TestSE2) {
     // Cheking SE2 distance calculated correctly
+    const auto s1 = m_statespace.get_state(m_id_1);
+    const auto s2 = m_statespace.get_state(m_id_2);
+    EXPECT_FALSE(s1 == nullptr);
+    EXPECT_FALSE(s2 == nullptr);
     EXPECT_NEAR(
         sqrt(pow(0.1, 2) + pow(0.3, 2) + pow(M_PI / 4, 2)),
         m_se2.get_distance(

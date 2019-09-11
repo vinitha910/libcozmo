@@ -31,6 +31,7 @@
 #define LIBCOZMO_DISTANCE_SE2_HPP_
 
 #include <memory>
+#include "statespace/SE2.hpp"
 #include "distance/distance.hpp"
 
 namespace libcozmo {
@@ -39,23 +40,22 @@ namespace distance {
 /// SE2 Distance Metric
 ///
 /// This class implements a distace metric between SE2 transformations.
-class SE2 : public virtual Distance {
+class SE2 : public Distance {
  public:
-	/// Constructs metric with given statespace
-	///
-	/// \param statespace The statespace the metric operates in
-	explicit SE2(
-		std::shared_ptr<libcozmo::statespace::StateSpace> statespace) : \
-		m_statespace(statespace) {}
-	~SE2() {}
+    /// Constructs metric with given statespace
+    ///
+    /// \param statespace The statespace the metric operates in
+    explicit SE2(const std::shared_ptr<statespace::SE2> statespace);
 
-	/// Documentation inherited
-	double get_distance(
-		const libcozmo::statespace::StateSpace::State& _state_1,
-		const libcozmo::statespace::StateSpace::State& _state_2) const override;
+    ~SE2() {}
+
+    /// Documentation inherited
+    double get_distance(
+        const statespace::StateSpace::State& _state_1,
+        const statespace::StateSpace::State& _state_2) const override;
 
  private:
-	const std::shared_ptr<libcozmo::statespace::StateSpace> m_statespace;
+    const std::shared_ptr<statespace::SE2> m_statespace;
 };
 
 }  // namespace distance

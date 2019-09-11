@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2019, Vinitha Ranganeni
+// Copyright (c) 2019, Brian Lee, Vinitha Ranganeni
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -40,7 +40,7 @@ namespace distance {
 /// The definition of distance depends on the derived class.
 class Distance {
  public:
-	/// Calculates distance
+	/// Calculates distance between two states
 	///
 	/// \return The distance
 	virtual double get_distance(
