@@ -2,7 +2,7 @@
 import rospy
 
 import cozmo
-from cozmo.util import pose_z_angle, radians
+from cozmo.util import angle_z_to_quaternion, pose_z_angle, radians
 import math
 
 from interactive_markers.interactive_marker_server import InteractiveMarkerServer
@@ -67,6 +67,7 @@ def cozmo_run(robot: cozmo.robot):
         #robot.go_to_pose(pose_z_angle(custom_obj.pose[0], custom_obj.pose[1], 0, radians(custom_obj.pose[2]))).wait_for_completed()
 
         print(custom_obj)
+        print(robot.pose)
         visualize(robot, custom_obj)
 
 def handle_viz_input(input):
@@ -84,13 +85,35 @@ def visualize(cozmo, custom_obj):
 
     cozmo_marker = Marker()
     cozmo_marker.type = Marker.CUBE
-    cozmo_marker.pose.orientation.w = 1
+    cozmo_marker.pose.position.x = cozmo.pose.position.x / 100.0
+    cozmo_marker.pose.position.y = cozmo.pose.position.y / 100.0
+    cozmo_marker.pose.position.z = 1 / 100.0
+    cozmo_marker.pose.orientation.x = cozmo.pose.rotation.q1
+    cozmo_marker.pose.orientation.y = cozmo.pose.rotation.q2
+    cozmo_marker.pose.orientation.z = cozmo.pose.rotation.q3
+    cozmo_marker.pose.orientation.w = cozmo.pose.rotation.q0
+    cozmo_marker.scale.x = custom_obj.width / 100.0
+    cozmo_marker.scale.y = custom_obj.width / 100.0
+    cozmo_marker.scale.z = custom_obj.width / 100.0
+    cozmo_marker.color.r = 0.0
+    cozmo_marker.color.g = 0.5
+    cozmo_marker.color.b = 0.5
+    cozmo_marker.color.a = 1.0
 
     box_marker = Marker()
     box_marker.type = Marker.CUBE
 
-    box_marker.pose.orientation.x = math.cos(custom_obj.pose[2])
-    box_marker.pose.orientation.y = math.sin(custom_obj.pose[2])
+    box_marker.pose.position.x = custom_obj.pose[0] / 100.0
+    box_marker.pose.position.y = custom_obj.pose[1] / 100.0
+    box_marker.pose.position.z = 1 / 100.0
+    # Add 90 degrees since cozmo front is x-axis
+    box_orientation = angle_z_to_quaternion(radians(custom_obj.pose[2] + math.pi / 2))
+    print(box_orientation)
+    box_marker.pose.orientation.x = box_orientation[1]
+    box_marker.pose.orientation.y = box_orientation[2]
+    box_marker.pose.orientation.z = box_orientation[3]
+    box_marker.pose.orientation.w = box_orientation[0]
+
     print(box_marker.pose.orientation.x)
     print(box_marker.pose.orientation.y)
     box_marker.scale.x = custom_obj.length / 100.0
@@ -105,6 +128,8 @@ def visualize(cozmo, custom_obj):
     button_control.interaction_mode = InteractiveMarkerControl.BUTTON
     button_control.always_visible = True
     button_control.markers.append(box_marker)
+    button_control.markers.append(cozmo_marker)
+
     int_marker.controls.append(button_control)
 
     server.insert(int_marker, handle_viz_input)
@@ -117,3 +142,7 @@ if __name__ == '__main__':
         cozmo.run_program(cozmo_run)
     except rospy.ROSInterruptException:
         pass
+
+# TODO: using python2, make publisher for box and cozmo and frames for it so that you can see
+# movement; also publish arrows after an action, async backward movement + look for cube ; look for cube behavior?
+# or need to cycle
