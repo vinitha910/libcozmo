@@ -41,9 +41,11 @@ class DistanceTest: public ::testing::Test {
  public:
     DistanceTest() : \
         m_statespace(statespace::SE2(0.1, 8)),
-        m_se2(distance::SE2(&m_statespace)),
-        m_trans(distance::Translation(&m_statespace)),
-        m_orient(distance::Orientation(&m_statespace)) {}
+        m_statespace_shared(
+            std::make_shared<statespace::SE2>(std::move(m_statespace))),
+        m_se2(distance::SE2(m_statespace_shared)),
+        m_trans(distance::Translation(m_statespace_shared)),
+        m_orient(distance::Orientation(m_statespace_shared)) {}
 
     void SetUp() {
         m_id_1 =
@@ -58,6 +60,7 @@ class DistanceTest: public ::testing::Test {
     distance::SE2 m_se2;
     distance::Translation m_trans;
     distance::Orientation m_orient;
+    std::shared_ptr<statespace::SE2> m_statespace_shared;
     int m_id_1;
     int m_id_2;
 };
@@ -65,35 +68,35 @@ class DistanceTest: public ::testing::Test {
 TEST_F(DistanceTest, TestSE2) {
     // Cheking SE2 distance calculated correctly
     EXPECT_NEAR(
-        sqrt(pow(0.1,2) + pow(0.3,2) + pow(M_PI/4, 2)), 
+        sqrt(pow(0.1, 2) + pow(0.3, 2) + pow(M_PI / 4, 2)),
         m_se2.get_distance(
-            *m_statespace.get_state(m_id_1),
-            *m_statespace.get_state(m_id_2)),
+            * m_statespace.get_state(m_id_1),
+            * m_statespace.get_state(m_id_2)),
         0.01);
 }
 
 TEST_F(DistanceTest, TestTranslation) {
     // Cheking translation calculated correctly
     EXPECT_NEAR(
-        sqrt(pow(0.1,2) + pow(0.3,2)), 
+        sqrt(pow(0.1, 2) + pow(0.3, 2)),
         m_trans.get_distance(
-            *m_statespace.get_state(m_id_1),
-            *m_statespace.get_state(m_id_2)),
+            * m_statespace.get_state(m_id_1),
+            * m_statespace.get_state(m_id_2)),
         0.01);
 }
 
 TEST_F(DistanceTest, TestOrientation) {
     // Cheking orientation calculated correctly
     EXPECT_NEAR(
-        M_PI/4, 
+        M_PI / 4,
         m_orient.get_distance(
-            *m_statespace.get_state(m_id_1),
-            *m_statespace.get_state(m_id_2)),
+            * m_statespace.get_state(m_id_1),
+            * m_statespace.get_state(m_id_2)),
         0.01);
 }
 
 }  // namespace test
-}  // namspace distance
+}  // namespace distance
 }  // namespace libcozmo
 
 int main(int argc, char **argv) {

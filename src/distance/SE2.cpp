@@ -35,7 +35,6 @@ namespace distance {
 	double SE2::get_distance(
 		const libcozmo::statespace::StateSpace::State& _state_1,
     	const libcozmo::statespace::StateSpace::State& _state_2) const {
-
 		return m_statespace->get_distance(_state_1, _state_2);
 	}
 

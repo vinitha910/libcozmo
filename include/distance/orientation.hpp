@@ -30,6 +30,7 @@
 #ifndef LIBCOZMO_DISTANCE_ORIENTATION_HPP_
 #define LIBCOZMO_DISTANCE_ORIENTATION_HPP_
 
+#include <memory>
 #include "distance/distance.hpp"
 
 namespace libcozmo {
@@ -41,25 +42,25 @@ namespace distance {
 /// distance of two states are defined by the difference of their orientation.
 class Orientation : public virtual Distance {
  public:
+	/// Constructs metric with given statespace
+	///
+	/// \param statespace The statespace that states to calculate the distance
+	/// 				  belongs to
+	explicit Orientation(
+		std::shared_ptr<libcozmo::statespace::StateSpace> statespace) : \
+		m_statespace(statespace) {}
+	~Orientation() {}
 
- 	/// /// Constructs metric with given statespace
- 	///
- 	/// \param statespace The statespace that states to calculate the distance
- 	/// 				  belongs to
-    Orientation(libcozmo::statespace::StateSpace* statespace) : \
- 		m_statespace(statespace) {}
- 	~Orientation() {}
+	/// Document inherited
+	double get_distance(
+		const libcozmo::statespace::StateSpace::State& _state_1,
+		const libcozmo::statespace::StateSpace::State& _state_2) const override;
 
- 	/// Document inherited
-    double get_distance(
-    	const libcozmo::statespace::StateSpace::State& _state_1,
-    	const libcozmo::statespace::StateSpace::State& _state_2) const override;
- 
  private:
- 	const libcozmo::statespace::StateSpace* m_statespace;
+	const std::shared_ptr<libcozmo::statespace::StateSpace> m_statespace;
 };
 
 }  // namespace distance
 }  // namespace libcozmo
 
-#endif
+#endif  // LIBCOZMO_DISTANCE_ORIENTATION_HPP_
