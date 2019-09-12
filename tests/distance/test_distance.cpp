@@ -49,9 +49,9 @@ class DistanceTest: public ::testing::Test {
 
     void SetUp() {
         m_id_1 =
-            m_statespace.get_or_create_state(statespace::SE2::State(0, 0, 0));
+            m_statespace.get_or_create_state(statespace::SE2::State(0, 0, 1));
         m_id_2 =
-            m_statespace.get_or_create_state(statespace::SE2::State(1, 3, 1));
+            m_statespace.get_or_create_state(statespace::SE2::State(1, 3, 3));
     }
 
     ~DistanceTest() {}
@@ -71,7 +71,7 @@ TEST_F(DistanceTest, TestSE2) {
     EXPECT_FALSE(s1 == nullptr);
     EXPECT_FALSE(s2 == nullptr);
     EXPECT_NEAR(
-        sqrt(pow(0.1, 2) + pow(0.3, 2) + pow(M_PI / 4, 2)),
+        sqrt(pow(0.1, 2) + pow(0.3, 2) + pow(M_PI / 2, 2)),
         m_se2.get_distance(
             * m_statespace.get_state(m_id_1),
             * m_statespace.get_state(m_id_2)),
@@ -91,7 +91,7 @@ TEST_F(DistanceTest, TestTranslation) {
 TEST_F(DistanceTest, TestOrientation) {
     // Cheking orientation calculated correctly
     EXPECT_NEAR(
-        M_PI / 4,
+        M_PI / 2,
         m_orient.get_distance(
             * m_statespace.get_state(m_id_1),
             * m_statespace.get_state(m_id_2)),

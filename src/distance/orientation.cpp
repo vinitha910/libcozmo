@@ -50,11 +50,13 @@ namespace distance {
         aikido::statespace::SE2::State continuous_state_2;
         m_statespace->
             discrete_state_to_continuous(_state_2, &continuous_state_2);
-        Eigen::Rotation2Dd rotation = Eigen::Rotation2Dd::Identity();
-        auto isometry = continuous_state_1.getIsometry() *
-            continuous_state_2.getIsometry();
-        rotation.fromRotationMatrix(isometry.rotation());
-        return std::abs(rotation.angle());
+        Eigen::Rotation2Dd rotation_1 = Eigen::Rotation2Dd::Identity();
+        Eigen::Rotation2Dd rotation_2 = Eigen::Rotation2Dd::Identity();
+        rotation_1.fromRotationMatrix(
+            continuous_state_1.getIsometry().rotation());
+        rotation_2.fromRotationMatrix(
+            continuous_state_2.getIsometry().rotation());
+        return std::abs(rotation_1.angle() - rotation_2.angle());
     }
 
 }  // namespace distance
