@@ -113,6 +113,13 @@ class Dijkstra : public virtual Planner {
         const int& goal_id,
         std::vector<int> *path_actions);
 
+    void Dijkstra::get_succ(
+        stat::SE2::State* state_,
+        aikido::statespace::SE2::State* s,
+        const double& x,
+        const double& y,
+        const double& theta);
+
  private:
     /// Action Space
  	libcozmo::actionspace::ActionSpace* m_action_space; 
