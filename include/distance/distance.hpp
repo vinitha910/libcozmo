@@ -1,5 +1,9 @@
 //////////////////////////////////////////////////////////////////////////////
+<<<<<<< HEAD
 // Copyright (c) 2019, Vinitha Ranganeni
+=======
+// Copyright (c) 2019, Brian Lee, Vinitha Ranganeni
+>>>>>>> a7fffa012325937d70466fdf4b5b0938ff1a8d82
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -35,6 +39,7 @@
 namespace libcozmo {
 namespace distance {
 
+<<<<<<< HEAD
 
 /// Distance metric class
 ///
@@ -56,3 +61,22 @@ class Distance {
 }  // namespace libcozmo
 
 #endif
+=======
+/// Distance metric class
+///
+/// The definition of distance depends on the derived class.
+class Distance {
+ public:
+    /// Calculates distance between two states
+    ///
+    /// \return The distance
+    virtual double get_distance(
+        const libcozmo::statespace::StateSpace::State& _state_1,
+        const libcozmo::statespace::StateSpace::State& _state_2) const = 0;
+};
+
+}  // namespace distance
+}  // namespace libcozmo
+
+#endif  // LIBCOZMO_DISTANCE_DISTANCE_HPP_
+>>>>>>> a7fffa012325937d70466fdf4b5b0938ff1a8d82
