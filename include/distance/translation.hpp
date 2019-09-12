@@ -1,5 +1,9 @@
 //////////////////////////////////////////////////////////////////////////////
+<<<<<<< HEAD
 // Copyright (c) 2019, Vinitha Ranganeni
+=======
+// Copyright (c) 2019, Brian Lee, Vinitha Ranganeni
+>>>>>>> a7fffa012325937d70466fdf4b5b0938ff1a8d82
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -30,6 +34,11 @@
 #ifndef LIBCOZMO_DISTANCE_TRANSLATION_HPP_
 #define LIBCOZMO_DISTANCE_TRANSLATION_HPP_
 
+<<<<<<< HEAD
+=======
+#include <memory>
+#include "statespace/SE2.hpp"
+>>>>>>> a7fffa012325937d70466fdf4b5b0938ff1a8d82
 #include "distance/distance.hpp"
 
 namespace libcozmo {
@@ -37,6 +46,7 @@ namespace distance {
 
 /// Distance metric class based on translation
 ///
+<<<<<<< HEAD
 /// This class implements a distace metric of a continuous translation i.e.
 /// distance of two states are defined by the euclidean distance between
 /// them w.r.t to the translational x,y axis.
@@ -65,3 +75,29 @@ class Translation : public virtual Distance {
 }  // namespace libcozmo
 
 #endif
+=======
+/// This class implements distance of a continuous translation i.e.
+/// distance of two states are defined by the euclidean distance between
+/// them w.r.t to the translational x,y axis (meters).
+class Translation : public virtual Distance {
+ public:
+    /// Constructs metric with given statespace
+    ///
+    /// \param statespace The statespace the metric operates in
+    explicit Translation(const std::shared_ptr<statespace::SE2> statespace);
+    ~Translation() {}
+
+    /// Documentation inherited
+    double get_distance(
+        const libcozmo::statespace::StateSpace::State& _state_1,
+        const libcozmo::statespace::StateSpace::State& _state_2) const override;
+
+ private:
+    const std::shared_ptr<libcozmo::statespace::StateSpace> m_statespace;
+};
+
+}  // namespace distance
+}  // namespace libcozmo
+
+#endif  // LIBCOZMO_DISTANCE_TRANSLATION_HPP_
+>>>>>>> a7fffa012325937d70466fdf4b5b0938ff1a8d82

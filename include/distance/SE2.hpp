@@ -1,5 +1,9 @@
 //////////////////////////////////////////////////////////////////////////////
+<<<<<<< HEAD
 // Copyright (c) 2019, Vinitha Ranganeni
+=======
+// Copyright (c) 2019, Brian Lee, Vinitha Ranganeni
+>>>>>>> a7fffa012325937d70466fdf4b5b0938ff1a8d82
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -30,12 +34,19 @@
 #ifndef LIBCOZMO_DISTANCE_SE2_HPP_
 #define LIBCOZMO_DISTANCE_SE2_HPP_
 
+<<<<<<< HEAD
 #include "distance/distance.hpp"
 #include "statespace/SE2.hpp"
+=======
+#include <memory>
+#include "statespace/SE2.hpp"
+#include "distance/distance.hpp"
+>>>>>>> a7fffa012325937d70466fdf4b5b0938ff1a8d82
 
 namespace libcozmo {
 namespace distance {
 
+<<<<<<< HEAD
 /// Distance Metric class
 ///
 /// This class implements a distace metric of a continuous two-dimensional
@@ -59,9 +70,34 @@ class SE2 : public virtual Distance {
  
  private:
  	const libcozmo::statespace::StateSpace* m_statespace;
+=======
+/// SE2 Distance Metric
+///
+/// This class implements a distace metric between SE2 transformations.
+class SE2 : public Distance {
+ public:
+    /// Constructs metric with given statespace
+    ///
+    /// \param statespace The statespace the metric operates in
+    explicit SE2(const std::shared_ptr<statespace::SE2> statespace);
+
+    ~SE2() {}
+
+    /// Documentation inherited
+    double get_distance(
+        const statespace::StateSpace::State& _state_1,
+        const statespace::StateSpace::State& _state_2) const override;
+
+ private:
+    const std::shared_ptr<statespace::SE2> m_statespace;
+>>>>>>> a7fffa012325937d70466fdf4b5b0938ff1a8d82
 };
 
 }  // namespace distance
 }  // namespace libcozmo
 
+<<<<<<< HEAD
 #endif
+=======
+#endif  // LIBCOZMO_DISTANCE_SE2_HPP_
+>>>>>>> a7fffa012325937d70466fdf4b5b0938ff1a8d82

@@ -30,10 +30,15 @@
 #include <cmath>
 #include "distance/translation.hpp"
 #include "statespace/SE2.hpp"
+<<<<<<< HEAD
+=======
+#include "utils/utils.hpp"
+>>>>>>> a7fffa012325937d70466fdf4b5b0938ff1a8d82
 
 namespace libcozmo {
 namespace distance {
 
+<<<<<<< HEAD
 	double Translation::get_distance(
 		const libcozmo::statespace::StateSpace::State& _state_1,
     	const libcozmo::statespace::StateSpace::State& _state_2) const {
@@ -56,3 +61,30 @@ namespace distance {
 
 }  // namespace distance
 }  // namespace libcozmo
+=======
+    Translation::Translation(const std::shared_ptr<statespace::SE2> statespace)
+        : m_statespace(statespace) {
+        if (m_statespace == nullptr) {
+            throw std::invalid_argument("statespace is a nullptr.");
+        }
+    }
+
+    double Translation::get_distance(
+        const libcozmo::statespace::StateSpace::State& _state_1,
+        const libcozmo::statespace::StateSpace::State& _state_2) const {
+        aikido::statespace::SE2::State continuous_state_1;
+        m_statespace->
+            discrete_state_to_continuous(_state_1, &continuous_state_1);
+        aikido::statespace::SE2::State continuous_state_2;
+        m_statespace->
+            discrete_state_to_continuous(_state_2, &continuous_state_2);
+        auto translation = continuous_state_1.getIsometry().translation() -
+            continuous_state_2.getIsometry().translation();
+        Eigen::Vector2d position(translation);
+        Eigen::Vector2d zeros(0, 0);
+        return utils::euclidean_distance(position, zeros);
+    }
+
+}  // namespace distance
+}  // namespace libcozmo
+>>>>>>> a7fffa012325937d70466fdf4b5b0938ff1a8d82

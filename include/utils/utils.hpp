@@ -49,7 +49,7 @@ std::vector<T> linspace(T a, T b, std::size_t N) {
 }
 
 template <typename T>
-double euclidean_distance(std::vector<T> a, std::vector<T> b) {
+double euclidean_distance(T a, T b) {
     double distance = 0;
     for (int i = 0; i < a.size(); i++) {
         distance = distance + pow((a[i] - b[i]), 2);
