@@ -1,5 +1,5 @@
-////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2019, Vinitha Ranganeni, Brian Lee, Eric Pan
+//////////////////////////////////////////////////////////////////////////////
+// Copyright (c) 2019, Vinitha Ranganeni
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -27,42 +27,41 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef COZMO_UTILS_HPP_
-#define COZMO_UTILS_HPP_
+#ifndef LIBCOZMO_DISTANCE_SE2_HPP_
+#define LIBCOZMO_DISTANCE_SE2_HPP_
 
-#include <vector>
-#include <cmath>
+#include "distance/distance.hpp"
+#include "statespace/SE2.hpp"
 
 namespace libcozmo {
-namespace utils {
+namespace distance {
 
-// https://gist.github.com/lorenzoriano/5414671
-template <typename T>
-std::vector<T> linspace(T a, T b, std::size_t N) {
-    T h = (b - a) / static_cast<T>(N-1);
-    std::vector<T> xs(N);
-    typename std::vector<T>::iterator x;
-    T val;
-    for (x = xs.begin(), val = a; x != xs.end(); ++x, val += h)
-        *x = val;
-    return xs;
-}
+/// Distance Metric class
+///
+/// This class implements a distace metric of a continuous two-dimensional
+/// Special Euclidean group SE(2), i.e. the space of planar rigid body
+/// transformations.
+class SE2 : public virtual Distance {
+ public:
 
-template <typename T>
-double euclidean_distance(std::vector<T> a, std::vector<T> b) {
-    double distance = 0;
-    for (int i = 0; i < a.size(); i++) {
-        distance = distance + pow((a[i] - b[i]), 2);
-    }
-    return sqrt(distance);
-}
+ 	/// Constructs metric with given statespace
+ 	///
+ 	/// \param statespace The statespace that states to calculate the distance
+ 	/// 				  belongs to
+ 	SE2(libcozmo::statespace::StateSpace* statespace) : \
+ 		m_statespace(statespace) {}
+ 	~SE2() {}
 
-template <typename T>
-double angle_normalization(T angle) {
-    return angle - 2.0 * M_PI * floor(angle / (2.0 * M_PI));
-}
+ 	/// Document inherited
+    double get_distance(
+    	const libcozmo::statespace::StateSpace::State& _state_1,
+    	const libcozmo::statespace::StateSpace::State& _state_2) const override;
+ 
+ private:
+ 	const libcozmo::statespace::StateSpace* m_statespace;
+};
 
-}  //  namespace utils
-}  //  namespace libcozmo
+}  // namespace distance
+}  // namespace libcozmo
 
-#endif  // COZMO_UTILS_HPP_
+#endif

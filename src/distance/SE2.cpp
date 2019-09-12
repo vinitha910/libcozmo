@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2019, Vinitha Ranganeni, Brian Lee, Eric Pan
+// Copyright (c) 2019, Brian Lee, Vinitha Ranganeni
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -27,42 +27,17 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef COZMO_UTILS_HPP_
-#define COZMO_UTILS_HPP_
-
-#include <vector>
-#include <cmath>
+#include "distance/SE2.hpp"
 
 namespace libcozmo {
-namespace utils {
+namespace distance {
 
-// https://gist.github.com/lorenzoriano/5414671
-template <typename T>
-std::vector<T> linspace(T a, T b, std::size_t N) {
-    T h = (b - a) / static_cast<T>(N-1);
-    std::vector<T> xs(N);
-    typename std::vector<T>::iterator x;
-    T val;
-    for (x = xs.begin(), val = a; x != xs.end(); ++x, val += h)
-        *x = val;
-    return xs;
-}
+	double SE2::get_distance(
+		const libcozmo::statespace::StateSpace::State& _state_1,
+    	const libcozmo::statespace::StateSpace::State& _state_2) const {
 
-template <typename T>
-double euclidean_distance(std::vector<T> a, std::vector<T> b) {
-    double distance = 0;
-    for (int i = 0; i < a.size(); i++) {
-        distance = distance + pow((a[i] - b[i]), 2);
-    }
-    return sqrt(distance);
-}
+		return m_statespace->get_distance(_state_1, _state_2);
+	}
 
-template <typename T>
-double angle_normalization(T angle) {
-    return angle - 2.0 * M_PI * floor(angle / (2.0 * M_PI));
-}
-
-}  //  namespace utils
-}  //  namespace libcozmo
-
-#endif  // COZMO_UTILS_HPP_
+}  // namespace distance
+}  // namespace libcozmo
