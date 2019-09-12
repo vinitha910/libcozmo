@@ -143,6 +143,9 @@ class SE2 : public virtual StateSpace {
         const StateSpace::State& _source, 
         StateSpace::State* _destination) const override;
 
+    /// Documentation inherited
+    double get_resolution() const override;
+
  private:
     /// Creates a new state and adds it to the statespace
     ///

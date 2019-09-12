@@ -21,6 +21,7 @@ add_message_files(
   DIRECTORY msg
   FILES
   ForkLift.msg
+  ObjectOrientedAction.msg
   ActionMsg.msg
 )
 
@@ -47,6 +48,7 @@ include_directories(
 
 add_library(cozmo SHARED
   src/cozmo_description/cozmo.cpp
+  src/actionspace/ObjectOrientedActionSpace.cpp
   src/actionspace/generic_action_space.cpp
   src/statespace/SE2.cpp
 )
@@ -82,6 +84,13 @@ target_link_libraries(test_libcozmo ${TEST_LIBS})
 catkin_add_gtest(test_generic_action_space tests/actionspace/test_generic_action_space.cpp )
 target_link_libraries(test_generic_action_space ${TEST_LIBS})
 
+catkin_add_gtest(test_angle_normalization tests/utils/test_angle_normalization.cpp)
+target_link_libraries(test_angle_normalization ${TEST_LIBS})
+
+catkin_add_gtest(test_object_oriented_action_space tests/actionspace/test_object_oriented_action_space.cpp)
+target_link_libraries(test_object_oriented_action_space
+    cozmo
+)
 
 catkin_add_gtest(test_euclidean tests/utils/test_euclidean_distance.cpp)
 target_link_libraries(test_euclidean ${TEST_LIBS})
