@@ -38,7 +38,7 @@ namespace distance {
 namespace test {
 
 TEST(DistanceTest, TestSE2) {
-    // Cheking SE2 distance calculated correctly
+    // Checking SE2 distance calculated correctly
     const auto statespace = std::make_shared<statespace::SE2>(0.1, 8);
     distance::SE2 se2 = distance::SE2(statespace);
     EXPECT_NEAR(
@@ -49,7 +49,7 @@ TEST(DistanceTest, TestSE2) {
 }
 
 TEST(DistanceTest, TestTranslation) {
-    // Cheking translation calculated correctly
+    // Checking translation calculated correctly
     const auto statespace = std::make_shared<statespace::SE2>(0.1, 8);
     distance::Translation trans = distance::Translation(statespace);
     EXPECT_NEAR(
@@ -61,7 +61,7 @@ TEST(DistanceTest, TestTranslation) {
 }
 
 TEST(DistanceTest, TestOrientation) {
-    // Cheking orientation calculated correctly
+    // Checking orientation calculated correctly
     const auto statespace = std::make_shared<statespace::SE2>(0.1, 8);
     distance::Orientation orient = distance::Orientation(statespace);
     EXPECT_NEAR(
