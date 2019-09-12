@@ -29,7 +29,6 @@
 
 #include "distance/orientation.hpp"
 #include "statespace/SE2.hpp"
-#include <iostream>
 
 namespace libcozmo {
 namespace distance {
