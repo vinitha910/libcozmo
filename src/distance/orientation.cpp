@@ -27,42 +27,14 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
-<<<<<<< HEAD
-#include "distance/orientation.hpp"
-#include "statespace/SE2.hpp"
-=======
 #include <iostream>
 #include "distance/orientation.hpp"
 #include "statespace/SE2.hpp"
 #include "utils/utils.hpp"
->>>>>>> a7fffa012325937d70466fdf4b5b0938ff1a8d82
 
 namespace libcozmo {
 namespace distance {
 
-<<<<<<< HEAD
-	double Orientation::get_distance(
-		const libcozmo::statespace::StateSpace::State& _state_1,
-    	const libcozmo::statespace::StateSpace::State& _state_2) const {
-		
-		aikido::statespace::SE2::State continuous_state_1;
-		m_statespace->
-			discrete_state_to_continuous(_state_1, &continuous_state_1);
-		aikido::statespace::SE2::State continuous_state_2;
-		m_statespace->
-			discrete_state_to_continuous(_state_2, &continuous_state_2);
-
-		Eigen::Rotation2Dd rotation_1 = Eigen::Rotation2Dd::Identity();
-		Eigen::Rotation2Dd rotation_2 = Eigen::Rotation2Dd::Identity();
-
-		rotation_1.fromRotationMatrix(continuous_state_1.getIsometry().rotation());
-		rotation_2.fromRotationMatrix(continuous_state_2.getIsometry().rotation());
-		return std::abs(rotation_1.angle() - rotation_2.angle());			
-	}
-
-}  // namespace distance
-}  // namespace libcozmo
-=======
     Orientation::Orientation(const std::shared_ptr<statespace::SE2> statespace)
         : m_statespace(statespace) {
         if (m_statespace == nullptr) {
@@ -91,4 +63,3 @@ namespace distance {
 
 }  // namespace distance
 }  // namespace libcozmo
->>>>>>> a7fffa012325937d70466fdf4b5b0938ff1a8d82
