@@ -39,7 +39,7 @@ namespace distance {
 
 /// Distance metric class based on translation
 ///
-/// This class implements distace of a continuous translation i.e.
+/// This class implements distance of a continuous translation i.e.
 /// distance of two states are defined by the euclidean distance between
 /// them w.r.t to the translational x,y axis (meters).
 class Translation : public virtual Distance {

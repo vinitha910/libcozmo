@@ -27,8 +27,10 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <iostream>
 #include "distance/orientation.hpp"
 #include "statespace/SE2.hpp"
+#include "utils/utils.hpp"
 
 namespace libcozmo {
 namespace distance {
@@ -55,7 +57,8 @@ namespace distance {
             continuous_state_1.getIsometry().rotation());
         rotation_2.fromRotationMatrix(
             continuous_state_2.getIsometry().rotation());
-        return std::abs(rotation_1.angle() - rotation_2.angle());
+        return utils::angle_normalization(
+            std::abs(rotation_1.angle() - rotation_2.angle()));
     }
 
 }  // namespace distance
