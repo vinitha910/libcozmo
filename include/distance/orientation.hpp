@@ -39,7 +39,7 @@ namespace distance {
 
 /// Distance metric class
 ///
-/// This class implements a distace metric of a continuous orientation i.e.
+/// This class implements a distance metric of a continuous orientation i.e.
 /// distance of two states are defined by the difference of their orientation
 /// in range [0, 2pi].
 class Orientation : public virtual Distance {
