@@ -2,7 +2,7 @@
 import rospy
 
 import cozmo
-from cozmo.util import angle_z_to_quaternion, pose_z_angle, radians
+from cozmo.util import angle_z_to_quaternion, pose_z_angle, radians, distance_mm, speed_mmps
 import math
 
 from interactive_markers.interactive_marker_server import InteractiveMarkerServer
@@ -41,6 +41,15 @@ def are_attached(cube1, cube2, threshold):
 
     return math.sqrt(abs(x2 - x1) ** 2 +  abs(y2 - y1) ** 2) < threshold + 5
 
+def create_custom_object(cubes, cube_len):
+    x1 = cubes[0].pose.position.x
+    y1 = cubes[0].pose.position.y
+    x2 = cubes[1].pose.position.x
+    y2 = cubes[1].pose.position.y
+    heading = cubes[0].pose.rotation.angle_z.radians
+
+    return CustomObject(((x1+ x2) / 2, (y1 + y2) / 2, heading), 2 * cube_len, cube_len)
+
 
 def cozmo_run(robot: cozmo.robot):
     num_cubes = 2
@@ -54,36 +63,33 @@ def cozmo_run(robot: cozmo.robot):
         print('Not enough cubes found')
     finally:
         look_around.stop()
-    #robot.go_to_pose(pose_z_angle(cube.pose.position.x - 60, cube.pose.position.y, 0, radians(cube.pose.rotation.angle_z.radians))).wait_for_completed()
     if are_attached(cubes[0], cubes[1], cube_len):
-        x1 = cubes[0].pose.position.x
-        y1 = cubes[0].pose.position.y
-        x2 = cubes[1].pose.position.x
-        y2 = cubes[1].pose.position.y
-        heading = cubes[0].pose.rotation.angle_z.radians
-
-        custom_obj = CustomObject(((x1+ x2) / 2, (y1 + y2) / 2, heading), 2 * cube_len, cube_len)
+        custom_obj = create_custom_object(cubes, cube_len)
 
         #robot.go_to_pose(pose_z_angle(custom_obj.pose[0], custom_obj.pose[1], 0, radians(custom_obj.pose[2]))).wait_for_completed()
 
         print(custom_obj)
         print(robot.pose)
-        visualize(robot, custom_obj)
+        #visualize(robot, custom_obj)
+        cozmo_publisher = rospy.Publisher('cozmo_marker', Marker, queue_size=10)
 
-def handle_viz_input(input):
-    if (input.event_type == InteractiveMarkerFeedback.BUTTON_CLICK):
-        rospy.loginfo(input.marker_name + ' was clicked.')
-    else:
-        rospy.loginfo('Cannot handle this InteractiveMarker event')
+        object_publisher = rospy.Publisher('object_marker', Marker, queue_size=10)
 
-def visualize(cozmo, custom_obj):
-    server = InteractiveMarkerServer("simple_marker")
-    int_marker = InteractiveMarker()
-    int_marker.header.frame_id = "base_link"
-    int_marker.name = "my_marker"
-    int_marker.description = "Custom Object"
+        while not rospy.is_shutdown():
+            publish_cozmo(cozmo_publisher, robot, custom_obj)
+            publish_object(object_publisher, custom_obj)
+            rospy.sleep(0.5)
+            
+            robot.go_to_pose(pose_z_angle(custom_obj.pose[0], custom_obj.pose[1], 0, radians(custom_obj.pose[2]))).wait_for_completed()
+            robot.drive_straight(distance_mm(-100), speed_mmps(100)).wait_for_completed()
 
+            cubes = robot.world.wait_until_observe_num_objects(num_cubes, cozmo.objects.LightCube, timeout=10)
+            custom_obj = create_custom_object(cubes, cube_len)
+
+
+def publish_cozmo(pub, cozmo, custom_obj):
     cozmo_marker = Marker()
+    cozmo_marker.header.frame_id = "base_link"
     cozmo_marker.type = Marker.CUBE
     cozmo_marker.pose.position.x = cozmo.pose.position.x / 100.0
     cozmo_marker.pose.position.y = cozmo.pose.position.y / 100.0
@@ -100,7 +106,11 @@ def visualize(cozmo, custom_obj):
     cozmo_marker.color.b = 0.5
     cozmo_marker.color.a = 1.0
 
+    pub.publish(cozmo_marker)
+
+def publish_object(pub, custom_obj):
     box_marker = Marker()
+    box_marker.header.frame_id = "base_link"
     box_marker.type = Marker.CUBE
 
     box_marker.pose.position.x = custom_obj.pose[0] / 100.0
@@ -123,18 +133,8 @@ def visualize(cozmo, custom_obj):
     box_marker.color.g = 0.5
     box_marker.color.b = 0.5
     box_marker.color.a = 1.0
-
-    button_control = InteractiveMarkerControl()
-    button_control.interaction_mode = InteractiveMarkerControl.BUTTON
-    button_control.always_visible = True
-    button_control.markers.append(box_marker)
-    button_control.markers.append(cozmo_marker)
-
-    int_marker.controls.append(button_control)
-
-    server.insert(int_marker, handle_viz_input)
-    server.applyChanges()
-    rospy.spin()
+    
+    pub.publish(box_marker)
 
 if __name__ == '__main__':
     rospy.init_node('edge_detection')
@@ -142,7 +142,7 @@ if __name__ == '__main__':
         cozmo.run_program(cozmo_run)
     except rospy.ROSInterruptException:
         pass
-
-# TODO: using python2, make publisher for box and cozmo and frames for it so that you can see
-# movement; also publish arrows after an action, async backward movement + look for cube ; look for cube behavior?
-# or need to cycle
+# publish cozmo movment always, but you can only update cube location when cozmo detects it
+#   once an action is performed -> call reupdate function that will update the cube location
+#   1) back up, 2) look for cube, 3) publish cube
+# fake location for where it should end up -> function that takes in that location and publishes it
