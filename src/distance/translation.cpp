@@ -30,6 +30,7 @@
 #include <cmath>
 #include "distance/translation.hpp"
 #include "statespace/SE2.hpp"
+#include "utils/utils.hpp"
 
 namespace libcozmo {
 namespace distance {
@@ -53,7 +54,8 @@ namespace distance {
         auto translation = continuous_state_1.getIsometry().translation() -
             continuous_state_2.getIsometry().translation();
         Eigen::Vector2d position(translation);
-        return sqrt(pow(position[0], 2) + pow(position[1], 2));
+        Eigen::Vector2d zeros(0, 0);
+        return utils::euclidean_distance(position, zeros);
     }
 
 }  // namespace distance
