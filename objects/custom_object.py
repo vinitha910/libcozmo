@@ -4,9 +4,8 @@ import rospy
 import cozmo
 from cozmo.util import angle_z_to_quaternion, pose_z_angle, radians, distance_mm, speed_mmps
 import math
+import threading
 
-from interactive_markers.interactive_marker_server import InteractiveMarkerServer
-from visualization_msgs.msg import InteractiveMarker, InteractiveMarkerControl, InteractiveMarkerFeedback
 from visualization_msgs.msg import Marker
 
 class CustomObject():
@@ -50,44 +49,41 @@ def create_custom_object(cubes, cube_len):
 
     return CustomObject(((x1+ x2) / 2, (y1 + y2) / 2, heading), 2 * cube_len, cube_len)
 
-
-def cozmo_run(robot: cozmo.robot):
-    num_cubes = 2
-    cube_len = 45
-
+def look_for_object(robot: cozmo.robot):
     look_around = robot.start_behavior(cozmo.behavior.BehaviorTypes.LookAroundInPlace)
     try:
-        cubes = robot.world.wait_until_observe_num_objects(num_cubes, cozmo.objects.LightCube, timeout=10)
+        cubes = robot.world.wait_until_observe_num_objects(2, cozmo.objects.LightCube, timeout=10)
         #cube = robot.world.wait_for_observed_light_cube(timeout=10)
     except asyncio.TimeoutError:
         print('Not enough cubes found')
     finally:
         look_around.stop()
-    if are_attached(cubes[0], cubes[1], cube_len):
-        custom_obj = create_custom_object(cubes, cube_len)
+    return create_custom_object(cubes, 45)
 
-        #robot.go_to_pose(pose_z_angle(custom_obj.pose[0], custom_obj.pose[1], 0, radians(custom_obj.pose[2]))).wait_for_completed()
-
-        print(custom_obj)
-        print(robot.pose)
-        #visualize(robot, custom_obj)
-        cozmo_publisher = rospy.Publisher('cozmo_marker', Marker, queue_size=10)
-
-        object_publisher = rospy.Publisher('object_marker', Marker, queue_size=10)
-
-        while not rospy.is_shutdown():
-            publish_cozmo(cozmo_publisher, robot, custom_obj)
-            publish_object(object_publisher, custom_obj)
-            rospy.sleep(0.5)
-            
-            robot.go_to_pose(pose_z_angle(custom_obj.pose[0], custom_obj.pose[1], 0, radians(custom_obj.pose[2]))).wait_for_completed()
-            robot.drive_straight(distance_mm(-100), speed_mmps(100)).wait_for_completed()
-
-            cubes = robot.world.wait_until_observe_num_objects(num_cubes, cozmo.objects.LightCube, timeout=10)
-            custom_obj = create_custom_object(cubes, cube_len)
+def cozmo_thread(pub, cozmo):
+    while not rospy.is_shutdown():
+        publish_cozmo(pub, cozmo)
 
 
-def publish_cozmo(pub, cozmo, custom_obj):
+def cozmo_run(robot: cozmo.robot):
+    cozmo_publisher = rospy.Publisher('cozmo_marker', Marker, queue_size=10)
+    object_publisher = rospy.Publisher('object_marker', Marker, queue_size=10)
+
+    t = threading.Thread(target=cozmo_thread, args=(cozmo_publisher, robot))
+    t.start()
+
+    while not rospy.is_shutdown():
+        custom_obj = look_for_object(robot)
+
+        #publish_cozmo(cozmo_publisher, robot)
+        publish_object(object_publisher, custom_obj)
+        rospy.sleep(0.1)
+        
+        robot.go_to_pose(pose_z_angle(custom_obj.pose[0], custom_obj.pose[1], 0, radians(custom_obj.pose[2]))).wait_for_completed()
+        robot.drive_straight(distance_mm(-100), speed_mmps(100)).wait_for_completed()
+
+
+def publish_cozmo(pub, cozmo):
     cozmo_marker = Marker()
     cozmo_marker.header.frame_id = "base_link"
     cozmo_marker.type = Marker.CUBE
@@ -98,9 +94,9 @@ def publish_cozmo(pub, cozmo, custom_obj):
     cozmo_marker.pose.orientation.y = cozmo.pose.rotation.q2
     cozmo_marker.pose.orientation.z = cozmo.pose.rotation.q3
     cozmo_marker.pose.orientation.w = cozmo.pose.rotation.q0
-    cozmo_marker.scale.x = custom_obj.width / 100.0
-    cozmo_marker.scale.y = custom_obj.width / 100.0
-    cozmo_marker.scale.z = custom_obj.width / 100.0
+    cozmo_marker.scale.x = 45 / 100.0
+    cozmo_marker.scale.y = 45 / 100.0
+    cozmo_marker.scale.z = 45 / 100.0
     cozmo_marker.color.r = 0.0
     cozmo_marker.color.g = 0.5
     cozmo_marker.color.b = 0.5
@@ -124,8 +120,6 @@ def publish_object(pub, custom_obj):
     box_marker.pose.orientation.z = box_orientation[3]
     box_marker.pose.orientation.w = box_orientation[0]
 
-    print(box_marker.pose.orientation.x)
-    print(box_marker.pose.orientation.y)
     box_marker.scale.x = custom_obj.length / 100.0
     box_marker.scale.y = custom_obj.width / 100.0
     box_marker.scale.z = custom_obj.width / 100.0
@@ -137,7 +131,7 @@ def publish_object(pub, custom_obj):
     pub.publish(box_marker)
 
 if __name__ == '__main__':
-    rospy.init_node('edge_detection')
+    rospy.init_node('custom_object')
     try:
         cozmo.run_program(cozmo_run)
     except rospy.ROSInterruptException:
@@ -146,3 +140,4 @@ if __name__ == '__main__':
 #   once an action is performed -> call reupdate function that will update the cube location
 #   1) back up, 2) look for cube, 3) publish cube
 # fake location for where it should end up -> function that takes in that location and publishes it
+# python2 in another file to do transforms 
