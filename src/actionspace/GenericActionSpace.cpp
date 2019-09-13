@@ -27,7 +27,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <actionspace/generic_action_space.hpp>
+#include <actionspace/GenericActionSpace.hpp>
 #include <exception>
 #include <iostream>
 
