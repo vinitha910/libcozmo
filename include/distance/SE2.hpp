@@ -1,5 +1,5 @@
-////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2019, Vinitha Ranganeni, Brian Lee, Eric Pan
+//////////////////////////////////////////////////////////////////////////////
+// Copyright (c) 2019, Brian Lee, Vinitha Ranganeni
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -27,42 +27,38 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef COZMO_UTILS_HPP_
-#define COZMO_UTILS_HPP_
+#ifndef LIBCOZMO_DISTANCE_SE2_HPP_
+#define LIBCOZMO_DISTANCE_SE2_HPP_
 
-#include <vector>
-#include <cmath>
+#include <memory>
+#include "statespace/SE2.hpp"
+#include "distance/distance.hpp"
 
 namespace libcozmo {
-namespace utils {
+namespace distance {
 
-// https://gist.github.com/lorenzoriano/5414671
-template <typename T>
-std::vector<T> linspace(T a, T b, std::size_t N) {
-    T h = (b - a) / static_cast<T>(N-1);
-    std::vector<T> xs(N);
-    typename std::vector<T>::iterator x;
-    T val;
-    for (x = xs.begin(), val = a; x != xs.end(); ++x, val += h)
-        *x = val;
-    return xs;
-}
+/// SE2 Distance Metric
+///
+/// This class implements a distace metric between SE2 transformations.
+class SE2 : public Distance {
+ public:
+    /// Constructs metric with given statespace
+    ///
+    /// \param statespace The statespace the metric operates in
+    explicit SE2(const std::shared_ptr<statespace::SE2> statespace);
 
-template <typename T>
-double euclidean_distance(T a, T b) {
-    double distance = 0;
-    for (int i = 0; i < a.size(); i++) {
-        distance = distance + pow((a[i] - b[i]), 2);
-    }
-    return sqrt(distance);
-}
+    ~SE2() {}
 
-template <typename T>
-double angle_normalization(T angle) {
-    return angle - 2.0 * M_PI * floor(angle / (2.0 * M_PI));
-}
+    /// Documentation inherited
+    double get_distance(
+        const statespace::StateSpace::State& _state_1,
+        const statespace::StateSpace::State& _state_2) const override;
 
-}  //  namespace utils
-}  //  namespace libcozmo
+ private:
+    const std::shared_ptr<statespace::SE2> m_statespace;
+};
 
-#endif  // COZMO_UTILS_HPP_
+}  // namespace distance
+}  // namespace libcozmo
+
+#endif  // LIBCOZMO_DISTANCE_SE2_HPP_

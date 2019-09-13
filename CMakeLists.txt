@@ -21,6 +21,7 @@ add_message_files(
   DIRECTORY msg
   FILES
   ForkLift.msg
+  ObjectOrientedAction.msg
   ActionMsg.msg
 )
 
@@ -47,9 +48,13 @@ include_directories(
 
 add_library(cozmo SHARED
   src/cozmo_description/cozmo.cpp
-  src/actionspace/generic_action_space.cpp
+  src/actionspace/ObjectOrientedActionSpace.cpp
+  src/actionspace/GenericActionSpace.cpp
   src/statespace/SE2.cpp
   src/model/DeterministicModel.cpp
+  src/distance/SE2.cpp
+  src/distance/translation.cpp
+  src/distance/orientation.cpp
 )
 
 target_include_directories(cozmo PUBLIC
@@ -83,6 +88,13 @@ target_link_libraries(test_libcozmo ${TEST_LIBS})
 catkin_add_gtest(test_generic_action_space tests/actionspace/test_generic_action_space.cpp )
 target_link_libraries(test_generic_action_space ${TEST_LIBS})
 
+catkin_add_gtest(test_angle_normalization tests/utils/test_angle_normalization.cpp)
+target_link_libraries(test_angle_normalization ${TEST_LIBS})
+
+catkin_add_gtest(test_object_oriented_action_space tests/actionspace/test_object_oriented_action_space.cpp)
+target_link_libraries(test_object_oriented_action_space
+    cozmo
+)
 
 catkin_add_gtest(test_euclidean tests/utils/test_euclidean_distance.cpp)
 target_link_libraries(test_euclidean ${TEST_LIBS})
@@ -90,8 +102,13 @@ target_link_libraries(test_euclidean ${TEST_LIBS})
 catkin_add_gtest(test_linspace tests/utils/test_linspace.cpp)
 target_link_libraries(test_linspace ${TEST_LIBS})
 
+
 catkin_add_gtest(test_deterministic_model tests/model/test_DeterministicModel.cpp)
 target_link_libraries(test_deterministic_model ${TEST_LIBS})
+
+catkin_add_gtest(test_distance tests/distance/test_distance.cpp)
+target_link_libraries(test_distance ${TEST_LIBS})
+
 
 ################################################################################
 # EXECUTABLES       

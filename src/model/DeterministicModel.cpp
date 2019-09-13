@@ -46,10 +46,7 @@ namespace model {
 		}
 		auto input_ = 
 			static_cast<const DeterministicModel::ModelInput&>(input);
-		double distance = 
-			static_cast<DeterministicModel::ModelType*>(
-				m_regressor)->get_resolution() *
-					input_.get_speed() * input_.get_duration();
+		double distance = input_.get_speed() * input_.get_duration();
 		double angle = input_.get_heading();
 		return new ModelOutput(
 			distance * cos(angle), distance * sin(angle), angle);

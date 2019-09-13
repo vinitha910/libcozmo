@@ -142,6 +142,8 @@ void SE2::copy_state(
     *destination = State(source.x, source.y, source.theta);
 }
 
+double SE2::get_resolution() const { return m_resolution; }
+
 StateSpace::State* SE2::create_state() {
     m_state_map.push_back(new State());
     const auto state = m_state_map.back();
@@ -175,9 +177,9 @@ int SE2::continuous_angle_to_discrete(const double& theta_rad) const {
 
 Eigen::Vector2d SE2::discrete_position_to_continuous(
     const Eigen::Vector2i& position) const {
-    const double x_m = position.x() * m_resolution + (m_resolution / 2.0);
-    const double y_m = position.y() * m_resolution + (m_resolution / 2.0);
-    return Eigen::Vector2d(x_m, y_m);
+    const double x_mm = position.x() * m_resolution + (m_resolution / 2.0);
+    const double y_mm = position.y() * m_resolution + (m_resolution / 2.0);
+    return Eigen::Vector2d(x_mm, y_mm);
 }
 
 Eigen::Vector2i SE2::continuous_position_to_discrete(

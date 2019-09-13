@@ -39,7 +39,7 @@ namespace test {
 class DeterministicModelTest: public ::testing::Test {
  public:
     DeterministicModelTest() :\
-    	m_type(0.1),
+    	m_type(),
     	m_model() {}
 
     void SetUp() {}
@@ -91,9 +91,9 @@ TEST_F(DeterministicModelTest, GetPredictionTest) {
 	EXPECT_NEAR(output1.getY(), 0, 0.001);
 	EXPECT_NEAR(output1.getTheta(), 0, 0.001);
 	EXPECT_NEAR(output2.getX(), 0, 0.001);
-	EXPECT_NEAR(output2.getY(), 5, 0.001);
+	EXPECT_NEAR(output2.getY(), 50, 0.001);
 	EXPECT_NEAR(output2.getTheta(), M_PI / 2.0, 0.001);
-	EXPECT_NEAR(output3.getX(), 5, 0.001);
+	EXPECT_NEAR(output3.getX(), 50, 0.001);
 	EXPECT_NEAR(output3.getY(), 0, 0.001);
 	EXPECT_NEAR(output3.getTheta(), M_PI, 0.001);
 }

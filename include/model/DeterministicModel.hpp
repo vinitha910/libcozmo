@@ -32,10 +32,7 @@
 
 #include <Eigen/Dense>
 #include "model/Model.hpp"
-#include "actionspace/generic_action_space.hpp"
-
-namespace AS = libcozmo::actionspace;
-
+#include "actionspace/GenericActionSpace.hpp"
 namespace libcozmo {
 namespace model {
 
@@ -45,22 +42,15 @@ class DeterministicModel : public virtual Model {
  public:
     class ModelType : public Model::ModelType {
      public:
-     	/// Constructs weight and bias term with given parameters
-     	explicit ModelType(const double& resolution) : \
-            m_resolution(resolution) {}
+     	ModelType() {}
 
      	~ModelType() = default;
-
-        double get_resolution() { return m_resolution; }
-
-     private:
-        double m_resolution;
     };
 	
 	class ModelInput : public Model::ModelInput {
 	 public:
 	 	/// Constructs input with given parameters
-	 	explicit ModelInput(const AS::GenericActionSpace::Action& action) : \
+	 	explicit ModelInput(const actionspace::GenericActionSpace::Action& action) : \
 	 		m_action(action) {}
 
 	 	~ModelInput() = default;
@@ -69,7 +59,7 @@ class DeterministicModel : public virtual Model {
         double get_duration() { return m_action.m_duration; }
         double get_heading() { return m_action.m_heading; }
 	 private:
-	 	const AS::GenericActionSpace::Action m_action;
+	 	const actionspace::GenericActionSpace::Action m_action;
     };
 	
 	class ModelOutput : public Model::ModelOutput {
