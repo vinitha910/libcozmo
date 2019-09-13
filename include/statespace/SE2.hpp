@@ -84,7 +84,7 @@ class SE2 : public virtual StateSpace {
 
     /// Constructs a discretized SE2 state space 
     ///
-    /// \param resolution_m Resolution of the environment (m)
+    /// \param resolution_m Resolution of the environment (mm)
     /// \param num_theta_vals Number of discretized theta values; Must be a 
     /// power of 2
     SE2(

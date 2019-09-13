@@ -27,149 +27,78 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <chrono>
 #include <gtest/gtest.h>
 #include "planner/Dijkstra.hpp"
+#include "distance/orientation.hpp"
+#include "distance/translation.hpp"
+
 
 namespace libcozmo {
 namespace planner {
 namespace test {
 
-class DijkstraTest: public ::testing::Test {
- public:
-    DijkstraTest() : \
-        m_handle(),
-        m_publisher(m_handle.advertise<libcozmo::ActionMsg>("Action", 10)) {}
 
-    void SetUp() {}
 
-    void TearDown() {}
+// TEST(DijkstraTest, StartIsGoalTest) {	
+//     /// Checking solver's base case where start is the same as goal
+//     libcozmo::statespace::SE2 state_space(10, 4);
+//     int start = state_space.get_or_create_state(
+//         libcozmo::statespace::SE2::State(0, 0, 0));
+//     libcozmo::actionspace::GenericActionSpace action_space(
+//         std::vector<double>{0.1},
+//         std::vector<double>{0.1},
+//         4);
+//     libcozmo::model::DeterministicModel model;
+//     auto se2 = distance::SE2(std::make_shared<statespace::SE2>(0.1, 4));
+//     model.load_model(new libcozmo::model::DeterministicModel::ModelType(0.1));
+//     libcozmo::planner::Dijkstra m_solver(&action_space, &state_space, &model, se2, 0.01);
+//     std::vector<int> actions;
+//     EXPECT_TRUE(m_solver.set_start(start));
+//     EXPECT_TRUE(m_solver.set_goal(start));
+//     bool solved  = m_solver.solve(&actions);
+//     EXPECT_TRUE(solved);
+// }
 
-    ros::Publisher* get_publisher() { return &m_publisher; }
-
-    ~DijkstraTest() {}
-
-    ros::NodeHandle m_handle;
-    ros::Publisher m_publisher;
-    // libcozmo::statespace::SE2 m_state_space;
-    // libcozmo::actionspace::GenericActionSpace m_action_space;
-    // libcozmo::model::DeterministicModel m_model;
-
-};
-
-/// Test very simple case of 2 states, with supposedly only one action required
-TEST_F(DijkstraTest, StartIsGoalTest) {	
-
-    libcozmo::statespace::SE2 state_space(0.1, 4);
-    int start = state_space.get_or_create_state(
-        libcozmo::statespace::SE2::State(0, 0, 0));
-    libcozmo::actionspace::GenericActionSpace action_space(
-        std::vector<double>{0.1},
-        std::vector<double>{0.1},
-        4);
-    libcozmo::model::DeterministicModel model;
-    model.load_model(new libcozmo::model::DeterministicModel::ModelType(0.1));
-    libcozmo::planner::Dijkstra m_solver(&action_space, &state_space, &model);
-    std::vector<int> actions;
-    EXPECT_TRUE(m_solver.set_start(start));
-    EXPECT_TRUE(m_solver.set_goal(start));
-    bool solved  = m_solver.solve(&actions);
-    EXPECT_TRUE(solved);
-}
-
-TEST_F(DijkstraTest, SimpleSolverTestCozmo) {
-    libcozmo::statespace::SE2 state_space(0.1, 4);
+TEST(DijkstraTest, SimpleSolverTestCozmo) {
+    /// Checking solver in a medium-sized problem
+    libcozmo::statespace::SE2 state_space(10, 4);
     int start = state_space.get_or_create_state(
         libcozmo::statespace::SE2::State(0, 0, 0));
     int goal = state_space.get_or_create_state(
-        libcozmo::statespace::SE2::State(50,30, 2));
-    
+        libcozmo::statespace::SE2::State(100,100, 3));
+    // discrete value: 10x is in mm.
     libcozmo::actionspace::GenericActionSpace action_space(
-        std::vector<double>{0, 5, 10, 15, 20},
-        std::vector<double>{1, 2, 3},
+        std::vector<double>{150, 200, 250},
+        std::vector<double>{1},
         4);
-
     libcozmo::model::DeterministicModel model;
-    model.load_model(new libcozmo::model::DeterministicModel::ModelType(0.1));
-
-    libcozmo::planner::Dijkstra m_solver(&action_space, &state_space, &model);
+    model.load_model(new libcozmo::model::DeterministicModel::ModelType(1));
+    auto distance_metric = distance::SE2(std::make_shared<statespace::SE2>(10, 4));
+    libcozmo::planner::Dijkstra m_solver(
+        &action_space, &state_space, &model, &distance_metric, 1);
     std::vector<int> actions;
     EXPECT_TRUE(m_solver.set_start(start));
     EXPECT_TRUE(m_solver.set_goal(goal));
+
+    auto start_time = std::chrono::high_resolution_clock::now(); 
+
     bool solved  = m_solver.solve(&actions);
+
+    auto stop = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start_time);
+
+    std::cout<<"NUM ACTIONS "<< actions.size() << "\n";
+    std::cout<<"TIME TAKEN " << duration.count() << "\n";
     EXPECT_TRUE(solved);
-    std::cout<<"There are "<<actions.size()<<" actions \n";
-    //Now that it is solved, let's push the actions all to cozmo
-    ros::Publisher publisher = *get_publisher();
-    for (int i = 0; i < actions.size(); i++) {
-        bool sent = false;
-        if (i  == 0) {
-            // sent = action_space.publish_action(actions[i], publisher);
-            sent = action_space.publish_action(actions[i], publisher);
-        } else {
-            sent = action_space.publish_action(actions[i], publisher);    
-        }
-        
-        if (sent) {
-            std::cout<<"msg published: action id "<<actions[i]<< " \n";
-            std::cout<<"speed: "<<static_cast<libcozmo::actionspace::GenericActionSpace::Action*>(action_space.get_action(actions[i]))->m_speed<<"\n";
-            std::cout<<"heading: "<<static_cast<libcozmo::actionspace::GenericActionSpace::Action*>(action_space.get_action(actions[i]))->m_heading<<"\n";
-            std::cout<<"duration: "<<static_cast<libcozmo::actionspace::GenericActionSpace::Action*>(action_space.get_action(actions[i]))->m_duration<<"\n";
-        }
-    }
 }
-
-// TEST_F(DijkstraTest, MediumSolverTestCozmo) {
-//     libcozmo::statespace::SE2 state_space(1.0, 4);
-//     int start = state_space.get_or_create_state(
-//         libcozmo::statespace::SE2::State(0, 0, 0));
-//     int goal = state_space.get_or_create_state(
-//         libcozmo::statespace::SE2::State(2, 11, 3));
-    
-//     libcozmo::actionspace::GenericActionSpace action_space(
-//         std::vector<double>{0, 0.1, 0.25, 0.5, 0.75, 1},
-//         std::vector<double>{0, 1},
-//         8);
-
-//     libcozmo::model::DeterministicModel model;
-//     libcozmo::model::DeterministicModel::ModelType model_type(
-//             Eigen::Vector3d(0, 0, 0),
-//             0,
-//             Eigen::Vector3d(0, 0, 0),
-//             0);
-//     model.load_model(&model_type);
-
-//     libcozmo::planner::Dijkstra m_solver(&action_space, &state_space, &model);
-//     std::vector<int> actions;
-//     EXPECT_TRUE(m_solver.set_start(start));
-//     EXPECT_TRUE(m_solver.set_goal(goal));
-//     bool solved  = m_solver.solve(&actions);
-//     EXPECT_TRUE(solved);
-//     std::cout<<"There are "<<actions.size()<<" actions \n";
-//     //Now that it is solved, let's push the actions all to cozmo
-//     ros::Publisher publisher = *get_publisher();
-//     for (int i = 0; i < actions.size(); i++) {
-//         bool sent = action_space.publish_action(actions[i], publisher);
-//         if (sent) {
-//             std::cout<<"msg published \n";
-//         }
-//     }
-// }
-
-
-    // m_state_space.get_or_create_state(libcozmo::statespace::SE2::state(0,0,0));
-	// run planner
-	// Given set of actions, publish it to cozmo sequentially
 
 }  // namespace test
 }  // namespace planner
 }  // namespace libcozmo
 
 int main(int argc, char **argv) {
-    ros::init(argc, argv, "Dijkstra");
     ::testing::InitGoogleTest(&argc, argv);
-    // ros::AsyncSpinner spinner(1);
-    // spinner.start();
     int result = RUN_ALL_TESTS();
-    // spinner.stop();
     return result;
 }

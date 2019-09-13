@@ -29,81 +29,79 @@
 
 #include "planner/Dijkstra.hpp"
 #include <iostream>
-namespace act = libcozmo::actionspace;
-namespace stat = libcozmo::statespace;
-namespace mod = libcozmo::model;
 
 namespace libcozmo {
 namespace planner {
 
-	bool Dijkstra::set_start(const int& start_id) {
-		if (m_state_space->is_valid_state(
+    bool Dijkstra::set_start(const int& start_id) {
+        if (m_state_space->is_valid_state(
                 *m_state_space->get_state(start_id))) {
             m_start_id = start_id;
             return true;    
         }
         return false;
-	}
+    }
 
-	bool Dijkstra::set_goal(const int& goal_id) {
-		if (m_state_space->is_valid_state(
+    bool Dijkstra::set_goal(const int& goal_id) {
+        if (m_state_space->is_valid_state(
                 *m_state_space->get_state(goal_id))) {
             m_goal_id = goal_id;
             return true;
         }
         return false;
-	}
+    }
 
-	bool Dijkstra::solve(std::vector<int>* actions) {
+    bool Dijkstra::solve(std::vector<int>* actions) {
         
         if (m_goal_id == -1 || m_start_id == -1) {
             return false;
         }
         CostMap costmap;
-    	ChildToParentMap child_to_parent_map;
-    	CostMapComparator comparator(costmap);
-    	std::set<int, CostMapComparator> Q(comparator);
-    	std::vector<int> path_ids;
-    	Q.insert(m_start_id);
-    	costmap[m_start_id] = 0;
-    	while (!Q.empty()) {
-	        int curr_state = *(Q.begin());
-	        Q.erase(Q.begin());
-	        Q.erase(curr_state);
-	        if (curr_state  == m_goal_id) {
-            	extract_path(child_to_parent_map, m_start_id, m_goal_id, actions);
+        ChildToParentMap child_to_parent_map;
+        CostMapComparator comparator(costmap);
+        std::set<int, CostMapComparator> Q(comparator);
+        std::vector<int> path_ids;
+        Q.insert(m_start_id);
+        costmap[m_start_id] = 0;
+        int n = 0;
+        int ac = 0;
+        while (!Q.empty()) {
+            int curr_state = *(Q.begin());
+            Q.erase(Q.begin());
+            Q.erase(curr_state);
+            n++;
+            if (curr_state  == m_goal_id ||
+                m_se2->get_distance(
+                    *m_state_space->get_state(curr_state),
+                    *m_state_space->get_state(m_goal_id)) <= m_threshold) {
+                extract_path(child_to_parent_map, m_start_id, m_goal_id, actions);
+                std::cout << "num expansions: " << n << std::endl;
+                std::cout << "actions explored: " << ac << std::endl;
                 return true;
-        	}
+            }
+            statespace::StateSpace::State* state =
+                m_state_space->get_state(curr_state);
 
-            stat::StateSpace::State* state = m_state_space->get_state(curr_state);
+            ac = ac + m_action_space->size();
             for (int i = 0; i < m_action_space->size(); i++) {
-                act::ActionSpace::Action* action = m_action_space->get_action(i);
+                actionspace::ActionSpace::Action* action =
+                    m_action_space->get_action(i);
                 const auto action_ = static_cast<
-                    const act::GenericActionSpace::Action*>(action);
-                const auto state_ = static_cast<const stat::SE2::State*>(state);
-                
-                mod::DeterministicModel::ModelInput input(*action_);
-                mod::DeterministicModel::ModelOutput* output =
-                    static_cast<mod::DeterministicModel::ModelOutput*>(
+                    const actionspace::GenericActionSpace::Action*>(action);
+                const auto state_ =
+                    static_cast<const statespace::SE2::State*>(state);
+                model::DeterministicModel::ModelInput input(*action_);
+                model::DeterministicModel::ModelOutput* output =
+                    static_cast<model::DeterministicModel::ModelOutput*>(
                         m_model->get_prediction(input));
-
-
-// m_state_space->discrete_state_to_continuous(*state_, s);
-//         auto curr_state_isometry = s.getIsometry();
-//         double x = curr_state_isometry.translation()[0] +
-//             output->getX();
-//         double y = curr_state_isometry.translation()[1] +
-//             output->getY();   
-
-//         Eigen::Isometry2d t = Eigen::Isometry2d::Identity();
-//         const Eigen::Rotation2D<double> rot(output->getTheta());
-//         t.linear() = rot.toRotationMatrix();
-//         t.translation() = Eigen::Vector2d(x, y);
-//         s->setIsometry(t);
-
                 aikido::statespace::SE2::State s;
-                Dijkstra::get_succ(state_, &s, output->getX(), output->getY(), output->getTheta());
-                stat::SE2::State succ_state; 
+                Dijkstra::get_succ(
+                    *state_,
+                    &s,
+                    output->getX(),
+                    output->getY(),
+                    output->getTheta());
+                statespace::SE2::State succ_state;
                 m_state_space->continuous_state_to_discrete(s, &succ_state);
                 if (m_state_space->is_valid_state(succ_state)) {
                     int id = m_state_space->get_or_create_state(succ_state);
@@ -111,6 +109,15 @@ namespace planner {
                         m_state_space->get_distance(*state_, succ_state);
                     if (costmap.find(id) == costmap.end() ||
                         costmap[id] > new_cost) {
+
+                        // std::cout << "SUCCESOR NODE: \n";
+                        // std::cout << "ID: " << id << "\n";
+                        // std::cout << "Parent: " << curr_state << "\n";
+                        // std::cout << "  X: " << succ_state.getX() << "\n";
+                        // std::cout << "  Y: " << succ_state.getY() << "\n";
+                        // std::cout << "  Theta: " << succ_state.getTheta() << "\n";
+                        // std::cout << "  Cost: " << new_cost << "\n";
+
                         child_to_parent_map[id] = std::make_pair(curr_state, i);
                         costmap[id] = new_cost;
                         assert(Q.find(curr_state) == Q.end());
@@ -118,31 +125,57 @@ namespace planner {
                         Q.insert(id);
                     }
                 }
+                // add_to_fringe(
+                //     &child_to_parent_map;
+                //     &costmap,
+                //     &Q,
+                //     state_
+                //     succ_state);
             }
-    	}
-    	return false;
-	}
+        }
+        return false;
+    }
+
+    // voidDijkstra::add_to_fringe(
+    //     ChildToParentMap* child_to_parent_map;
+    //     CostMap* costmap,
+    //     std::set<int, CostMapComparator>* Q,
+    //     statespace::SE2::State* state_
+    //     const statespace::SE2::State& succ_state) {
+    //     if (m_state_space->is_valid_state(succ_state)) {
+    //         int id = m_state_space->get_or_create_state(succ_state);
+    //         double new_cost = *costmap[curr_state] +
+    //             m_state_space->get_distance(*state_, succ_state);
+    //         if (costmap->find(id) == costmap->end() ||
+    //             *costmap[id] > new_cost) {
+    //             *child_to_parent_map[id] = std::make_pair(curr_state, i);
+    //             *costmap[id] = new_cost;
+    //             assert(Q->find(curr_state) == Q->end());
+    //             Q->erase(id);
+    //             Q->insert(id);
+    //         }
+    //     }
+    // }
 
     void Dijkstra::get_succ(
-        stat::SE2::State* state_,
+        const statespace::SE2::State& state_,
         aikido::statespace::SE2::State* s,
         const double& x,
         const double& y,
         const double& theta) {
-        m_state_space->discrete_state_to_continuous(*state_, s);
-        auto curr_state_isometry = s.getIsometry();
-        double x = curr_state_isometry.translation()[0] + x;
-        double y = curr_state_isometry.translation()[1] + y;
-
+        m_state_space->discrete_state_to_continuous(state_, s);
+        auto curr_state_isometry = s->getIsometry();
+        double x_ = curr_state_isometry.translation()[0] + x;
+        double y_ = curr_state_isometry.translation()[1] + y;
         Eigen::Isometry2d t = Eigen::Isometry2d::Identity();
-        const Eigen::Rotation2D<double> rot(output->getTheta());
+        const Eigen::Rotation2D<double> rot(theta);
         t.linear() = rot.toRotationMatrix();
-        t.translation() = Eigen::Vector2d(x, y);
+        t.translation() = Eigen::Vector2d(x_, y_);
         s->setIsometry(t);
     }
 
-	void Dijkstra::extract_path(
-		const ChildToParentMap& child_to_parent_map,
+    void Dijkstra::extract_path(
+        const ChildToParentMap& child_to_parent_map,
         const int& start_id,
         const int& goal_id,
         std::vector<int>* path_actions) {

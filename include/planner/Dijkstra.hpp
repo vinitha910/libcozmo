@@ -40,10 +40,7 @@
 #include "model/DeterministicModel.hpp"
 #include "statespace/SE2.hpp"
 #include "actionspace/generic_action_space.hpp"
-
-// namespace act = libcozmo::actionspace;
-// namespace stat = libcozmo::statespace;
-// namespace mod = libcozmo::model;
+#include "distance/SE2.hpp"
 
 namespace libcozmo {
 namespace planner {
@@ -79,26 +76,30 @@ class CostMapComparator {
 /// Transition model output successor state given input state and action.
 class Dijkstra : public virtual Planner {
  public:
- 	Dijkstra(
- 		libcozmo::actionspace::ActionSpace* actionspace,
- 		libcozmo::statespace::StateSpace* statespace,
-        libcozmo::model::Model* model) : \
-     	 m_action_space(actionspace), m_state_space(statespace), m_model(model),
+    Dijkstra(
+        libcozmo::actionspace::ActionSpace* actionspace,
+        libcozmo::statespace::StateSpace* statespace,
+        libcozmo::model::Model* model,
+        distance::Distance* distance,
+        const double& threshold) : \
+         m_action_space(actionspace), m_state_space(statespace), m_model(model),
          m_continuous_statespace(std::make_shared<aikido::statespace::SE2>()),
-        m_distance_metric(aikido::distance::SE2(m_continuous_statespace))  {
+        m_distance_metric(aikido::distance::SE2(m_continuous_statespace)),
+        m_se2(distance),
+        m_threshold(threshold)  {
         m_start_id = -1;
         m_goal_id = -1;
      }
     ~Dijkstra() {}
 
     /// Document inherited
-	bool set_start(const int& start_id) override;
+    bool set_start(const int& start_id) override;
 
     /// Document inherited
-	bool set_goal(const int& goal_id) override;
+    bool set_goal(const int& goal_id) override;
 
     /// Document inherited
-	bool solve(std::vector<
+    bool solve(std::vector<
         int>* actions) override;
 
     /// Extracts sequence of actions from start to goal
@@ -107,32 +108,41 @@ class Dijkstra : public virtual Planner {
     /// \param start_id Starting ID
     /// \param goal_id ID Goal ID
     /// \param[out] path_actions Vector of actions
-	void extract_path(
-		const ChildToParentMap& child_to_parent_map,
+    void extract_path(
+        const ChildToParentMap& child_to_parent_map,
         const int& start_id,
         const int& goal_id,
         std::vector<int> *path_actions);
 
-    void Dijkstra::get_succ(
-        stat::SE2::State* state_,
+    void get_succ(
+        const statespace::SE2::State& state_,
         aikido::statespace::SE2::State* s,
         const double& x,
         const double& y,
         const double& theta);
 
+    // void add_to_fringe(
+    //     ChildToParentMap* child_to_parent_map;
+    //     CostMap* costmap,
+    //     std::set<int, CostMapComparator>* Q,
+    //     statespace::SE2::State* state_
+    //     const statespace::SE2::State& succ_state);
+
  private:
     /// Action Space
- 	libcozmo::actionspace::ActionSpace* m_action_space; 
- 	/// State Space
+    libcozmo::actionspace::ActionSpace* m_action_space; 
+    /// State Space
     libcozmo::statespace::StateSpace* m_state_space;
- 	/// Starting ID
+    /// Starting ID
     int m_start_id;
- 	/// Goal ID
+    /// Goal ID
     int m_goal_id;
     /// Transition model
- 	libcozmo::model::Model* m_model;
+    libcozmo::model::Model* m_model;
     std::shared_ptr<aikido::statespace::SE2> m_continuous_statespace;
     aikido::distance::SE2 m_distance_metric;
+    distance::Distance* m_se2;
+    const double m_threshold;
 };
 
 }  // namespace planner

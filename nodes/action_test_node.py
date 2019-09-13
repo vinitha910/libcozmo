@@ -26,7 +26,7 @@ class CozmoActionNode(object):
 	def callback(self, data):
 		self.heading = data.heading
 		self.duration = data.duration
-		self.speed = data.speed * 10.0
+		self.speed = data.speed
 		print("I heard the following action: heading: %f duration: %f \
 			speed: %f" % (self.heading, self.duration, self.speed))
 		cozmo.run_program(self.move_cozmo)

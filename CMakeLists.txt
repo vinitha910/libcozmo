@@ -56,11 +56,8 @@ add_library(cozmo SHARED
   src/actionspace/ObjectOrientedActionSpace.cpp
   src/actionspace/generic_action_space.cpp
   src/statespace/SE2.cpp
-<<<<<<< HEAD
   src/model/DeterministicModel.cpp
   src/planner/Dijkstra.cpp
-=======
->>>>>>> a7fffa012325937d70466fdf4b5b0938ff1a8d82
   src/distance/SE2.cpp
   src/distance/translation.cpp
   src/distance/orientation.cpp
@@ -111,16 +108,12 @@ target_link_libraries(test_euclidean ${TEST_LIBS})
 catkin_add_gtest(test_linspace tests/utils/test_linspace.cpp)
 target_link_libraries(test_linspace ${TEST_LIBS})
 
-<<<<<<< HEAD
-
 catkin_add_gtest(test_deterministic_model tests/model/test_DeterministicModel.cpp)
 target_link_libraries(test_deterministic_model ${TEST_LIBS})
 
 catkin_add_gtest(test_dijkstra tests/planner/test_Dijkstra.cpp)
 target_link_libraries(test_dijkstra ${TEST_LIBS})
 
-=======
->>>>>>> a7fffa012325937d70466fdf4b5b0938ff1a8d82
 catkin_add_gtest(test_distance tests/distance/test_distance.cpp)
 target_link_libraries(test_distance ${TEST_LIBS})
 
