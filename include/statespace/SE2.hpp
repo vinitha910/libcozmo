@@ -84,7 +84,7 @@ class SE2 : public virtual StateSpace {
 
     /// Constructs a discretized SE2 state space 
     ///
-    /// \param resolution_m Resolution of the environment (m)
+    /// \param resolution_m Resolution of the environment (mm)
     /// \param num_theta_vals Number of discretized theta values; Must be a 
     /// power of 2
     SE2(
@@ -170,16 +170,16 @@ class SE2 : public virtual StateSpace {
     /// \return Discrete angle in [0, num_theta_vals]
     int continuous_angle_to_discrete(const double& theta) const;
 
-    /// Converts discrete position to continuous (x_m, y_m)
+    /// Converts discrete position to continuous (x_mm, y_mm)
     ///
     /// \param position Discrete coordinates
     /// \return Continous coordinates in meters
     Eigen::Vector2d discrete_position_to_continuous(
         const Eigen::Vector2i& position) const;
 
-    /// Converts continuous position (x_m, y_m) to discrete
+    /// Converts continuous position (x_mm, y_mm) to discrete
     ///
-    /// \param position Continuous coordinates in meters
+    /// \param position Continuous coordinates in millimeters
     /// \return Discrete coordinates
     Eigen::Vector2i continuous_position_to_discrete(
         const Eigen::Vector2d& position) const;
@@ -194,7 +194,7 @@ class SE2 : public virtual StateSpace {
     /// Number of discretized theta values
     const int m_num_theta_vals;
 
-    /// Resolution of environment (m)
+    /// Resolution of environment (mm)
     const double m_resolution;
 
     std::shared_ptr<aikido::statespace::SE2> m_statespace;
