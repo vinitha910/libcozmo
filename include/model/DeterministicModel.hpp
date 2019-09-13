@@ -42,46 +42,47 @@ class DeterministicModel : public virtual Model {
  public:
     class ModelType : public Model::ModelType {
      public:
-     	ModelType() {}
+        ModelType() {}
 
-     	~ModelType() = default;
+        ~ModelType() = default;
     };
-	
-	class ModelInput : public Model::ModelInput {
-	 public:
-	 	/// Constructs input with given parameters
-	 	explicit ModelInput(const actionspace::GenericActionSpace::Action& action) : \
-	 		m_action(action) {}
 
-	 	~ModelInput() = default;
+    class ModelInput : public Model::ModelInput {
+     public:
+        /// Constructs input with given parameters
+        explicit ModelInput(
+            const actionspace::GenericActionSpace::Action& action) : \
+            m_action(action) {}
 
-	 	double get_speed() { return m_action.m_speed; }
+        ~ModelInput() = default;
+
+        double get_speed() { return m_action.m_speed; }
         double get_duration() { return m_action.m_duration; }
         double get_heading() { return m_action.m_heading; }
-	 private:
-	 	const actionspace::GenericActionSpace::Action m_action;
+     private:
+        const actionspace::GenericActionSpace::Action m_action;
     };
-	
-	class ModelOutput : public Model::ModelOutput {
-	 public:
-	 	/// Constructs output with given parameters
-	 	ModelOutput(const double& x, const double& y, const double& theta) : \
-	 		m_x(x), m_y(y), m_theta(theta) {}
 
-	 	~ModelOutput() = default;
-	 	double getX() { return m_x; }
+    class ModelOutput : public Model::ModelOutput {
+     public:
+        /// Constructs output with given parameters
+        ModelOutput(const double& x, const double& y, const double& theta) : \
+            m_x(x), m_y(y), m_theta(theta) {}
+
+        ~ModelOutput() = default;
+        double getX() { return m_x; }
         double getY() { return m_y; }
         double getTheta() { return m_theta; }
 
-	 private:
-	 	double m_x;
-	 	double m_y;
+     private:
+        double m_x;
+        double m_y;
         double m_theta;
     };
 
     /// Identitiy constructor, model not taken as argument
     DeterministicModel(): \
-    	m_regressor(nullptr) {}
+        m_regressor(nullptr) {}
     ~DeterministicModel() {}
 
     /// Loads a Model
@@ -97,7 +98,7 @@ class DeterministicModel : public virtual Model {
     Model::ModelOutput* get_prediction(const Model::ModelInput& input) override;
 
  private:
-	Model::ModelType* m_regressor;
+    Model::ModelType* m_regressor;
 };
 
 }  // namespace model

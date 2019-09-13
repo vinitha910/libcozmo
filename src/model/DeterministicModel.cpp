@@ -32,24 +32,24 @@
 namespace libcozmo {
 namespace model {
 
-	bool DeterministicModel::load_model(Model::ModelType* model) {
-		if (model != nullptr) {
-			m_regressor = model;
-			return true;
-		}
-		return false;
-	}
-	Model::ModelOutput* DeterministicModel::get_prediction(
-		const Model::ModelInput& input) {
-		if (m_regressor == nullptr) {
-			return nullptr;
-		}
-		auto input_ = 
-			static_cast<const DeterministicModel::ModelInput&>(input);
-		double distance = input_.get_speed() * input_.get_duration();
-		double angle = input_.get_heading();
-		return new ModelOutput(
-			distance * cos(angle), distance * sin(angle), angle);
-	}
+    bool DeterministicModel::load_model(Model::ModelType* model) {
+        if (model != nullptr) {
+            m_regressor = model;
+            return true;
+        }
+        return false;
+    }
+    Model::ModelOutput* DeterministicModel::get_prediction(
+        const Model::ModelInput& input) {
+        if (m_regressor == nullptr) {
+            return nullptr;
+        }
+        auto input_ =
+            static_cast<const DeterministicModel::ModelInput&>(input);
+        double distance = input_.get_speed() * input_.get_duration();
+        double angle = input_.get_heading();
+        return new ModelOutput(
+            distance * cos(angle), distance * sin(angle), angle);
+    }
 }  // namespace model
 }  // namespace libcozmo
