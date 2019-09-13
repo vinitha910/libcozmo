@@ -37,7 +37,7 @@ namespace planner {
         if (m_state_space->is_valid_state(
                 *m_state_space->get_state(start_id))) {
             m_start_id = start_id;
-            return true;    
+            return true;
         }
         return false;
     }
@@ -52,7 +52,6 @@ namespace planner {
     }
 
     bool Dijkstra::solve(std::vector<int>* actions) {
-        
         if (m_goal_id == -1 || m_start_id == -1) {
             return false;
         }
@@ -64,114 +63,83 @@ namespace planner {
         Q.insert(m_start_id);
         costmap[m_start_id] = 0;
         int n = 0;
-        int ac = 0;
         while (!Q.empty()) {
-            int curr_state = *(Q.begin());
+            int curr_state_id = *(Q.begin());
             Q.erase(Q.begin());
-            Q.erase(curr_state);
+            Q.erase(curr_state_id);
             n++;
-            if (curr_state  == m_goal_id ||
-                m_se2->get_distance(
-                    *m_state_space->get_state(curr_state),
-                    *m_state_space->get_state(m_goal_id)) <= m_threshold) {
-                extract_path(child_to_parent_map, m_start_id, m_goal_id, actions);
+            if (is_goal(curr_state_id)) {
+                extract_path(
+                    child_to_parent_map, m_start_id, m_goal_id, actions);
                 std::cout << "num expansions: " << n << std::endl;
-                std::cout << "actions explored: " << ac << std::endl;
                 return true;
             }
-            statespace::StateSpace::State* state =
-                m_state_space->get_state(curr_state);
-
-            ac = ac + m_action_space->size();
+            statespace::StateSpace::State* curr_state =
+                m_state_space->get_state(curr_state_id);
             for (int i = 0; i < m_action_space->size(); i++) {
                 actionspace::ActionSpace::Action* action =
                     m_action_space->get_action(i);
                 const auto action_ = static_cast<
                     const actionspace::GenericActionSpace::Action*>(action);
-                const auto state_ =
-                    static_cast<const statespace::SE2::State*>(state);
+                const auto curr_state_ =
+                    static_cast<const statespace::SE2::State*>(curr_state);
                 model::DeterministicModel::ModelInput input(*action_);
                 model::DeterministicModel::ModelOutput* output =
                     static_cast<model::DeterministicModel::ModelOutput*>(
                         m_model->get_prediction(input));
-                aikido::statespace::SE2::State s;
+                aikido::statespace::SE2::State succesor_state;
                 Dijkstra::get_succ(
-                    *state_,
-                    &s,
+                    *curr_state_,
+                    &succesor_state,
                     output->getX(),
                     output->getY(),
                     output->getTheta());
-                statespace::SE2::State succ_state;
-                m_state_space->continuous_state_to_discrete(s, &succ_state);
-                if (m_state_space->is_valid_state(succ_state)) {
-                    int id = m_state_space->get_or_create_state(succ_state);
-                    double new_cost = costmap[curr_state] +
-                        m_state_space->get_distance(*state_, succ_state);
+                statespace::SE2::State succesor_state_;
+                m_state_space->continuous_state_to_discrete(
+                    succesor_state, &succesor_state_);
+                if (m_state_space->is_valid_state(succesor_state_)) {
+                    int id =
+                        m_state_space->get_or_create_state(succesor_state_);
+                    double new_cost = costmap[curr_state_id] +
+                        m_state_space->get_distance(
+                            *curr_state_,
+                            succesor_state_);
                     if (costmap.find(id) == costmap.end() ||
                         costmap[id] > new_cost) {
-
-                        // std::cout << "SUCCESOR NODE: \n";
-                        // std::cout << "ID: " << id << "\n";
-                        // std::cout << "Parent: " << curr_state << "\n";
-                        // std::cout << "  X: " << succ_state.getX() << "\n";
-                        // std::cout << "  Y: " << succ_state.getY() << "\n";
-                        // std::cout << "  Theta: " << succ_state.getTheta() << "\n";
-                        // std::cout << "  Cost: " << new_cost << "\n";
-
-                        child_to_parent_map[id] = std::make_pair(curr_state, i);
+                        child_to_parent_map[id] =
+                            std::make_pair(curr_state_id, i);
                         costmap[id] = new_cost;
-                        assert(Q.find(curr_state) == Q.end());
+                        assert(Q.find(curr_state_id) == Q.end());
                         Q.erase(id);
                         Q.insert(id);
                     }
                 }
-                // add_to_fringe(
-                //     &child_to_parent_map;
-                //     &costmap,
-                //     &Q,
-                //     state_
-                //     succ_state);
             }
         }
         return false;
     }
 
-    // voidDijkstra::add_to_fringe(
-    //     ChildToParentMap* child_to_parent_map;
-    //     CostMap* costmap,
-    //     std::set<int, CostMapComparator>* Q,
-    //     statespace::SE2::State* state_
-    //     const statespace::SE2::State& succ_state) {
-    //     if (m_state_space->is_valid_state(succ_state)) {
-    //         int id = m_state_space->get_or_create_state(succ_state);
-    //         double new_cost = *costmap[curr_state] +
-    //             m_state_space->get_distance(*state_, succ_state);
-    //         if (costmap->find(id) == costmap->end() ||
-    //             *costmap[id] > new_cost) {
-    //             *child_to_parent_map[id] = std::make_pair(curr_state, i);
-    //             *costmap[id] = new_cost;
-    //             assert(Q->find(curr_state) == Q->end());
-    //             Q->erase(id);
-    //             Q->insert(id);
-    //         }
-    //     }
-    // }
+    bool Dijkstra::is_goal(int curr_state_id) {
+        return curr_state_id  == m_goal_id || m_se2->get_distance(
+            *m_state_space->get_state(curr_state_id),
+            *m_state_space->get_state(m_goal_id)) <= m_threshold;
+    }
 
     void Dijkstra::get_succ(
         const statespace::SE2::State& state_,
-        aikido::statespace::SE2::State* s,
+        aikido::statespace::SE2::State* succesor,
         const double& x,
         const double& y,
         const double& theta) {
-        m_state_space->discrete_state_to_continuous(state_, s);
-        auto curr_state_isometry = s->getIsometry();
+        m_state_space->discrete_state_to_continuous(state_, succesor);
+        auto curr_state_isometry = succesor->getIsometry();
         double x_ = curr_state_isometry.translation()[0] + x;
         double y_ = curr_state_isometry.translation()[1] + y;
         Eigen::Isometry2d t = Eigen::Isometry2d::Identity();
         const Eigen::Rotation2D<double> rot(theta);
         t.linear() = rot.toRotationMatrix();
         t.translation() = Eigen::Vector2d(x_, y_);
-        s->setIsometry(t);
+        succesor->setIsometry(t);
     }
 
     void Dijkstra::extract_path(

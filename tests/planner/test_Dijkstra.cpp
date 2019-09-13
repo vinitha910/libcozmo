@@ -27,38 +27,34 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <chrono>
 #include <gtest/gtest.h>
 #include "planner/Dijkstra.hpp"
-#include "distance/orientation.hpp"
-#include "distance/translation.hpp"
-
+#include "distance/SE2.hpp"
 
 namespace libcozmo {
 namespace planner {
 namespace test {
 
-
-
-// TEST(DijkstraTest, StartIsGoalTest) {	
-//     /// Checking solver's base case where start is the same as goal
-//     libcozmo::statespace::SE2 state_space(10, 4);
-//     int start = state_space.get_or_create_state(
-//         libcozmo::statespace::SE2::State(0, 0, 0));
-//     libcozmo::actionspace::GenericActionSpace action_space(
-//         std::vector<double>{0.1},
-//         std::vector<double>{0.1},
-//         4);
-//     libcozmo::model::DeterministicModel model;
-//     auto se2 = distance::SE2(std::make_shared<statespace::SE2>(0.1, 4));
-//     model.load_model(new libcozmo::model::DeterministicModel::ModelType(0.1));
-//     libcozmo::planner::Dijkstra m_solver(&action_space, &state_space, &model, se2, 0.01);
-//     std::vector<int> actions;
-//     EXPECT_TRUE(m_solver.set_start(start));
-//     EXPECT_TRUE(m_solver.set_goal(start));
-//     bool solved  = m_solver.solve(&actions);
-//     EXPECT_TRUE(solved);
-// }
+TEST(DijkstraTest, StartIsGoalTest) {
+    /// Checking solver's base case where start is the same as goal
+    libcozmo::statespace::SE2 state_space(10, 4);
+    int start = state_space.get_or_create_state(
+        libcozmo::statespace::SE2::State(0, 0, 0));
+    libcozmo::actionspace::GenericActionSpace action_space(
+        std::vector<double>{0.1},
+        std::vector<double>{0.1},
+        4);
+    libcozmo::model::DeterministicModel model;
+    auto se2 = distance::SE2(std::make_shared<statespace::SE2>(0.1, 4));
+    model.load_model(new libcozmo::model::DeterministicModel::ModelType(0.1));
+    libcozmo::planner::Dijkstra m_solver(
+        &action_space, &state_space, &model, se2, 0.01);
+    std::vector<int> actions;
+    EXPECT_TRUE(m_solver.set_start(start));
+    EXPECT_TRUE(m_solver.set_goal(start));
+    bool solved  = m_solver.solve(&actions);
+    EXPECT_TRUE(solved);
+}
 
 TEST(DijkstraTest, SimpleSolverTestCozmo) {
     /// Checking solver in a medium-sized problem
@@ -66,30 +62,21 @@ TEST(DijkstraTest, SimpleSolverTestCozmo) {
     int start = state_space.get_or_create_state(
         libcozmo::statespace::SE2::State(0, 0, 0));
     int goal = state_space.get_or_create_state(
-        libcozmo::statespace::SE2::State(100,100, 3));
-    // discrete value: 10x is in mm.
+        libcozmo::statespace::SE2::State(100, 100, 3));
     libcozmo::actionspace::GenericActionSpace action_space(
         std::vector<double>{150, 200, 250},
         std::vector<double>{1},
         4);
     libcozmo::model::DeterministicModel model;
     model.load_model(new libcozmo::model::DeterministicModel::ModelType(1));
-    auto distance_metric = distance::SE2(std::make_shared<statespace::SE2>(10, 4));
+    auto distance_metric =
+        distance::SE2(std::make_shared<statespace::SE2>(10, 4));
     libcozmo::planner::Dijkstra m_solver(
         &action_space, &state_space, &model, &distance_metric, 1);
     std::vector<int> actions;
     EXPECT_TRUE(m_solver.set_start(start));
     EXPECT_TRUE(m_solver.set_goal(goal));
-
-    auto start_time = std::chrono::high_resolution_clock::now(); 
-
     bool solved  = m_solver.solve(&actions);
-
-    auto stop = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start_time);
-
-    std::cout<<"NUM ACTIONS "<< actions.size() << "\n";
-    std::cout<<"TIME TAKEN " << duration.count() << "\n";
     EXPECT_TRUE(solved);
 }
 

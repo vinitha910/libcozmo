@@ -60,7 +60,7 @@ class CostMapComparator {
 
     bool operator()(const int& state_1,
                     const int& state_2) const {
-        return cost_map_.find(state_1)->second <= 
+        return cost_map_.find(state_1)->second <=
         cost_map_.find(state_2)->second;
     }
 
@@ -102,6 +102,8 @@ class Dijkstra : public virtual Planner {
     bool solve(std::vector<
         int>* actions) override;
 
+ private:
+
     /// Extracts sequence of actions from start to goal
     ///
     /// \param child_to_parent_map Maps state ID -> (parent ID, action)
@@ -114,23 +116,24 @@ class Dijkstra : public virtual Planner {
         const int& goal_id,
         std::vector<int> *path_actions);
 
+    /// Finds succestor state in continuous space
+    ///
+    /// \param state_ Current state
+    /// \param successor The succesor state
+    /// \param x Delta x
+    /// \param y Delta y
+    /// \param theta Delta theta
     void get_succ(
         const statespace::SE2::State& state_,
-        aikido::statespace::SE2::State* s,
+        aikido::statespace::SE2::State* succesor,
         const double& x,
         const double& y,
         const double& theta);
 
-    // void add_to_fringe(
-    //     ChildToParentMap* child_to_parent_map;
-    //     CostMap* costmap,
-    //     std::set<int, CostMapComparator>* Q,
-    //     statespace::SE2::State* state_
-    //     const statespace::SE2::State& succ_state);
+    bool is_goal(int curr_state_id);
 
- private:
     /// Action Space
-    libcozmo::actionspace::ActionSpace* m_action_space; 
+    libcozmo::actionspace::ActionSpace* m_action_space;
     /// State Space
     libcozmo::statespace::StateSpace* m_state_space;
     /// Starting ID
