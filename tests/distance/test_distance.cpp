@@ -1,5 +1,4 @@
 ////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2019, Vinitha Ranganeni, Brian Lee
 // Copyright (c) 2019, Brian Lee, Vinitha Ranganeni
 // All rights reserved.
 //
