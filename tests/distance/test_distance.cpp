@@ -73,7 +73,7 @@ TEST(DistanceTest, TestOrientation) {
 }
 
 }  // namespace test
-}  // namspace distance
+}  // namespace distance
 }  // namespace libcozmo
 
 int main(int argc, char **argv) {
