@@ -46,9 +46,9 @@ TEST(DijkstraTest, StartIsGoalTest) {
         4);
     libcozmo::model::DeterministicModel model;
     auto se2 = distance::SE2(std::make_shared<statespace::SE2>(0.1, 4));
-    model.load_model(new libcozmo::model::DeterministicModel::ModelType(0.1));
+    model.load_model(new libcozmo::model::DeterministicModel::ModelType());
     libcozmo::planner::Dijkstra m_solver(
-        &action_space, &state_space, &model, se2, 0.01);
+        &action_space, &state_space, &model, &se2, 0.01);
     std::vector<int> actions;
     EXPECT_TRUE(m_solver.set_start(start));
     EXPECT_TRUE(m_solver.set_goal(start));
@@ -68,7 +68,7 @@ TEST(DijkstraTest, SimpleSolverTestCozmo) {
         std::vector<double>{1},
         4);
     libcozmo::model::DeterministicModel model;
-    model.load_model(new libcozmo::model::DeterministicModel::ModelType(1));
+    model.load_model(new libcozmo::model::DeterministicModel::ModelType());
     auto distance_metric =
         distance::SE2(std::make_shared<statespace::SE2>(10, 4));
     libcozmo::planner::Dijkstra m_solver(

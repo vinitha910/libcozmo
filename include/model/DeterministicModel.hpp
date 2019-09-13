@@ -32,10 +32,7 @@
 
 #include <Eigen/Dense>
 #include "model/Model.hpp"
-#include "actionspace/generic_action_space.hpp"
-
-namespace AS = libcozmo::actionspace;
-
+#include "actionspace/GenericActionSpace.hpp"
 namespace libcozmo {
 namespace model {
 
@@ -45,53 +42,47 @@ class DeterministicModel : public virtual Model {
  public:
     class ModelType : public Model::ModelType {
      public:
-     	/// Constructs weight and bias term with given parameters
-     	explicit ModelType(const double& resolution) : \
-            m_resolution(resolution) {}
+        ModelType() {}
 
-     	~ModelType() = default;
-
-        double get_resolution() { return m_resolution; }
-
-     private:
-        double m_resolution;
+        ~ModelType() = default;
     };
-	
-	class ModelInput : public Model::ModelInput {
-	 public:
-	 	/// Constructs input with given parameters
-	 	explicit ModelInput(const AS::GenericActionSpace::Action& action) : \
-	 		m_action(action) {}
 
-	 	~ModelInput() = default;
+    class ModelInput : public Model::ModelInput {
+     public:
+        /// Constructs input with given parameters
+        explicit ModelInput(
+            const actionspace::GenericActionSpace::Action& action) : \
+            m_action(action) {}
 
-	 	double get_speed() { return m_action.m_speed; }
+        ~ModelInput() = default;
+
+        double get_speed() { return m_action.m_speed; }
         double get_duration() { return m_action.m_duration; }
         double get_heading() { return m_action.m_heading; }
-	 private:
-	 	const AS::GenericActionSpace::Action m_action;
+     private:
+        const actionspace::GenericActionSpace::Action m_action;
     };
-	
-	class ModelOutput : public Model::ModelOutput {
-	 public:
-	 	/// Constructs output with given parameters
-	 	ModelOutput(const double& x, const double& y, const double& theta) : \
-	 		m_x(x), m_y(y), m_theta(theta) {}
 
-	 	~ModelOutput() = default;
-	 	double getX() { return m_x; }
+    class ModelOutput : public Model::ModelOutput {
+     public:
+        /// Constructs output with given parameters
+        ModelOutput(const double& x, const double& y, const double& theta) : \
+            m_x(x), m_y(y), m_theta(theta) {}
+
+        ~ModelOutput() = default;
+        double getX() { return m_x; }
         double getY() { return m_y; }
         double getTheta() { return m_theta; }
 
-	 private:
-	 	double m_x;
-	 	double m_y;
+     private:
+        double m_x;
+        double m_y;
         double m_theta;
     };
 
     /// Identitiy constructor, model not taken as argument
     DeterministicModel(): \
-    	m_regressor(nullptr) {}
+        m_regressor(nullptr) {}
     ~DeterministicModel() {}
 
     /// Loads a Model
@@ -107,7 +98,7 @@ class DeterministicModel : public virtual Model {
     Model::ModelOutput* get_prediction(const Model::ModelInput& input) override;
 
  private:
-	Model::ModelType* m_regressor;
+    Model::ModelType* m_regressor;
 };
 
 }  // namespace model

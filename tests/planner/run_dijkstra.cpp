@@ -43,7 +43,7 @@ int main(int argc, char* argv[]) {
         std::vector<double>{1},
         4);
     libcozmo::model::DeterministicModel model;
-    model.load_model(new libcozmo::model::DeterministicModel::ModelType(1));
+    model.load_model(new libcozmo::model::DeterministicModel::ModelType());
     auto distance_metric =
         libcozmo::distance::SE2(
             std::make_shared<libcozmo::statespace::SE2>(10, 4));

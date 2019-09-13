@@ -88,7 +88,7 @@ namespace planner {
                     static_cast<model::DeterministicModel::ModelOutput*>(
                         m_model->get_prediction(input));
                 aikido::statespace::SE2::State succesor_state;
-                Dijkstra::get_succ(
+                get_succ(
                     *curr_state_,
                     &succesor_state,
                     output->getX(),
@@ -96,7 +96,7 @@ namespace planner {
                     output->getTheta());
                 statespace::SE2::State succesor_state_;
                 m_state_space->continuous_state_to_discrete(
-                    succesor_state, &succesor_state_);
+                    succesor_state, &succesor_state_);                
                 if (m_state_space->is_valid_state(succesor_state_)) {
                     int id =
                         m_state_space->get_or_create_state(succesor_state_);
@@ -119,7 +119,7 @@ namespace planner {
         return false;
     }
 
-    bool Dijkstra::is_goal(int curr_state_id) {
+    bool Dijkstra::is_goal(const int& curr_state_id) {
         return curr_state_id  == m_goal_id || m_se2->get_distance(
             *m_state_space->get_state(curr_state_id),
             *m_state_space->get_state(m_goal_id)) <= m_threshold;
@@ -157,6 +157,31 @@ namespace planner {
         }
         std::reverse(path_actions->begin(), path_actions->end());
     }
+
+    // void Dijkstra::add_to_fringe(
+    //     statespace::SE2::State succesor_state_,
+    //     CostMap costmap,
+    //     ChildToParentMap child_to_parent_map,
+    //     std::set<int, CostMapComparator> Q,
+    //     int curr_state_id) {
+    //     if (m_state_space->is_valid_state(succesor_state_)) {
+    //         int id =
+    //             m_state_space->get_or_create_state(succesor_state_);
+    //         double new_cost = costmap[curr_state_id] +
+    //             m_state_space->get_distance(
+    //                 *curr_state_,
+    //                 succesor_state_);
+    //         if (costmap.find(id) == costmap.end() ||
+    //             costmap[id] > new_cost) {
+    //             child_to_parent_map[id] =
+    //                 std::make_pair(curr_state_id, i);
+    //             costmap[id] = new_cost;
+    //             assert(Q.find(curr_state_id) == Q.end());
+    //             Q.erase(id);
+    //             Q.insert(id);
+    //         }
+    //     }
+    // }
 
 }  // namespace planner
 }  // namespace libcozmo

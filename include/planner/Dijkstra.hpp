@@ -39,7 +39,6 @@
 #include "planner/Planner.hpp"
 #include "model/DeterministicModel.hpp"
 #include "statespace/SE2.hpp"
-#include "actionspace/generic_action_space.hpp"
 #include "distance/SE2.hpp"
 
 namespace libcozmo {
@@ -130,7 +129,18 @@ class Dijkstra : public virtual Planner {
         const double& y,
         const double& theta);
 
-    bool is_goal(int curr_state_id);
+    /// Check whether goal condition is met
+    ///
+    /// \param curr_state_id The ID of current state
+    /// \return True if goal is met; false otherwise 
+    bool is_goal(const int& curr_state_id);
+
+    void add_to_fringe(
+        statespace::SE2::State succesor_state_,
+        CostMap costmap,
+        ChildToParentMap child_to_parent_map,
+        std::set<int, CostMapComparator> Q,
+        int curr_state_id);
 
     /// Action Space
     libcozmo::actionspace::ActionSpace* m_action_space;

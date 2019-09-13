@@ -54,7 +54,7 @@ include_directories(
 add_library(cozmo SHARED
   src/cozmo_description/cozmo.cpp
   src/actionspace/ObjectOrientedActionSpace.cpp
-  src/actionspace/generic_action_space.cpp
+  src/actionspace/GenericActionSpace.cpp
   src/statespace/SE2.cpp
   src/model/DeterministicModel.cpp
   src/planner/Dijkstra.cpp

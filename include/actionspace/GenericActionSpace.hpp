@@ -55,7 +55,7 @@ class GenericActionSpace : public virtual ActionSpace {
      public:
         /// Constructor
 
-        /// \param speed The speed of action (m/s)
+        /// \param speed The speed of action (mm/s)
         /// \param duration The duration of action (s)
         /// \param heading The heading of action (radians)
         explicit Action(
@@ -66,7 +66,7 @@ class GenericActionSpace : public virtual ActionSpace {
             m_duration(duration),
             m_heading(heading) {}
 
-        /// Speed of action (m/s)
+        /// Speed of action (mm/s)
         const double m_speed;
 
         /// Duration of action (s)
