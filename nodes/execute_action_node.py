@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
 
-"""
-This node implements ROS to receive a sequence of actions from a solver,
-and then passes it to Cozmo SDK to execute them.
-"""
 import time
 import rospy
 from libcozmo.msg import ActionMsg
@@ -11,12 +7,19 @@ import cozmo
 from cozmo.util import radians
 
 class CozmoActionNode(object):
+	""" ROS node to execute actions on Cozmo
+
+	This node implements ROS to receive a sequence of actions from the solver,
+	and processes them to the Cozmo SDK for the robot to execute.
+
+	Attributes:
+		subscriber: ROS subscriber node
+		heading: Heading of action (radians)
+		duraton: Duration of action (seconds)
+		speed: Speed of action (millimiters/second)
 	"""
-    A Cozmo node class that contains the following topics:
-    forklift_position, head_position, pose, camera, imu
-    """
 	def __init__(self):
-		
+		"""Constructs subscriber for receiving action messages"""
 		self.subscriber = rospy.Subscriber( \
 			"Action", ActionMsg, self.callback, queue_size = 10)
 		rospy.spin()

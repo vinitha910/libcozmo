@@ -37,7 +37,7 @@ namespace libcozmo {
 namespace model {
 
 /// Generic model to predict Cozmo's movement
-/// Given action, delta x, y, theta is calculated
+/// Given action, distance and dtheta is calculated
 class DeterministicModel : public virtual Model {
  public:
     class ModelType : public Model::ModelType {

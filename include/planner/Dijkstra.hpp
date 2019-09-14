@@ -9,7 +9,7 @@
 //        this list of conditions and the following disclaimer.
 //     2. Redistributions in binary form must reproduce the above copyright
 //        notice, this list of conditions and the following disclaimer in the
-//        documentation and/or other materials provided with the distribution.
+//        Documentationation and/or other materials provided with the distribution.
 //     3. Neither the name of the copyright holder nor the names of its
 //        contributors may be used to endorse or promote products derived from
 //        this software without specific prior written permission.
@@ -89,13 +89,13 @@ class Dijkstra : public virtual Planner {
      }
     ~Dijkstra() {}
 
-    /// Document inherited
+    /// Documentation inherited
     bool set_start(const int& start_id) override;
 
-    /// Document inherited
+    /// Documentation inherited
     bool set_goal(const int& goal_id) override;
 
-    /// Document inherited
+    /// Documentation inherited
     bool solve(std::vector<
         int>* actions) override;
 
@@ -115,10 +115,10 @@ class Dijkstra : public virtual Planner {
     /// Finds succestor state in continuous space
     ///
     /// \param state_ Current state
-    /// \param successor The succesor state
     /// \param x Delta x
     /// \param y Delta y
     /// \param theta Delta theta
+    /// \param[out] successor The succesor state
     void get_succ(
         const statespace::SE2::State& state_,
         aikido::statespace::SE2::State* succesor,
@@ -126,21 +126,17 @@ class Dijkstra : public virtual Planner {
         const double& y,
         const double& theta);
 
-    /// Check whether goal condition is met
+    /// Check whether the solver has reached the goal
+    /// Goal definition depend on distance metric and threshold
     ///
     /// \param curr_state_id The ID of current state
-    /// \return True if goal is met; false otherwise
+    /// \return True if goal condition is met; false otherwise
     bool is_goal(const int& curr_state_id);
 
-    /// Action Space
     libcozmo::actionspace::ActionSpace* m_action_space;
-    /// State Space
     libcozmo::statespace::StateSpace* m_state_space;
-    /// Starting ID
     int m_start_id;
-    /// Goal ID
     int m_goal_id;
-    /// Transition model
     libcozmo::model::Model* m_model;
     std::shared_ptr<aikido::statespace::SE2> m_continuous_statespace;
     aikido::distance::SE2 m_distance_metric;
