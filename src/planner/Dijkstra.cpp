@@ -62,28 +62,25 @@ namespace planner {
         std::vector<int> path_ids;
         Q.insert(m_start_id);
         costmap[m_start_id] = 0;
-        int n = 0;
         while (!Q.empty()) {
             int curr_state_id = *(Q.begin());
             Q.erase(Q.begin());
             Q.erase(curr_state_id);
-            n++;
             if (is_goal(curr_state_id)) {
                 extract_path(
                     child_to_parent_map, m_start_id, m_goal_id, actions);
-                std::cout << "num expansions: " << n << std::endl;
                 return true;
             }
-            statespace::StateSpace::State* curr_state =
+            const statespace::StateSpace::State* curr_state =
                 m_state_space->get_state(curr_state_id);
             for (int i = 0; i < m_action_space->size(); i++) {
-                actionspace::ActionSpace::Action* action =
+                const actionspace::ActionSpace::Action* action =
                     m_action_space->get_action(i);
                 const auto action_ = static_cast<
                     const actionspace::GenericActionSpace::Action*>(action);
                 const auto curr_state_ =
                     static_cast<const statespace::SE2::State*>(curr_state);
-                model::DeterministicModel::ModelInput input(*action_);
+                const model::DeterministicModel::ModelInput input(*action_);
                 model::DeterministicModel::ModelOutput* output =
                     static_cast<model::DeterministicModel::ModelOutput*>(
                         m_model->get_prediction(input));
@@ -96,22 +93,22 @@ namespace planner {
                     output->getTheta());
                 statespace::SE2::State succesor_state_;
                 m_state_space->continuous_state_to_discrete(
-                    succesor_state, &succesor_state_);                
+                    succesor_state, &succesor_state_);
                 if (m_state_space->is_valid_state(succesor_state_)) {
-                    int id =
+                    const int succesor_id =
                         m_state_space->get_or_create_state(succesor_state_);
-                    double new_cost = costmap[curr_state_id] +
+                    const double new_cost = costmap[curr_state_id] +
                         m_state_space->get_distance(
                             *curr_state_,
                             succesor_state_);
-                    if (costmap.find(id) == costmap.end() ||
-                        costmap[id] > new_cost) {
-                        child_to_parent_map[id] =
+                    if (costmap.find(succesor_id) == costmap.end() ||
+                        costmap[succesor_id] > new_cost) {
+                        child_to_parent_map[succesor_id] =
                             std::make_pair(curr_state_id, i);
-                        costmap[id] = new_cost;
+                        costmap[succesor_id] = new_cost;
                         assert(Q.find(curr_state_id) == Q.end());
-                        Q.erase(id);
-                        Q.insert(id);
+                        Q.erase(succesor_id);
+                        Q.insert(succesor_id);
                     }
                 }
             }
@@ -157,31 +154,6 @@ namespace planner {
         }
         std::reverse(path_actions->begin(), path_actions->end());
     }
-
-    // void Dijkstra::add_to_fringe(
-    //     statespace::SE2::State succesor_state_,
-    //     CostMap costmap,
-    //     ChildToParentMap child_to_parent_map,
-    //     std::set<int, CostMapComparator> Q,
-    //     int curr_state_id) {
-    //     if (m_state_space->is_valid_state(succesor_state_)) {
-    //         int id =
-    //             m_state_space->get_or_create_state(succesor_state_);
-    //         double new_cost = costmap[curr_state_id] +
-    //             m_state_space->get_distance(
-    //                 *curr_state_,
-    //                 succesor_state_);
-    //         if (costmap.find(id) == costmap.end() ||
-    //             costmap[id] > new_cost) {
-    //             child_to_parent_map[id] =
-    //                 std::make_pair(curr_state_id, i);
-    //             costmap[id] = new_cost;
-    //             assert(Q.find(curr_state_id) == Q.end());
-    //             Q.erase(id);
-    //             Q.insert(id);
-    //         }
-    //     }
-    // }
 
 }  // namespace planner
 }  // namespace libcozmo

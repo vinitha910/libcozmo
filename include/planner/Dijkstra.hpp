@@ -33,13 +33,11 @@
 #include <ros/ros.h>
 #include <utility>
 #include <unordered_map>
-#include "actionspace/ActionSpace.hpp"
-#include "statespace/StateSpace.hpp"
-#include "model/Model.hpp"
-#include "planner/Planner.hpp"
-#include "model/DeterministicModel.hpp"
+#include "actionspace/GenericActionSpace.hpp"
 #include "statespace/SE2.hpp"
-#include "distance/SE2.hpp"
+#include "model/DeterministicModel.hpp"
+#include "planner/Planner.hpp"
+#include "distance/distance.hpp"
 
 namespace libcozmo {
 namespace planner {
@@ -102,7 +100,6 @@ class Dijkstra : public virtual Planner {
         int>* actions) override;
 
  private:
-
     /// Extracts sequence of actions from start to goal
     ///
     /// \param child_to_parent_map Maps state ID -> (parent ID, action)
@@ -132,15 +129,8 @@ class Dijkstra : public virtual Planner {
     /// Check whether goal condition is met
     ///
     /// \param curr_state_id The ID of current state
-    /// \return True if goal is met; false otherwise 
+    /// \return True if goal is met; false otherwise
     bool is_goal(const int& curr_state_id);
-
-    void add_to_fringe(
-        statespace::SE2::State succesor_state_,
-        CostMap costmap,
-        ChildToParentMap child_to_parent_map,
-        std::set<int, CostMapComparator> Q,
-        int curr_state_id);
 
     /// Action Space
     libcozmo::actionspace::ActionSpace* m_action_space;
