@@ -66,25 +66,35 @@ void SE2::discrete_state_to_continuous(
     const StateSpace::State& _state,
     aikido::statespace::StateSpace::State* _continuous_state) const {
     const State state = static_cast<const State&>(_state);
-    
-    Eigen::VectorXd state_log(3);
+    Eigen::Vector3d state_log;
     state_log.head<2>() =
         discrete_position_to_continuous(Eigen::Vector2i(state.x, state.y));
     state_log[2] =
         discrete_angle_to_continuous(state.theta);
-    m_statespace->expMap(state_log, _continuous_state);
+    double angle = state_log(2);
+    Eigen::Vector2d translation = state_log.head<2>();
+    Eigen::Isometry2d transform(Eigen::Isometry2d::Identity());
+    transform.linear() = Eigen::Rotation2Dd(angle).matrix();
+    transform.translation() = translation;
+    aikido::statespace::SE2::State* se2_continuous_state =
+        static_cast<aikido::statespace::SE2::State*>(_continuous_state);
+    se2_continuous_state->setIsometry(transform);
+    _continuous_state = se2_continuous_state;
 }
 
 void SE2::continuous_state_to_discrete(
     const aikido::statespace::StateSpace::State& _state, 
     StateSpace::State* _discrete_state) const {
-    Eigen::VectorXd log_state;
-    m_statespace->logMap(&_state, log_state);
-
+    Eigen::Vector3d log_state;
+    auto se2_state = static_cast<const aikido::statespace::SE2::State&>(_state);
+    Eigen::Isometry2d transform = se2_state.getIsometry();
+    log_state.head<2>() = transform.translation();
+    Eigen::Rotation2Dd rotation = Eigen::Rotation2Dd::Identity();
+    rotation.fromRotationMatrix(transform.rotation());
+    log_state[2] = rotation.angle();
     const Eigen::Vector2i position = 
         continuous_position_to_discrete(log_state.head<2>());
     const int theta = continuous_angle_to_discrete(log_state[2]);
-    
     State* discrete_state = static_cast<State*>(_discrete_state);
     *discrete_state = State(position.x(), position.y(), theta);
 }
@@ -151,7 +161,6 @@ StateSpace::State* SE2::create_state() {
 }
 
 double SE2::normalize_angle_rad(const double& theta_rad) const {
-    assert(m_bins % 2 == 0);
     double normalized_theta_rad = theta_rad;
     if (abs(theta_rad) > 2.0 * M_PI) {
         normalized_theta_rad = normalized_theta_rad -
