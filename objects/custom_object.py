@@ -63,11 +63,16 @@ def look_for_object(robot: cozmo.robot):
 def cozmo_thread(pub, cozmo):
     while not rospy.is_shutdown():
         publish_cozmo(pub, cozmo)
+        rospy.sleep(0.001)
 
 
 def cozmo_run(robot: cozmo.robot):
     cozmo_publisher = rospy.Publisher('cozmo_marker', Marker, queue_size=10)
     object_publisher = rospy.Publisher('object_marker', Marker, queue_size=10)
+
+    # Can't set attribute
+    #reset_pose = pose_z_angle(0, 0, 0, radians(0))
+    #robot.pose = reset_pose
 
     t = threading.Thread(target=cozmo_thread, args=(cozmo_publisher, robot))
     t.start()
@@ -75,9 +80,9 @@ def cozmo_run(robot: cozmo.robot):
     while not rospy.is_shutdown():
         custom_obj = look_for_object(robot)
 
-        #publish_cozmo(cozmo_publisher, robot)
+        publish_cozmo(cozmo_publisher, robot)
         publish_object(object_publisher, custom_obj)
-        rospy.sleep(0.1)
+        rospy.sleep(0.001)
         
         robot.go_to_pose(pose_z_angle(custom_obj.pose[0], custom_obj.pose[1], 0, radians(custom_obj.pose[2]))).wait_for_completed()
         robot.drive_straight(distance_mm(-100), speed_mmps(100)).wait_for_completed()
@@ -113,15 +118,15 @@ def publish_object(pub, custom_obj):
     box_marker.pose.position.y = custom_obj.pose[1] / 100.0
     box_marker.pose.position.z = 1 / 100.0
     # Add 90 degrees since cozmo front is x-axis
-    box_orientation = angle_z_to_quaternion(radians(custom_obj.pose[2] + math.pi / 2))
+    box_orientation = angle_z_to_quaternion(radians(custom_obj.pose[2]))
     print(box_orientation)
     box_marker.pose.orientation.x = box_orientation[1]
     box_marker.pose.orientation.y = box_orientation[2]
     box_marker.pose.orientation.z = box_orientation[3]
     box_marker.pose.orientation.w = box_orientation[0]
 
-    box_marker.scale.x = custom_obj.length / 100.0
-    box_marker.scale.y = custom_obj.width / 100.0
+    box_marker.scale.x = custom_obj.width / 100.0
+    box_marker.scale.y = custom_obj.length / 100.0
     box_marker.scale.z = custom_obj.width / 100.0
     box_marker.color.r = 0.0
     box_marker.color.g = 0.5
