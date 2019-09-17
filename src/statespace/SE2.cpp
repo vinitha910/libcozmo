@@ -65,36 +65,27 @@ int SE2::get_or_create_state(
 void SE2::discrete_state_to_continuous(
     const StateSpace::State& _state,
     aikido::statespace::StateSpace::State* _continuous_state) const {
-    const State state = static_cast<const State&>(_state);
-    Eigen::Vector3d state_log;
-    state_log.head<2>() =
-        discrete_position_to_continuous(Eigen::Vector2i(state.x, state.y));
-    state_log[2] =
-        discrete_angle_to_continuous(state.theta);
-    double angle = state_log(2);
-    Eigen::Vector2d translation = state_log.head<2>();
+    const State state = static_cast<const State&>(_state);   
+    const double angle = discrete_angle_to_continuous(state.theta);
     Eigen::Isometry2d transform(Eigen::Isometry2d::Identity());
     transform.linear() = Eigen::Rotation2Dd(angle).matrix();
-    transform.translation() = translation;
-    aikido::statespace::SE2::State* se2_continuous_state =
+    transform.translation() =
+        discrete_position_to_continuous(Eigen::Vector2i(state.x, state.y));
+    aikido::statespace::SE2::State* continuous_state =
         static_cast<aikido::statespace::SE2::State*>(_continuous_state);
-    se2_continuous_state->setIsometry(transform);
-    _continuous_state = se2_continuous_state;
+    continuous_state->setIsometry(transform);
 }
 
 void SE2::continuous_state_to_discrete(
     const aikido::statespace::StateSpace::State& _state, 
     StateSpace::State* _discrete_state) const {
-    Eigen::Vector3d log_state;
     auto se2_state = static_cast<const aikido::statespace::SE2::State&>(_state);
     Eigen::Isometry2d transform = se2_state.getIsometry();
-    log_state.head<2>() = transform.translation();
     Eigen::Rotation2Dd rotation = Eigen::Rotation2Dd::Identity();
     rotation.fromRotationMatrix(transform.rotation());
-    log_state[2] = rotation.angle();
     const Eigen::Vector2i position = 
-        continuous_position_to_discrete(log_state.head<2>());
-    const int theta = continuous_angle_to_discrete(log_state[2]);
+        continuous_position_to_discrete(transform.translation());
+    const int theta = continuous_angle_to_discrete(rotation.angle());
     State* discrete_state = static_cast<State*>(_discrete_state);
     *discrete_state = State(position.x(), position.y(), theta);
 }
