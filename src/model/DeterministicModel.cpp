@@ -34,14 +34,14 @@ namespace model {
 
     bool DeterministicModel::load_model(Model::ModelType* model) {
         if (model != nullptr) {
-            m_regressor = model;
+            m_model = model;
             return true;
         }
         return false;
     }
     Model::ModelOutput* DeterministicModel::get_prediction(
         const Model::ModelInput& input) {
-        if (m_regressor == nullptr) {
+        if (m_model == nullptr) {
             return nullptr;
         }
         auto input_ =

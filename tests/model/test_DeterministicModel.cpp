@@ -40,10 +40,6 @@ class DeterministicModelTest: public ::testing::Test {
         m_type(),
         m_model() {}
 
-    void SetUp() {}
-
-    void TearDown() {}
-
     ~DeterministicModelTest() {}
 
     bool load_model() {
@@ -54,13 +50,11 @@ class DeterministicModelTest: public ::testing::Test {
     DeterministicModel::ModelType m_type;
 };
 
-/// Check that model without anything loaded simply handles nullptr,
-/// and that Lin Reg weights & bias are updated correctly
+/// Check that model without anything loaded simply handles nullptr
 TEST_F(DeterministicModelTest, LoadModelTest) {
     DeterministicModel::ModelInput input = DeterministicModel::ModelInput(
         actionspace::GenericActionSpace::Action(0, 0, 0));
     EXPECT_TRUE(m_model.get_prediction(input) == nullptr);
-    EXPECT_TRUE(load_model());
 }
 
 /// Check that model outputs correct delta values for each action

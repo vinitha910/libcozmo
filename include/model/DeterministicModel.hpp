@@ -36,7 +36,12 @@
 namespace libcozmo {
 namespace model {
 
-/// Generic model to predict Cozmo's movement
+/// Deterministic model to predict Cozmo's movement
+///
+/// Delta state calculated by calculating predicted change in cozmo's position
+/// via distance change in x,y respectively, with its new heading predicted as
+/// the heading of given action
+///
 /// Given action, delta x, y, theta is calculated
 class DeterministicModel : public virtual Model {
  public:
@@ -80,25 +85,18 @@ class DeterministicModel : public virtual Model {
         double m_theta;
     };
 
-    /// Identitiy constructor, model not taken as argument
-    DeterministicModel(): \
-        m_regressor(nullptr) {}
+    /// Identitiy constructor
+    DeterministicModel(): m_model(nullptr) {}
     ~DeterministicModel() {}
 
-    /// Loads a Model
-    ///
-    /// \param model The regression model
-    /// \return true if succesfully loaded; false otherwise
+    /// Documentation inherited
     bool load_model(Model::ModelType* model) override;
 
-    /// Predict delta state given action
-    ///
-    /// \param input The model input
-    /// \return delta state (distance, dtheta)
+    /// Documentation inherited
     Model::ModelOutput* get_prediction(const Model::ModelInput& input) override;
 
  private:
-    Model::ModelType* m_regressor;
+    Model::ModelType* m_model;
 };
 
 }  // namespace model
