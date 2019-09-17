@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2019, Vinitha Ranganeni, Brian Lee, Eric Pan
+// Copyright (c) 2019,  Brian Lee, Vinitha Ranganeni
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -27,42 +27,60 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef COZMO_UTILS_HPP_
-#define COZMO_UTILS_HPP_
-
-#include <vector>
-#include <cmath>
+#include <actionspace/GenericActionSpace.hpp>
+#include <exception>
+#include <iostream>
 
 namespace libcozmo {
-namespace utils {
+namespace actionspace {
 
-// https://gist.github.com/lorenzoriano/5414671
-template <typename T>
-std::vector<T> linspace(T a, T b, std::size_t N) {
-    T h = (b - a) / static_cast<T>(N-1);
-    std::vector<T> xs(N);
-    typename std::vector<T>::iterator x;
-    T val;
-    for (x = xs.begin(), val = a; x != xs.end(); ++x, val += h)
-        *x = val;
-    return xs;
-}
-
-template <typename T>
-double euclidean_distance(T a, T b) {
-    double distance = 0;
-    for (int i = 0; i < a.size(); i++) {
-        distance = distance + pow((a[i] - b[i]), 2);
+bool GenericActionSpace::action_similarity(
+    const int& action_id1, const int& action_id2, double* similarity) const {
+    if (!(is_valid_action_id(action_id1) && is_valid_action_id(action_id2))) {
+        return false;
     }
-    return sqrt(distance);
+
+    Action* action1 = m_actions[action_id1];
+    Action* action2 = m_actions[action_id2];
+    std::vector<double> action1_vector{
+        action1->m_speed,
+        action1->m_duration,
+        action1->m_heading};
+    std::vector<double> action2_vector{
+        action2->m_speed,
+        action2->m_duration,
+        action2->m_heading};
+    *similarity = utils::euclidean_distance(action1_vector, action2_vector);
+    return true;
 }
 
-template <typename T>
-double angle_normalization(T angle) {
-    return angle - 2.0 * M_PI * floor(angle / (2.0 * M_PI));
+int GenericActionSpace::size() const {
+    return m_actions.size();
 }
 
-}  //  namespace utils
-}  //  namespace libcozmo
+ActionSpace::Action* GenericActionSpace::get_action(const int& action_id) const {
+    if (!is_valid_action_id(action_id)) {
+        return nullptr;
+    }
+    return m_actions[action_id];
+}
 
-#endif  // COZMO_UTILS_HPP_
+bool GenericActionSpace::is_valid_action_id(const int& action_id) const {
+    return ((action_id < m_actions.size() && action_id >= 0));
+}
+
+bool GenericActionSpace::publish_action(
+    const int& action_id, const ros::Publisher& publisher) const {
+    libcozmo::ActionMsg msg;
+    Action* action = static_cast<Action*>(get_action(action_id));
+    if (action == nullptr) {
+        return false;
+    }
+    msg.speed = action->m_speed;
+    msg.heading = action->m_heading;
+    msg.duration = action->m_duration;
+    publisher.publish(msg);
+    return true;
+}
+}  // namespace actionspace
+}  // namespace libcozmo

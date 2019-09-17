@@ -29,7 +29,7 @@
 
 #include <gtest/gtest.h>
 #include <iostream>
-#include "actionspace/generic_action_space.hpp"
+#include "actionspace/GenericActionSpace.hpp"
 
 class GenericActionFixture: public ::testing::Test {
  public:
