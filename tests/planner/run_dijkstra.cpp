@@ -37,7 +37,7 @@ int main(int argc, char* argv[]) {
     int start = state_space.get_or_create_state(
     libcozmo::statespace::SE2::State(0, 0, 0));
     int goal = state_space.get_or_create_state(
-    libcozmo::statespace::SE2::State(100, 100, 3));
+    libcozmo::statespace::SE2::State(300, 300, 3));
     libcozmo::actionspace::GenericActionSpace action_space(
         std::vector<double>{150, 200, 250},
         std::vector<double>{1},
