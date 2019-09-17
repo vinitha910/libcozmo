@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2019,  Brian Lee, Vinitha Ranganeni
+// Copyright (c) 2019, Brian Lee, Vinitha Ranganeni
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -27,60 +27,39 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <actionspace/generic_action_space.hpp>
-#include <exception>
 #include <iostream>
+#include "distance/orientation.hpp"
+#include "statespace/SE2.hpp"
+#include "utils/utils.hpp"
 
 namespace libcozmo {
-namespace actionspace {
+namespace distance {
 
-bool GenericActionSpace::action_similarity(
-    const int& action_id1, const int& action_id2, double* similarity) const {
-    if (!(is_valid_action_id(action_id1) && is_valid_action_id(action_id2))) {
-        return false;
+    Orientation::Orientation(const std::shared_ptr<statespace::SE2> statespace)
+        : m_statespace(statespace) {
+        if (m_statespace == nullptr) {
+            throw std::invalid_argument("statespace is a nullptr.");
+        }
     }
 
-    Action* action1 = m_actions[action_id1];
-    Action* action2 = m_actions[action_id2];
-    std::vector<double> action1_vector{
-        action1->m_speed,
-        action1->m_duration,
-        action1->m_heading};
-    std::vector<double> action2_vector{
-        action2->m_speed,
-        action2->m_duration,
-        action2->m_heading};
-    *similarity = utils::euclidean_distance(action1_vector, action2_vector);
-    return true;
-}
-
-int GenericActionSpace::size() const {
-    return m_actions.size();
-}
-
-ActionSpace::Action* GenericActionSpace::get_action(const int& action_id) const {
-    if (!is_valid_action_id(action_id)) {
-        return nullptr;
+    double Orientation::get_distance(
+        const libcozmo::statespace::StateSpace::State& _state_1,
+        const libcozmo::statespace::StateSpace::State& _state_2) const {
+        aikido::statespace::SE2::State continuous_state_1;
+        m_statespace->
+            discrete_state_to_continuous(_state_1, &continuous_state_1);
+        aikido::statespace::SE2::State continuous_state_2;
+        m_statespace->
+            discrete_state_to_continuous(_state_2, &continuous_state_2);
+        Eigen::Rotation2Dd rotation_1 = Eigen::Rotation2Dd::Identity();
+        Eigen::Rotation2Dd rotation_2 = Eigen::Rotation2Dd::Identity();
+        rotation_1.fromRotationMatrix(
+            continuous_state_1.getIsometry().rotation());
+        rotation_2.fromRotationMatrix(
+            continuous_state_2.getIsometry().rotation());
+        return utils::angle_normalization(
+            std::abs(rotation_1.angle() - rotation_2.angle()));
     }
-    return m_actions[action_id];
-}
 
-bool GenericActionSpace::is_valid_action_id(const int& action_id) const {
-    return ((action_id < m_actions.size() && action_id >= 0));
-}
-
-bool GenericActionSpace::publish_action(
-    const int& action_id, const ros::Publisher& publisher) const {
-    libcozmo::ActionMsg msg;
-    Action* action = static_cast<Action*>(get_action(action_id));
-    if (action == nullptr) {
-        return false;
-    }
-    msg.speed = action->m_speed;
-    msg.heading = action->m_heading;
-    msg.duration = action->m_duration;
-    publisher.publish(msg);
-    return true;
-}
-}  // namespace actionspace
+}  // namespace distance
 }  // namespace libcozmo

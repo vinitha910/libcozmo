@@ -149,6 +149,11 @@ TEST_F(SE2StatespaceTest, CopyState) {
     EXPECT_EQ(1, dest.getTheta());    
 }
 
+TEST_F(SE2StatespaceTest, GetResolution) {
+    double resolution = statespace.get_resolution();
+    EXPECT_NEAR(0.1, resolution, 0.0001);
+}
+
 }  // namespace test
 }  // namspace statespace
 }  // namespace libcozmo
