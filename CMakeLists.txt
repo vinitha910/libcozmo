@@ -3,9 +3,10 @@ project(libcozmo)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 set(CMAKE_BUILD_TYPE Release)
+set(PYBIND11_PYTHON_VERSION 3.5)
+find_package(PythonInterp 3.5 REQUIRED)
+find_package(PythonLibs 3.5 REQUIRED)
 
-find_package(PythonInterp 3)
-find_package(PythonLibs 3)
 find_package(catkin REQUIRED COMPONENTS 
   roscpp 
   pybind11_catkin 
