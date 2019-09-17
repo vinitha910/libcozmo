@@ -9,6 +9,7 @@ import threading
 from visualization_msgs.msg import Marker
 from roscpp_initializer import roscpp_initializer
 from cozmopy import Cozmo
+from aikidopy import InteractiveMarkerViewer
 
 class CustomObject():
     """
@@ -92,7 +93,7 @@ def cozmo_run(robot: cozmo.robot):
     while not rospy.is_shutdown():
         custom_obj = look_for_object(robot)
 
-        publish_cozmo(cozmo_publisher, robot)
+        publish_cozmo(cozmo_publisher, robot, cozmo)
         publish_object(object_publisher, custom_obj)
         rospy.sleep(0.001)
         
@@ -101,37 +102,18 @@ def cozmo_run(robot: cozmo.robot):
 
 
 def publish_cozmo(pub, robot, cozmo):
-    # cozmo_marker = Marker()
-    # cozmo_marker.header.frame_id = "base_link"
-    # cozmo_marker.type = Marker.CUBE
-    # cozmo_marker.pose.position.x = cozmo.pose.position.x / 100.0
-    # cozmo_marker.pose.position.y = cozmo.pose.position.y / 100.0
-    # cozmo_marker.pose.position.z = 1 / 100.0
-    # cozmo_marker.pose.orientation.x = cozmo.pose.rotation.q1
-    # cozmo_marker.pose.orientation.y = cozmo.pose.rotation.q2
-    # cozmo_marker.pose.orientation.z = cozmo.pose.rotation.q3
-    # cozmo_marker.pose.orientation.w = cozmo.pose.rotation.q0
-    # cozmo_marker.scale.x = 45 / 100.0
-    # cozmo_marker.scale.y = 45 / 100.0
-    # cozmo_marker.scale.z = 45 / 100.0
-    # cozmo_marker.color.r = 0.0
-    # cozmo_marker.color.g = 0.5
-    # cozmo_marker.color.b = 0.5
-    # cozmo_marker.color.a = 1.0
-    
     q = robot.pose.rotation
     quat = [q.q0, q.q1, q.q2, q.q3]
-    cozmo.setState(robot.pose.position.x, robot.pose.position.y, quat)
-    #pub.publish(cozmo_marker)
+    cozmo.setState(robot.pose.position.x / 1000.0, robot.pose.position.y / 1000.0, quat)
 
 def publish_object(pub, custom_obj):
     box_marker = Marker()
     box_marker.header.frame_id = "base_link"
     box_marker.type = Marker.CUBE
 
-    box_marker.pose.position.x = custom_obj.pose[0] / 100.0
-    box_marker.pose.position.y = custom_obj.pose[1] / 100.0
-    box_marker.pose.position.z = 1 / 100.0
+    box_marker.pose.position.x = custom_obj.pose[0] / 1000.0
+    box_marker.pose.position.y = custom_obj.pose[1] / 1000.0
+    box_marker.pose.position.z = 35 / 1000.0
     # conversion not necessary anymore 
     box_orientation = angle_z_to_quaternion(radians(custom_obj.pose[2]))
     print(box_orientation)
@@ -140,9 +122,9 @@ def publish_object(pub, custom_obj):
     box_marker.pose.orientation.z = box_orientation[3]
     box_marker.pose.orientation.w = box_orientation[0]
 
-    box_marker.scale.x = custom_obj.width / 100.0
-    box_marker.scale.y = custom_obj.length / 100.0
-    box_marker.scale.z = custom_obj.width / 100.0
+    box_marker.scale.x = custom_obj.width / 1000.0
+    box_marker.scale.y = custom_obj.length / 1000.0
+    box_marker.scale.z = custom_obj.width / 1000.0
     box_marker.color.r = 0.0
     box_marker.color.g = 0.5
     box_marker.color.b = 0.5
@@ -168,21 +150,3 @@ if __name__ == '__main__':
     # instanciating ros::NodeHandle will lead to a fatal error.
     # roscpp_initializer initializes roscpp and ros::NodeHandle in the background
 
-    topicName = "dart_markers"
-    baseFrameName = "map"
-
-    if not rospy.is_shutdown():
-            cozmo = Cozmo(args.mesh_dir)
-            skeleton = cozmo.getCozmoSkeleton();
-
-            print("Starting viewer. Please subscribe to the {} InteractiveMarker" 
-                      " topic in Rviz".format(topicName))
-
-            viewer = InteractiveMarkerViewer(topicName, baseFrameName)
-            cozmo_marker = viewer.addSkeleton(skeleton)
-            viewer.setAutoUpdate(True);
-# publish cozmo movment always, but you can only update cube location when cozmo detects it
-#   once an action is performed -> call reupdate function that will update the cube location
-#   1) back up, 2) look for cube, 3) publish cube
-# fake location for where it should end up -> function that takes in that location and publishes it
-# python2 in another file to do transforms 
