@@ -79,8 +79,8 @@ void SE2::discrete_state_to_continuous(
 void SE2::continuous_state_to_discrete(
     const aikido::statespace::StateSpace::State& _state, 
     StateSpace::State* _discrete_state) const {
-    auto se2_state = static_cast<const aikido::statespace::SE2::State&>(_state);
-    Eigen::Isometry2d transform = se2_state.getIsometry();
+    auto state = static_cast<const aikido::statespace::SE2::State&>(_state);
+    Eigen::Isometry2d transform = state.getIsometry();
     Eigen::Rotation2Dd rotation = Eigen::Rotation2Dd::Identity();
     rotation.fromRotationMatrix(transform.rotation());
     const Eigen::Vector2i position = 
