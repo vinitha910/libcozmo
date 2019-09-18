@@ -42,7 +42,7 @@ namespace model {
 
     bool DeterministicModel::get_prediction(
         const Model::ModelInput& input,
-        Model::ModelOutput* output) const{
+        Model::ModelOutput* output) const {
         if (m_model != nullptr) {
             auto input_ =
                 static_cast<const DeterministicModelInput&>(input);

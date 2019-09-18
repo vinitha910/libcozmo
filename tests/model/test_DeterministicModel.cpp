@@ -55,34 +55,21 @@ TEST_F(DeterministicModelTest, LoadModelTest) {
     DeterministicModel::DeterministicModelInput input =
         DeterministicModel::DeterministicModelInput(
             actionspace::GenericActionSpace::Action(0, 0, 0));
-    DeterministicModel::DeterministicModelOutput output(0,0,0);
+    DeterministicModel::DeterministicModelOutput output(0, 0, 0);
     EXPECT_FALSE(m_model.get_prediction(input, &output));
 }
 
 /// Check that model outputs correct delta values for each action
 TEST_F(DeterministicModelTest, GetPredictionTest) {
-    load_model();
+    load_model();;
     DeterministicModel::DeterministicModelInput input1 =
         DeterministicModel::DeterministicModelInput(
-            actionspace::GenericActionSpace::Action(0, 0, 0));
-    DeterministicModel::DeterministicModelInput input2 =
-        DeterministicModel::DeterministicModelInput(
             actionspace::GenericActionSpace::Action(50, 1, M_PI / 2.0));
-    DeterministicModel::DeterministicModelInput input3 =
-        DeterministicModel::DeterministicModelInput(
-            actionspace::GenericActionSpace::Action(-50, 1, M_PI));
-
-    DeterministicModel::DeterministicModelOutput output1(0,0,0);
+    DeterministicModel::DeterministicModelOutput output1(0, 0, 0);
     ASSERT_TRUE(m_model.get_prediction(input1, &output1));
-    DeterministicModel::DeterministicModelOutput output2(0,0,0);
-    ASSERT_TRUE(m_model.get_prediction(input2, &output2));
-
-    // EXPECT_NEAR(output1.getX(), 0, 0.001);
-    // EXPECT_NEAR(output1.getY(), 0, 0.001);
-    // EXPECT_NEAR(output1.getTheta(), 0, 0.001);
-    EXPECT_NEAR(output2.getX(), 0, 0.001);
-    EXPECT_NEAR(output2.getY(), 50, 0.001);
-    EXPECT_NEAR(output2.getTheta(), M_PI / 2.0, 0.001);
+    EXPECT_NEAR(output1.getX(), 0, 0.001);
+    EXPECT_NEAR(output1.getY(), 50, 0.001);
+    EXPECT_NEAR(output1.getTheta(), M_PI / 2.0, 0.001);
 }
 
 }  // namespace test
