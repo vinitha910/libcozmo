@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
+import rospy
 import sys
 
 import cozmo
 from cozmo.util import degrees
 import matplotlib.pyplot as plt
+
+from visualization_msgs.msg import Marker
 
 # Finds the corner coordinates of a 4 sided surface
 # Assumes Cozmo starts perpendicular to an edge
@@ -33,6 +36,10 @@ def perpendicular_detector(robot: cozmo.robot.Robot):
         robot.drive_wheels(-100, -100, duration=1.5)
         robot.turn_in_place(degrees(angle)).wait_for_completed()
 
+    plane_publisher = rospy.Publisher('plane_marker', Marker, queue_size=10)
+    while not rospy.is_shutdown():
+        publish_plane(plane_publisher, [x_max - x_min, y_max - y_min])
+
     print(x_max - x_min, y_max - y_min)
 
     plt.figure(0)
@@ -45,10 +52,11 @@ def perpendicular_detector(robot: cozmo.robot.Robot):
     plt.plot([x_min, x_max], [y_max, y_max], 'b')
     plt.plot([x_min, x_min], [y_min, y_max], 'b')
     plt.plot([x_max, x_max], [y_min, y_max], 'b')
-    
+
     plt.savefig('edge.png')
     plt.show()
 
+# Keeps bouncing off edges until dimensions no longer expand
 def generic_detector(robot: cozmo.robot.Robot):
     print(robot.pose.rotation.angle_z.degrees)
     x_min = sys.maxsize
@@ -71,7 +79,7 @@ def generic_detector(robot: cozmo.robot.Robot):
         x.append(x_curr)
         y.append(y_curr)
         robot.drive_wheels(-100, -100, duration=1.5)
-        
+
         robot.turn_in_place(degrees(91)).wait_for_completed()
 
         x_min = min(x_curr, x_min)
@@ -97,4 +105,34 @@ def generic_detector(robot: cozmo.robot.Robot):
 
     plt.show()
 
-cozmo.run_program(generic_detector)
+def publish_plane(pub, dimensions):
+    plane_marker = Marker()
+    plane_marker.header.frame_id = "base_link"
+    plane_marker.type = Marker.CUBE
+
+    plane_marker.pose.position.x = 0
+    plane_marker.pose.position.y = 0
+    plane_marker.pose.position.z = 0
+
+    plane_marker.pose.orientation.x = 0
+    plane_marker.pose.orientation.y = 0
+    plane_marker.pose.orientation.z = 0
+    plane_marker.pose.orientation.w = 1
+
+    plane_marker.scale.x = dimensions[0] / 1000.0
+    plane_marker.scale.y = dimensions[1] / 1000.0
+    plane_marker.scale.z = 1 / 1000.0
+
+    plane_marker.color.r = 0.0
+    plane_marker.color.g = 0.5
+    plane_marker.color.b = 0.5
+    plane_marker.color.a = 1.0
+
+    pub.publish(plane_marker)
+
+if __name__ == '__main__':
+    rospy.init_node("edge_detection")
+    try:
+        cozmo.run_program(perpendicular_detector)
+    except rospy.ROSInterruptException:
+        pass
