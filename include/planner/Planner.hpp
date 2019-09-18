@@ -33,18 +33,15 @@
 namespace libcozmo {
 namespace planner {
 
-
-/// Plans sequence of actions required to reach from start to goal
-/// A strategy of finding such path should be determined as a derived class
-/// e.g. Dijkstra
+/// This class plans a sequence of actions required reach from given start to
+/// goal state. The strategy to which the solution is found will vary based on
+/// the derived classes.
 ///
-/// Actionspace handles possible set of actions at given time
-/// Statespace handles states present in the representation
-/// Transition model outputs successor state given a state and an action.
-class Planner
-{
+/// For finding a solution the class utilizes an actionspace to get set of
+/// actions to explore, statespace to build a graph representation, and
+/// a model to get successors.
+class Planner {
  public:
-
     /// Sets start ID
     ///
     /// \param start_id The starting state ID
@@ -57,10 +54,11 @@ class Planner
     /// \return true if goal_id valid; false otherwise
     virtual bool set_goal(const int& goal_id) = 0;
 
-    /// Solves given search problem and finds path from start to goal
+    /// Solves given search problem and finds a sequence of actions from the
+    /// start to goal.
     ///
-    /// \param path Vector of ID pairs
-    /// \return true if path is found; false otherwise
+    /// \param[out] path Vector of action IDs
+    /// \return true if solution is found; false otherwise
     virtual bool solve(
         std::vector<int>* actions) = 0;
 };

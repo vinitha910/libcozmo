@@ -67,7 +67,7 @@ namespace planner {
             Q.erase(Q.begin());
             Q.erase(curr_state_id);
             if (is_goal(curr_state_id)) {
-                extract_path(
+                extract_sequence(
                     child_to_parent_map, m_start_id, m_goal_id, actions);
                 return true;
             }
@@ -139,20 +139,20 @@ namespace planner {
         succesor->setIsometry(t);
     }
 
-    void Dijkstra::extract_path(
+    void Dijkstra::extract_sequence(
         const ChildToParentMap& child_to_parent_map,
         const int& start_id,
         const int& goal_id,
-        std::vector<int>* path_actions) {
+        std::vector<int>* actions) {
         if (goal_id == start_id) {
             return;
         }
         auto parent = child_to_parent_map.find(goal_id);
         while (parent != child_to_parent_map.end()) {
-            path_actions->push_back(parent->second.second);
+            actions->push_back(parent->second.second);
             parent = child_to_parent_map.find(parent->second.first);
         }
-        std::reverse(path_actions->begin(), path_actions->end());
+        std::reverse(actions->begin(), actions->end());
     }
 
 }  // namespace planner

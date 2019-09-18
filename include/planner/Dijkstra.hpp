@@ -1,5 +1,5 @@
-//////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2019, Brian Lee, Vinitha Ranganeni
+////////////////////////////////////////////////////////////////////////////////
+// Copyright (c) 2019,  Brian Lee, Vinitha Ranganeni
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -9,7 +9,7 @@
 //        this list of conditions and the following disclaimer.
 //     2. Redistributions in binary form must reproduce the above copyright
 //        notice, this list of conditions and the following disclaimer in the
-//        Documentationation and/or other materials provided with the distribution.
+//        documentation and/or other materials provided with the distribution.
 //     3. Neither the name of the copyright holder nor the names of its
 //        contributors may be used to endorse or promote products derived from
 //        this software without specific prior written permission.
@@ -45,12 +45,12 @@ namespace planner {
 /// Maps state ID to it's appropiate cost
 typedef std::unordered_map<int, double> CostMap;
 
-/// Maps the child/successor state ID to the parent ID and the action id
+/// Maps the child/successor state ID to its parent ID and to the action id
 /// that is taken to get to the child state from parent state
 typedef std::unordered_map<int, std::pair<
     int, int>> ChildToParentMap;
 
-// Comparator used to order the states based on their costs
+// Comparator orders state IDs based on their costs from start
 class CostMapComparator {
  public:
     explicit CostMapComparator(const CostMap& cost_map): cost_map_(cost_map) {}
@@ -65,12 +65,11 @@ class CostMapComparator {
     const CostMap& cost_map_;
 };
 
-/// Uses Dijkstra's algorithm to find optimial sequence of actions
-/// to get from specified start state to goal state
+/// This class uses Dijkstra's algorithm to find sequence of actions
+/// to get from start state to goal state
 ///
-/// Actionspace handles possible set of actions at given time
-/// Statespace handles states present in the representation
-/// Transition model output successor state given input state and action.
+/// To search for a path the class implements an actionspace, a statespace,
+/// and a model
 class Dijkstra : public virtual Planner {
  public:
     Dijkstra(
@@ -103,21 +102,21 @@ class Dijkstra : public virtual Planner {
     /// Extracts sequence of actions from start to goal
     ///
     /// \param child_to_parent_map Maps state ID -> (parent ID, action)
-    /// \param start_id Starting ID
-    /// \param goal_id ID Goal ID
-    /// \param[out] path_actions Vector of actions
-    void extract_path(
+    /// \param start_id Starting The ID of the start state
+    /// \param goal_id ID The ID of the goal state
+    /// \param[out] actions Vector of action IDs
+    void extract_sequence(
         const ChildToParentMap& child_to_parent_map,
         const int& start_id,
         const int& goal_id,
-        std::vector<int> *path_actions);
+        std::vector<int> *actions);
 
-    /// Finds succestor state in continuous space
+    /// Finds succestor state given input state and delta x, y, theta
     ///
-    /// \param state_ Current state
-    /// \param x Delta x
-    /// \param y Delta y
-    /// \param theta Delta theta
+    /// \param state_ The current state (in continuous space)
+    /// \param x Change in x distance (mm)
+    /// \param y Change in y distance (mm)
+    /// \param theta Change in theta (radians)
     /// \param[out] successor The succesor state
     void get_succ(
         const statespace::SE2::State& state_,
@@ -126,8 +125,8 @@ class Dijkstra : public virtual Planner {
         const double& y,
         const double& theta);
 
-    /// Check whether the solver has reached the goal
-    /// Goal definition depend on distance metric and threshold
+    /// Check whether the solver has reached the goal, which its defintion
+    /// varies based on distance metric
     ///
     /// \param curr_state_id The ID of current state
     /// \return True if goal condition is met; false otherwise
