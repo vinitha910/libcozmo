@@ -36,13 +36,12 @@
 namespace libcozmo {
 namespace model {
 
-/// Deterministic model to predict Cozmo's movement
+/// This model predicts Cozmo's end state after executing a given action
 ///
-/// Delta state calculated by calculating predicted change in cozmo's position
-/// via distance change in x,y respectively, with its new heading predicted as
-/// the heading of given action
-///
-/// Given action, delta x, y, theta is calculated
+/// Given an action (ModelInput), the delta state (ModelOutput) is predicted
+/// by taking the action's speed and duration to calculate the change in
+/// distance with respect to Cozmo's x & y axis, and the executed action's
+/// heading as the output heading.
 class DeterministicModel : public virtual Model {
  public:
     class ModelType : public Model::ModelType {
@@ -54,35 +53,36 @@ class DeterministicModel : public virtual Model {
 
     class ModelInput : public Model::ModelInput {
      public:
-        /// Constructs input with given parameters
+        /// Constructs input with speed, duration, and heading from given action
         explicit ModelInput(
             const actionspace::GenericActionSpace::Action& action) : \
             m_action(action) {}
 
         ~ModelInput() = default;
 
-        double get_speed() { return m_action.m_speed; }
-        double get_duration() { return m_action.m_duration; }
-        double get_heading() { return m_action.m_heading; }
+        double get_speed() const { return m_action.m_speed; }
+        double get_duration() const { return m_action.m_duration; }
+        double get_heading() const { return m_action.m_heading; }
      private:
         const actionspace::GenericActionSpace::Action m_action;
     };
 
     class ModelOutput : public Model::ModelOutput {
      public:
-        /// Constructs output with given parameters
+        /// Constructs output from predicted delta distance and final heading
+        /// after executing given action
         ModelOutput(const double& x, const double& y, const double& theta) : \
             m_x(x), m_y(y), m_theta(theta) {}
 
         ~ModelOutput() = default;
-        double getX() { return m_x; }
-        double getY() { return m_y; }
-        double getTheta() { return m_theta; }
+        double getX() const { return m_x; }
+        double getY() const { return m_y; }
+        double getTheta() const { return m_theta; }
 
      private:
-        double m_x;
-        double m_y;
-        double m_theta;
+        const double m_x;
+        const double m_y;
+        const double m_theta;
     };
 
     /// Identitiy constructor

@@ -67,8 +67,7 @@ class Model::ModelType {
     ~ModelType() = default;
 };
 
-/// Class for handling model of the input, which its definition depends on the
-/// model type.
+/// Class for handling input of the model; varies based on model type
 class Model::ModelInput {
  protected:
     /// This is a base class that should only be used in derived classes
@@ -77,8 +76,7 @@ class Model::ModelInput {
     ~ModelInput() = default;
 };
 
-/// Class for handling output of the model, which its defintion depends on the
-/// model type.
+/// Class for handling output of the model; varies based on model type
 class Model::ModelOutput {
  protected:
     /// This is a base class that should only be used in derived classes
