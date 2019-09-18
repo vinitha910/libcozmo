@@ -117,6 +117,8 @@ target_link_libraries(test_dijkstra ${TEST_LIBS})
 catkin_add_gtest(test_distance tests/distance/test_distance.cpp)
 target_link_libraries(test_distance ${TEST_LIBS})
 
+
+
 ################################################################################
 # EXECUTABLES       
 ################################################################################
@@ -149,16 +151,6 @@ target_link_libraries(execute_traj
   ${aikido_LIBRARIES}
 )
 
-add_executable(run_dijkstra tests/planner/run_dijkstra.cpp)
-target_include_directories(run_dijkstra PRIVATE
-  ${aikido_INCLUDE_DIRS}
-  ${roscpp_INCLUDE_DIRS}
-)
-target_link_libraries(run_dijkstra
-  cozmo
-  ${aikido_LIBRARIES}
-  ${roscpp_LIBRARIES}
-)
 
 ################################################################################
 # PYBIND 

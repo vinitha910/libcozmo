@@ -80,17 +80,16 @@ namespace planner {
                     const actionspace::GenericActionSpace::Action*>(action);
                 const auto curr_state_ =
                     static_cast<const statespace::SE2::State*>(curr_state);
-                const model::DeterministicModel::ModelInput input(*action_);
-                model::DeterministicModel::ModelOutput* output =
-                    static_cast<model::DeterministicModel::ModelOutput*>(
-                        m_model->get_prediction(input));
+                const model::DeterministicModel::DeterministicModelInput input(*action_);
+                model::DeterministicModel::DeterministicModelOutput output;
+                m_model->get_prediction(input, &output);
                 aikido::statespace::SE2::State succesor_state;
                 get_succ(
                     *curr_state_,
                     &succesor_state,
-                    output->getX(),
-                    output->getY(),
-                    output->getTheta());
+                    output.getX(),
+                    output.getY(),
+                    output.getTheta());
                 statespace::SE2::State succesor_state_;
                 m_state_space->continuous_state_to_discrete(
                     succesor_state, &succesor_state_);

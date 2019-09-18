@@ -37,6 +37,7 @@ namespace test {
 
 TEST(DijkstraTest, StartIsGoalTest) {
     /// Checking solver's base case where start is the same as goal
+    auto type_ = libcozmo::model::DeterministicModel::DeterministicModelType();
     libcozmo::statespace::SE2 state_space(10, 4);
     int start = state_space.get_or_create_state(
         libcozmo::statespace::SE2::State(0, 0, 0));
@@ -46,7 +47,7 @@ TEST(DijkstraTest, StartIsGoalTest) {
         4);
     libcozmo::model::DeterministicModel model;
     auto se2 = distance::SE2(std::make_shared<statespace::SE2>(0.1, 4));
-    model.load_model(new libcozmo::model::DeterministicModel::ModelType());
+    model.load_model(&type_);
     libcozmo::planner::Dijkstra m_solver(
         &action_space, &state_space, &model, &se2, 0.01);
     std::vector<int> actions;
@@ -58,17 +59,18 @@ TEST(DijkstraTest, StartIsGoalTest) {
 
 TEST(DijkstraTest, SimpleSolverTestCozmo) {
     /// Checking solver in a medium-sized problem
+    auto type_ = libcozmo::model::DeterministicModel::DeterministicModelType();
     libcozmo::statespace::SE2 state_space(10, 4);
     int start = state_space.get_or_create_state(
         libcozmo::statespace::SE2::State(0, 0, 0));
     int goal = state_space.get_or_create_state(
-        libcozmo::statespace::SE2::State(100, 100, 3));
+        libcozmo::statespace::SE2::State(50, 50, 3));
     libcozmo::actionspace::GenericActionSpace action_space(
         std::vector<double>{150, 200, 250},
         std::vector<double>{1},
         4);
     libcozmo::model::DeterministicModel model;
-    model.load_model(new libcozmo::model::DeterministicModel::ModelType());
+    model.load_model(&type_);
     auto distance_metric =
         distance::SE2(std::make_shared<statespace::SE2>(10, 4));
     libcozmo::planner::Dijkstra m_solver(

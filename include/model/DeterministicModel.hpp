@@ -36,43 +36,51 @@
 namespace libcozmo {
 namespace model {
 
-/// Generic model to predict Cozmo's movement
-/// Given action, distance and dtheta is calculated
+/// Given an action(ModelInput), this model predicts the delta SE2 state
+/// (ModelOutput)
 class DeterministicModel : public virtual Model {
  public:
-    class ModelType : public Model::ModelType {
+    class DeterministicModelType : public Model::ModelType {
      public:
-        ModelType() {}
+        DeterministicModelType() {}
 
-        ~ModelType() = default;
+        ~DeterministicModelType() = default;
     };
 
-    class ModelInput : public Model::ModelInput {
+    class DeterministicModelInput : public Model::ModelInput {
      public:
-        /// Constructs input with given parameters
-        explicit ModelInput(
+        /// The ModelInput is an action defined by a speed, duration and heading
+        explicit DeterministicModelInput(
             const actionspace::GenericActionSpace::Action& action) : \
             m_action(action) {}
 
-        ~ModelInput() = default;
+        ~DeterministicModelInput() = default;
 
-        double get_speed() { return m_action.m_speed; }
-        double get_duration() { return m_action.m_duration; }
-        double get_heading() { return m_action.m_heading; }
+        double get_speed() const { return m_action.m_speed; }
+        double get_duration() const { return m_action.m_duration; }
+        double get_heading() const { return m_action.m_heading; }
      private:
         const actionspace::GenericActionSpace::Action m_action;
     };
 
-    class ModelOutput : public Model::ModelOutput {
+    class DeterministicModelOutput : public Model::ModelOutput {
      public:
-        /// Constructs output with given parameters
-        ModelOutput(const double& x, const double& y, const double& theta) : \
+        /// The ModelOutput is the change in the SE2 state after applying the
+        /// given action
+        DeterministicModelOutput() {
+            m_x = 0;
+            m_y = 0;
+            m_theta = 0;}
+        DeterministicModelOutput(
+            const double& x,
+            const double& y,
+            const double& theta) : \
             m_x(x), m_y(y), m_theta(theta) {}
 
-        ~ModelOutput() = default;
-        double getX() { return m_x; }
-        double getY() { return m_y; }
-        double getTheta() { return m_theta; }
+        ~DeterministicModelOutput() = default;
+        double getX() const { return m_x; }
+        double getY() const { return m_y; }
+        double getTheta() const { return m_theta; }
 
      private:
         double m_x;
@@ -80,25 +88,20 @@ class DeterministicModel : public virtual Model {
         double m_theta;
     };
 
-    /// Identitiy constructor, model not taken as argument
-    DeterministicModel(): \
-        m_regressor(nullptr) {}
+    /// Identitiy constructor
+    DeterministicModel(): m_model(nullptr) {}
     ~DeterministicModel() {}
 
-    /// Loads a Model
-    ///
-    /// \param model The regression model
-    /// \return true if succesfully loaded; false otherwise
+    /// Documentation inherited
     bool load_model(Model::ModelType* model) override;
 
-    /// Predict delta state given action
-    ///
-    /// \param input The model input
-    /// \return delta state (distance, dtheta)
-    Model::ModelOutput* get_prediction(const Model::ModelInput& input) override;
+    /// Documentation inherited
+    bool get_prediction(
+        const Model::ModelInput& input,
+        Model::ModelOutput* output) const override;
 
  private:
-    Model::ModelType* m_regressor;
+    Model::ModelType* m_model;
 };
 
 }  // namespace model
