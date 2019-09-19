@@ -30,8 +30,33 @@
 #ifndef LIBCOZMO_PLANNER_PLANNER_HPP_
 #define LIBCOZMO_PLANNER_PLANNER_HPP_
 
+#include <utility>
+#include <unordered_map>
+
 namespace libcozmo {
 namespace planner {
+
+/// Maps state ID to it's appropiate cost
+typedef std::unordered_map<int, double> CostMap;
+
+/// Maps the child/successor state ID to its parent ID and to the action id
+/// that is taken to get to the child state from parent state
+typedef std::unordered_map<int, std::pair<
+    int, int>> ChildToParentMap;
+
+// Comparator orders state IDs based on their costs from start
+class CostMapComparator {
+ public:
+    explicit CostMapComparator(const CostMap& cost_map): cost_map_(cost_map) {}
+
+    bool operator()(const int& state_1, const int& state_2) const {
+        return cost_map_.find(state_1)->second <=
+        cost_map_.find(state_2)->second;
+    }
+
+ private:
+    const CostMap& cost_map_;
+};
 
 /// This class plans a sequence of actions required reach from given start to
 /// goal state. The strategy to which the solution is found will vary based on
@@ -59,8 +84,7 @@ class Planner {
     ///
     /// \param[out] path Vector of action IDs
     /// \return true if solution is found; false otherwise
-    virtual bool solve(
-        std::vector<int>* actions) = 0;
+    virtual bool solve(std::vector<int>* actions) = 0;
 };
 
 }  // namespace planner

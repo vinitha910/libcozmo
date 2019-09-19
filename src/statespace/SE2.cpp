@@ -152,6 +152,7 @@ StateSpace::State* SE2::create_state() {
 }
 
 double SE2::normalize_angle_rad(const double& theta_rad) const {
+    assert(m_bins % 2 == 0);
     double normalized_theta_rad = theta_rad;
     if (abs(theta_rad) > 2.0 * M_PI) {
         normalized_theta_rad = normalized_theta_rad -

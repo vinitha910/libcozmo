@@ -30,9 +30,7 @@
 #ifndef LIBCOZMO_PLANNER_DIJKSTRA_HPP_
 #define LIBCOZMO_PLANNER_DIJKSTRA_HPP_
 
-#include <ros/ros.h>
-#include <utility>
-#include <unordered_map>
+// #include <ros/ros.h>
 #include "actionspace/GenericActionSpace.hpp"
 #include "statespace/SE2.hpp"
 #include "model/DeterministicModel.hpp"
@@ -42,47 +40,35 @@
 namespace libcozmo {
 namespace planner {
 
-/// Maps state ID to it's appropiate cost
-typedef std::unordered_map<int, double> CostMap;
-
-/// Maps the child/successor state ID to its parent ID and to the action id
-/// that is taken to get to the child state from parent state
-typedef std::unordered_map<int, std::pair<
-    int, int>> ChildToParentMap;
-
-// Comparator orders state IDs based on their costs from start
-class CostMapComparator {
- public:
-    explicit CostMapComparator(const CostMap& cost_map): cost_map_(cost_map) {}
-
-    bool operator()(const int& state_1,
-                    const int& state_2) const {
-        return cost_map_.find(state_1)->second <=
-        cost_map_.find(state_2)->second;
-    }
-
- private:
-    const CostMap& cost_map_;
-};
-
-/// This class uses Dijkstra's algorithm to find sequence of actions
+/// This class uses Dijkstra's algorithm to find a sequence of actions
 /// to get from start state to goal state
 ///
 /// To search for a path the class implements an actionspace, a statespace,
 /// and a model
 class Dijkstra : public virtual Planner {
  public:
+    /// Constructs a planner with given actionspace, statespace, model
+    ///
+    /// Constructs distance metric and goal tolerance that defines the solver's
+    /// additional stopping condition.
+    ///
+    /// \param actionspace The actionspace to get set of actions to explore
+    /// \param statespace The statespace to build graph representation with
+    /// \param model Model to generate successors
+    /// \param distance_metric The metric to calculate distance to goal
+    /// \param goal_tolerance Additional stopping condition for solver
     Dijkstra(
         libcozmo::actionspace::ActionSpace* actionspace,
         libcozmo::statespace::StateSpace* statespace,
         libcozmo::model::Model* model,
-        distance::Distance* distance,
-        const double& threshold) : \
-         m_action_space(actionspace), m_state_space(statespace), m_model(model),
-         m_continuous_statespace(std::make_shared<aikido::statespace::SE2>()),
-        m_distance_metric(aikido::distance::SE2(m_continuous_statespace)),
-        m_se2(distance),
-        m_threshold(threshold)  {
+        distance::Distance* distance_metric,
+        const double& goal_tolerance) : \
+        m_action_space(actionspace),
+        m_state_space(statespace),
+        m_model(model),
+        m_continuous_statespace(std::make_shared<aikido::statespace::SE2>()),
+        m_distance_metric(distance_metric),
+        m_goal_tolerance(goal_tolerance)  {
         m_start_id = -1;
         m_goal_id = -1;
      }
@@ -95,42 +81,28 @@ class Dijkstra : public virtual Planner {
     bool set_goal(const int& goal_id) override;
 
     /// Documentation inherited
-    bool solve(std::vector<
-        int>* actions) override;
+    bool solve(std::vector<int>* actions) override;
 
  private:
     /// Extracts sequence of actions from start to goal
     ///
-    /// \param child_to_parent_map Maps state ID -> (parent ID, action)
-    /// \param start_id Starting The ID of the start state
-    /// \param goal_id ID The ID of the goal state
     /// \param[out] actions Vector of action IDs
-    void extract_sequence(
-        const ChildToParentMap& child_to_parent_map,
-        const int& start_id,
-        const int& goal_id,
-        std::vector<int> *actions);
+    void extract_sequence(std::vector<int> *actions);
 
-    /// Finds succestor state given input state and delta x, y, theta
+    /// Finds all successor states given input state
     ///
     /// \param state_ The current state (in continuous space)
-    /// \param x Change in x distance (mm)
-    /// \param y Change in y distance (mm)
-    /// \param theta Change in theta (radians)
-    /// \param[out] successor The succesor state
-    void get_succ(
-        const statespace::SE2::State& state_,
-        aikido::statespace::SE2::State* succesor,
-        const double& x,
-        const double& y,
-        const double& theta);
+    /// \param[out] successors Vector of succesor states
+    void get_successors(
+        const statespace::SE2::State* state_,
+        std::vector<statespace::SE2::State>* succesors);
 
     /// Check whether the solver has reached the goal, which its defintion
     /// varies based on distance metric
     ///
     /// \param curr_state_id The ID of current state
     /// \return True if goal condition is met; false otherwise
-    bool is_goal(const int& curr_state_id);
+    bool is_goal(const int& curr_state_id) const;
 
     libcozmo::actionspace::ActionSpace* m_action_space;
     libcozmo::statespace::StateSpace* m_state_space;
@@ -138,9 +110,9 @@ class Dijkstra : public virtual Planner {
     int m_goal_id;
     libcozmo::model::Model* m_model;
     std::shared_ptr<aikido::statespace::SE2> m_continuous_statespace;
-    aikido::distance::SE2 m_distance_metric;
-    distance::Distance* m_se2;
-    const double m_threshold;
+    distance::Distance* m_distance_metric;
+    const double m_goal_tolerance;
+    ChildToParentMap m_child_to_parent_map;
 };
 
 }  // namespace planner

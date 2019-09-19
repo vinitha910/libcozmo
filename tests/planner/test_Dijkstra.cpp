@@ -64,9 +64,9 @@ TEST(DijkstraTest, SimpleSolverTestCozmo) {
     int start = state_space.get_or_create_state(
         libcozmo::statespace::SE2::State(0, 0, 0));
     int goal = state_space.get_or_create_state(
-        libcozmo::statespace::SE2::State(50, 50, 3));
+        libcozmo::statespace::SE2::State(35, 30, 3));
     libcozmo::actionspace::GenericActionSpace action_space(
-        std::vector<double>{150, 200, 250},
+        std::vector<double>{0, 150, 200, 250},
         std::vector<double>{1},
         4);
     libcozmo::model::DeterministicModel model;
