@@ -151,6 +151,14 @@ target_link_libraries(execute_traj
   ${aikido_LIBRARIES}
 )
 
+add_executable(example_dijkstra src/examples/run_dijkstra.cpp)
+target_include_directories(example_dijkstra PRIVATE
+  ${aikido_INCLUDE_DIRS}
+)
+target_link_libraries(example_dijkstra
+  cozmo
+  ${aikido_LIBRARIES}
+)
 
 ################################################################################
 # PYBIND 
