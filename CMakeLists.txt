@@ -55,7 +55,6 @@ add_library(cozmo SHARED
   src/distance/SE2.cpp
   src/distance/translation.cpp
   src/distance/orientation.cpp
-  src/model/DeterministicModel.cpp
 )
 
 target_include_directories(cozmo PUBLIC
@@ -109,8 +108,6 @@ target_link_libraries(test_dijkstra ${TEST_LIBS})
 catkin_add_gtest(test_distance tests/distance/test_distance.cpp)
 target_link_libraries(test_distance ${TEST_LIBS})
 
-
-
 ################################################################################
 # EXECUTABLES       
 ################################################################################
@@ -142,7 +139,6 @@ target_link_libraries(execute_traj
   cozmo
   ${aikido_LIBRARIES}
 )
-
 
 ################################################################################
 # PYBIND 
