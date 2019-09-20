@@ -59,6 +59,7 @@ add_library(cozmo SHARED
   src/distance/translation.cpp
   src/distance/orientation.cpp
   src/model/GPRModel.cpp
+  src/model/ScikitLearnModel.cpp
 )
 
 target_include_directories(cozmo PUBLIC

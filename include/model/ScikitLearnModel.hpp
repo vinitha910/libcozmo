@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2019,  Brian Lee, Vinitha Ranganeni
+// Copyright (c) 2019, Vinitha Ranganeni
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -27,48 +27,29 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef LIBCOZMO_MODEL_MODEL_HPP_
-#define LIBCOZMO_MODEL_MODEL_HPP_
+#ifndef LIBCOZMO_SCIKITLEARNMODEL_SCIKITLEARNMODEL_HPP_
+#define LIBCOZMO_SCIKITLEARNMODEL_SCIKITLEARNMODEL_HPP_
 
-#include "model/ModelFramework.hpp"
+#include <model/ModelFramework.hpp>
 
 namespace libcozmo {
 namespace model {
 
-class Model : public ModelFramework {
+/// Class for handling model of trained in a specific framework such as 
+/// scikit-learn, pytorch, etc
+class ScikitLearnModel : public virtual ModelFramework {
  public:
-    /// Base class for model input
-    class ModelInput;
+    /// Initialize the python interpreter
+    ScikitLearnModel(const std::string& model_path);
 
-    /// Base class for model output
-    class ModelOutput;
+    /// Free memory allocated by python interpreter
+    ~ScikitLearnModel();
 
-    /// Get the model's predicted output given then input
-    ///
-    /// \param input The model input, dependent on model type
-    /// \return output The ouput after running inference
-    virtual void inference(const ModelInput& input, ModelOutput* output) = 0;
-};
-
-/// Class for handling input of the model; varies based on model 
-class Model::ModelInput {
- protected:
-    /// This is a base class that should only be used in derived classes
-    ModelInput() = default;
-
-    ~ModelInput() = default;
-};
-
-/// Class for handling output of the model; varies based on model type
-class Model::ModelOutput {
- protected:
-    /// This is a base class that should only be used in derived classes
-    ModelOutput() = default;
-
-    ~ModelOutput() = default;
+    /// Documentation inherited
+    void initialize(const std::string& model_path) override;
 };
 
 }  // namespace model
 }  // namespace libcozmo
 
-#endif  // LIBCOZMO_MODEL_MODEL_HPP_
+#endif  // LIBCOZMO_SCIKITLEARNMODEL_SCIKITLEARNMODEL_HPP_

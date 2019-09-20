@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2019,  Brian Lee, Vinitha Ranganeni
+// Copyright (c) 2019, Vinitha Ranganeni
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -27,48 +27,38 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef LIBCOZMO_MODEL_MODEL_HPP_
-#define LIBCOZMO_MODEL_MODEL_HPP_
+#ifndef LIBCOZMO_MODELFRAMEWORK_MODELFRAMEWORK_HPP_
+#define LIBCOZMO_MODELFRAMEWORK_MODELFRAMEWORK_HPP_
 
-#include "model/ModelFramework.hpp"
+#include <Python.h>
+#include <string>
 
 namespace libcozmo {
 namespace model {
 
-class Model : public ModelFramework {
+/// Class for handling model of trained in a specific framework such as 
+/// scikit-learn, pytorch, etc.
+///
+/// Note, we do not define the inference function in this class as the 
+/// inputs and outputs for inference vary based on trained model (defined 
+/// in the dervied class)
+class ModelFramework {
  public:
-    /// Base class for model input
-    class ModelInput;
-
-    /// Base class for model output
-    class ModelOutput;
-
-    /// Get the model's predicted output given then input
+    ModelFramework() = default;
+    ~ModelFramework() = default;
+    /// This function compiles the embedded python code for loading a model
+    /// of a specific framework (defined by the derived class) and running 
+    /// inference. 
     ///
-    /// \param input The model input, dependent on model type
-    /// \return output The ouput after running inference
-    virtual void inference(const ModelInput& input, ModelOutput* output) = 0;
-};
+    /// \param model_path The path to the model file
+    virtual void initialize(const std::string& model_path) = 0;
 
-/// Class for handling input of the model; varies based on model 
-class Model::ModelInput {
- protected:
-    /// This is a base class that should only be used in derived classes
-    ModelInput() = default;
-
-    ~ModelInput() = default;
-};
-
-/// Class for handling output of the model; varies based on model type
-class Model::ModelOutput {
- protected:
-    /// This is a base class that should only be used in derived classes
-    ModelOutput() = default;
-
-    ~ModelOutput() = default;
+  protected:
+    PyObject* p_model;
+    PyObject* p_module;
 };
 
 }  // namespace model
 }  // namespace libcozmo
 
-#endif  // LIBCOZMO_MODEL_MODEL_HPP_
+#endif  // LIBCOZMO_MODELFRAMEWORK_MODELFRAMEWORK_HPP_
