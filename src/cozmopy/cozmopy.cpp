@@ -3,7 +3,6 @@
 #include <pybind11/chrono.h>
 #include <cozmo_description/cozmo.hpp>
 #include <chrono>
-#include <Eigen/Geometry>
 
 namespace py = pybind11;
 
@@ -29,18 +28,9 @@ PYBIND11_MODULE(cozmopy, m)
 		{
 			return cozmo.executeTrajectory(
 				std::chrono::duration_cast<std::chrono::milliseconds>(milliseconds), traj);
-		})
-        .def("setState", [](
-            libcozmo::Cozmo& cozmo,
-            const double& x, 
-            const double& y, 
-            const std::vector<double>& quat)        
-        {
-            Eigen::Quaterniond q(quat[0], quat[1], quat[2], quat[3]);
-            cozmo.setState(x, y, q);
-        });
-        
-        py::class_<libcozmo::Waypoint>(m, "Waypoint")
+		});
+
+	py::class_<libcozmo::Waypoint>(m, "Waypoint")
 		.def(py::init([](const double x, const double y, const double th, const double t) {
 			libcozmo::Waypoint w = {.x = x, .y = y, .th = th, .t = t};
 			return w;
