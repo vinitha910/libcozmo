@@ -10,6 +10,7 @@ from visualization_msgs.msg import Marker
 
 # Finds the corner coordinates of a 4 sided surface
 # Assumes Cozmo starts perpendicular to an edge
+# Cozmo will visit each edge once
 def perpendicular_detector(robot: cozmo.robot.Robot):
     x_min = sys.maxsize
     x_max = -sys.maxsize - 1
@@ -36,12 +37,6 @@ def perpendicular_detector(robot: cozmo.robot.Robot):
         robot.drive_wheels(-100, -100, duration=1.5)
         robot.turn_in_place(degrees(angle)).wait_for_completed()
 
-    plane_publisher = rospy.Publisher('plane_marker', Marker, queue_size=10)
-    while not rospy.is_shutdown():
-        publish_plane(plane_publisher, [x_max - x_min, y_max - y_min])
-
-    print(x_max - x_min, y_max - y_min)
-
     plt.figure(0)
     plt.scatter(x, y)
     plt.plot(x[0:2], y[0:2], 'r')
@@ -56,9 +51,10 @@ def perpendicular_detector(robot: cozmo.robot.Robot):
     plt.savefig('edge.png')
     plt.show()
 
-# Keeps bouncing off edges until dimensions no longer expand
+# Finds the corner coordinates of a 4 sided surface
+# Cozmo will continuously find coordinates of the edges of the surface
+# until new coordinates are no longer expanding the known dimensions
 def generic_detector(robot: cozmo.robot.Robot):
-    print(robot.pose.rotation.angle_z.degrees)
     x_min = sys.maxsize
     x_max = -sys.maxsize - 1
     y_min = sys.maxsize
@@ -90,8 +86,6 @@ def generic_detector(robot: cozmo.robot.Robot):
         if x_min != x_curr and x_max != x_curr and y_min != y_curr and y_max != y_curr:
             done = True
 
-    print(x_max - x_min, y_max - y_min)
-
     plt.figure(0)
     plt.scatter(x, y)
     plt.plot(x, y, 'r')
@@ -105,6 +99,7 @@ def generic_detector(robot: cozmo.robot.Robot):
 
     plt.show()
 
+# Publish the surface found based on the 4 corners
 def publish_plane(pub, dimensions):
     plane_marker = Marker()
     plane_marker.header.frame_id = "base_link"
