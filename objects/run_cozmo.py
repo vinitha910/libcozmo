@@ -21,10 +21,7 @@ def look_for_object(robot: cozmo.robot):
     look_around = robot.start_behavior(
         cozmo.behavior.BehaviorTypes.LookAroundInPlace)
     try:
-        cubes = robot.world.wait_until_observe_num_objects(
-            2,
-            cozmo.objects.LightCube,
-            timeout=10)
+        cubes = robot.world.wait_until_observe_num_objects(2, cozmo.objects.LightCube, timeout=10)
     except asyncio.TimeoutError:
         print('Not enough cubes found')
     finally:
