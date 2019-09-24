@@ -33,6 +33,9 @@
 namespace libcozmo {
 namespace model {
 
+/// Abstract class for all model types. When using this class or its derived
+/// classes in a script you must wrap the code with Py_Initialize() and 
+/// Py_Finalize();
 class Model {
  public:
     /// Base class for model input

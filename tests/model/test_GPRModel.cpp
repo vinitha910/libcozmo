@@ -29,7 +29,7 @@
 
 #include <gtest/gtest.h>
 #include "model/GPRModel.hpp"
-#include "model/ScikitLearnModel.hpp"
+#include "model/ScikitLearnFramework.hpp"
 #include <Python.h>
 
 namespace libcozmo {

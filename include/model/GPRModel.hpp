@@ -1,5 +1,5 @@
 #include "model/Model.hpp"
-#include "model/ScikitLearnModel.hpp"
+#include "model/ScikitLearnFramework.hpp"
 #include <Python.h>
 #include <memory>
 
