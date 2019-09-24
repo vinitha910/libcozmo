@@ -28,7 +28,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include <gtest/gtest.h>
-#include <iostream>
 #include "actionspace/GenericActionSpace.hpp"
 
 class GenericActionFixture: public ::testing::Test {
@@ -64,7 +63,11 @@ class GenericActionFixture: public ::testing::Test {
     }
 
     bool Publish(const int id) {
-        // return m_actionspace.publish_action(id, m_action_publisher);
+        aikido::statespace::SE2::State _state;
+        return m_actionspace.publish_action(
+            id,
+            m_action_publisher,
+            _state);
     }
 
     void WaitForMessage() {

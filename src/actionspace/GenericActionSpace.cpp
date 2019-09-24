@@ -28,8 +28,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include <actionspace/GenericActionSpace.hpp>
-#include <exception>
-#include <iostream>
 
 namespace libcozmo {
 namespace actionspace {
@@ -58,7 +56,8 @@ int GenericActionSpace::size() const {
     return m_actions.size();
 }
 
-ActionSpace::Action* GenericActionSpace::get_action(const int& action_id) const {
+ActionSpace::Action* GenericActionSpace::get_action(
+    const int& action_id) const {
     if (!is_valid_action_id(action_id)) {
         return nullptr;
     }

@@ -43,7 +43,7 @@ namespace actionspace {
 /// Actions are applicable regardless of Cozmo's state in the world
 ///
 /// Actions consist of speed, duration and heading
-/// The total number of possible actions = 
+/// The total number of possible actions =
 /// number of speeds * number of durations * number of headings
 ///
 /// Headings are represented as angles from [0, 2pi]. The difference between
@@ -95,7 +95,7 @@ class GenericActionSpace : public virtual ActionSpace {
             for (int j = 0; j < num_speed; j++) {
                 for (int k = 0; k < num_duration; k++) {
                     for (int l = 0; l < num_headings; l++) {
-                        const int id = 
+                        const int id =
                             (((j * num_duration) + k) * num_headings) + l;
                         m_actions[id] = new Action(
                             m_speeds[j], m_durations[k], m_headings[l]);
