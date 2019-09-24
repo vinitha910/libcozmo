@@ -54,7 +54,8 @@ class ModelFramework {
     /// inference. 
     ///
     /// \param model_path The path to the model file
-    virtual void initialize(const std::string& model_path) = 0;
+    /// \return True if initialized correctly; false otherwise
+    virtual bool initialize(const std::string& model_path) = 0;
 
     PyObject* get_model() const { return p_model; }
     PyObject* get_module() const { return p_module; }

@@ -48,7 +48,7 @@ class GPRModel : public virtual Model {
  		double dtheta;
  	};
 
- 	GPRModel(const std::shared_ptr<ScikitLearnModel> framework) :
+ 	GPRModel(const std::shared_ptr<ScikitLearnFramework> framework) :
  		m_framework(framework) {}
  	
  	~GPRModel() = default;
@@ -57,7 +57,7 @@ class GPRModel : public virtual Model {
  		const Model::ModelInput& input, Model::ModelOutput* output) override;
 
  private:
- 	const std::shared_ptr<ScikitLearnModel> m_framework;
+ 	const std::shared_ptr<ScikitLearnFramework> m_framework;
 
 };
 

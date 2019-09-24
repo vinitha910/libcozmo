@@ -27,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef LIBCOZMO_SCIKITLEARNMODEL_SCIKITLEARNMODEL_HPP_
-#define LIBCOZMO_SCIKITLEARNMODEL_SCIKITLEARNMODEL_HPP_
+#ifndef LIBCOZMO_SCIKITLEARNFRAMEWORK_SCIKITLEARNFRAMEWORK_HPP_
+#define LIBCOZMO_SCIKITLEARNFRAMEWORK_SCIKITLEARNFRAMEWORK_HPP_
 
 #include <model/ModelFramework.hpp>
 
@@ -37,19 +37,22 @@ namespace model {
 
 /// Class for handling model of trained in a specific framework such as 
 /// scikit-learn, pytorch, etc
-class ScikitLearnModel : public virtual ModelFramework {
+class ScikitLearnFramework : public virtual ModelFramework {
  public:
-    /// Initialize the python interpreter
-    ScikitLearnModel(const std::string& model_path);
+    /// Compiles embedded python code and loads model
+    ///
+    /// Throws an invalid_argument exception if the path is invalid or if the
+    /// model can't be loaded correctly
+    ScikitLearnFramework(const std::string& model_path);
 
-    /// Free memory allocated by python interpreter
-    ~ScikitLearnModel();
+    /// Frees memory allocated by python interpreter
+    ~ScikitLearnFramework();
 
     /// Documentation inherited
-    void initialize(const std::string& model_path) override;
+    bool initialize(const std::string& model_path) override;
 };
 
 }  // namespace model
 }  // namespace libcozmo
 
-#endif  // LIBCOZMO_SCIKITLEARNMODEL_SCIKITLEARNMODEL_HPP_
+#endif  // LIBCOZMO_SCIKITLEARNFRAMEWORK_SCIKITLEARNFRAMEWORK_HPP_

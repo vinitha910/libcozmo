@@ -17,20 +17,14 @@ void GPRModel::inference(
     PyObject* p_input = PyList_New(1);
     PyList_SetItem(p_input, 0, p_list);
 
-    PyObject* p_predict_fn = 
+    PyObject* p_inference_fn = 
         PyObject_GetAttrString(m_framework->get_module(), "inference");
     PyObject* p_args = PyTuple_Pack(2, m_framework->get_model(), p_input);
-    PyObject* p_result = PyObject_CallObject(p_predict_fn, p_args);
+    PyObject* p_result = PyObject_CallObject(p_inference_fn, p_args);
 
-    const double distance = PyFloat_AsDouble(PyList_GetItem(p_result, 0));
-    // const double dtheta = PyFloat_AsDouble(PyList_GetItem(outputs, 1));
-
-    std::cout << distance << std::endl;
-
-    // reminder, remember to test with updated model
     ModelOutput* output = static_cast<ModelOutput*>(output_);
-    output->distance = distance;
-    output->dtheta = distance;
+    output->distance = PyFloat_AsDouble(PyList_GetItem(p_result, 0));
+    output->dtheta = PyFloat_AsDouble(PyList_GetItem(p_result, 1));
 }
 
 }

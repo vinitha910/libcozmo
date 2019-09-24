@@ -28,34 +28,38 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include <gtest/gtest.h>
+#include <stdexcept>
+#include <Python.h>
 #include "model/GPRModel.hpp"
 #include "model/ScikitLearnFramework.hpp"
-#include <Python.h>
 
 namespace libcozmo {
 namespace model {
 namespace test {
 
-class GPRModelTest: public ::testing::Test {
- public:
-    GPRModelTest() :
-        m_framework(std::make_shared<ScikitLearnModel>("/home/vinitha/workspaces/curiosity_ws/src/curiosity_project/python/models/novel_uninformed/angle_regressor_12.pkl")),
-        m_model(m_framework) {
-    }
+// Check model inference is correct
+TEST(GPRModelTest, LoadModelTest) {
+    Py_Initialize();
+    auto framework = std::make_shared<ScikitLearnFramework>("SampleGPRModel.pkl");
+    auto model = GPRModel(framework);
 
-    ~GPRModelTest() { }
-
-    std::shared_ptr<ScikitLearnModel> m_framework;
-    GPRModel m_model;
-};
-
-/// Check that model without anything loaded simply handles nullptr
-TEST_F(GPRModelTest, LoadModelTest) {
-    GPRModel::ModelInput input =
-        GPRModel::ModelInput(10, 0.75, 1);
+    GPRModel::ModelInput input = GPRModel::ModelInput(30, 1.0, 0);
     GPRModel::ModelOutput output;
-    m_model.inference(input, &output);
-    EXPECT_NEAR(0.00012, output.distance, 0.01);
+    model.inference(input, &output);
+    EXPECT_NEAR(0, output.distance, 0.001);
+    EXPECT_NEAR(0, output.dtheta, 0.001);
+    Py_Finalize();
+}
+
+TEST(GPRModelTest, IncorrectLoadModelTest) {
+    Py_Initialize();
+    try {
+        auto framework = ScikitLearnFramework("");
+    } catch(std::invalid_argument const& error) {
+        EXPECT_EQ(error.what(), 
+            std::string("[ScikitLearnFramework] Invalid model_path"));
+    }
+    Py_Finalize();
 }
 
 }  // namespace test
@@ -63,9 +67,7 @@ TEST_F(GPRModelTest, LoadModelTest) {
 }  // namespace libcozmo
 
 int main(int argc, char **argv) {
-    Py_Initialize();
     ::testing::InitGoogleTest(&argc, argv);
     const auto results = RUN_ALL_TESTS();
-    Py_Finalize();
     return results;
 }

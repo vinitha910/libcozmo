@@ -1,26 +1,29 @@
 #include "model/ScikitLearnFramework.hpp"
 #include <sstream> 
 #include <iostream>
+#include <stdexcept>
 
 namespace libcozmo {
 namespace model {
 
-ScikitLearnModel::ScikitLearnModel(const std::string& model_path) {
-    initialize(model_path);
+ScikitLearnFramework::ScikitLearnFramework(const std::string& model_path) {
+    if (!initialize(model_path)) {
+        throw std::invalid_argument("[ScikitLearnFramework] Invalid model_path");
+    }
 }
 
-ScikitLearnModel::~ScikitLearnModel() { 
+ScikitLearnFramework::~ScikitLearnFramework() { 
     Py_DecRef(p_model);
     Py_DecRef(p_module);
 }
 
-void ScikitLearnModel::initialize(const std::string& model_path) {
+bool ScikitLearnFramework::initialize(const std::string& model_path) {
     std::stringstream buf;
     buf << "import _pickle as pickle" << std::endl
         << "def load_model(filename):" << std::endl
-        << "    return pickle.load(open(filename, 'rb'), encoding='latin1')" << std::endl
+        << "    return pickle.load(open(filename, 'rb'))" << std::endl
         << "def inference(model, input):" << std::endl
-        << "    return list(model.predict(input))" << std::endl;
+        << "    return model.predict(input).tolist()[0]" << std::endl;
 
     // Compile python code
     PyObject* p_compiled_fn = 
@@ -45,9 +48,12 @@ void ScikitLearnModel::initialize(const std::string& model_path) {
             }
 
             Py_DecRef(p_load_model_fn);
+            Py_DecRef(p_compiled_fn);
+            
+            return true;
         }
     }
-    Py_DecRef(p_compiled_fn);
+    return false;
 }
 
 }
