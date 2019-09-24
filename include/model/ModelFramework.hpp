@@ -42,6 +42,9 @@ namespace model {
 /// Note, we do not define the inference function in this class as the 
 /// inputs and outputs for inference vary based on trained model (defined 
 /// in the dervied class)
+///
+/// When using this class or its derived classes in a script you must wrap the 
+/// code with Py_Initialize() and Py_Finalize()
 class ModelFramework {
  public:
     ModelFramework() = default;
