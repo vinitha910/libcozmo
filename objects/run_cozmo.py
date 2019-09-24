@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from custom_object import CustomObject, create_custom_object
+from custom_object import RectangularCuboid
 import rospy
 
 import cozmo
@@ -26,7 +26,9 @@ def look_for_object(robot: cozmo.robot):
         print('Not enough cubes found')
     finally:
         look_around.stop()
-    return create_custom_object(cubes, 45)
+    cube = RectangularCuboid(2, (0, 0, 0), 45)
+    cube.update_object(cubes)
+    return cube
 
 def publish_cozmo(pub, robot, cozmo):
     """
@@ -63,7 +65,7 @@ def cozmo_run(robot: cozmo.robot):
 
     while not rospy.is_shutdown():
         custom_obj = look_for_object(robot)
-        custom_obj.publish_object(object_publisher)
+        custom_obj.publish_cube(object_publisher)
         rospy.sleep(0.001)
 
         # Actions to take
