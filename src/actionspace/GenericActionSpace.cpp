@@ -70,7 +70,8 @@ bool GenericActionSpace::is_valid_action_id(const int& action_id) const {
 }
 
 bool GenericActionSpace::publish_action(
-    const int& action_id, const ros::Publisher& publisher) const {
+    const int& action_id, const ros::Publisher& publisher,
+    const aikido::statespace::StateSpace::State& _state) const {
     libcozmo::ActionMsg msg;
     Action* action = static_cast<Action*>(get_action(action_id));
     if (action == nullptr) {

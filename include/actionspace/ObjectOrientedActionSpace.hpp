@@ -37,6 +37,7 @@
 #include "utils/utils.hpp"
 #include <libcozmo/ObjectOrientedAction.h>
 
+
 namespace libcozmo {
 namespace actionspace {
 
@@ -52,54 +53,64 @@ namespace actionspace {
 /// offsets from each center. The number of actions in the action space is 4 *
 /// num_offsets * num_speeds * num_durations
 
+#define FRONT 0
+#define LEFT M_PI / 2
+#define BACK M_PI
+#define RIGHT 3 * M_PI / 2
+
 class ObjectOrientedActionSpace : public virtual ActionSpace {
     public:
-        class Action : public ActionSpace::Action {
+        class GenericAction : public ActionSpace::Action {
             public:
                 /// \param speed : the speed of cozmo, in mm / s, negative speed
                 ///     refers to backward movement
-                /// \param duration : the amount of time to move, in seconds,
-                ///     should be >= 0
-                /// \param start_pose : Cozmo's inital (x, y, theta) position,
-                ///     in (mm, mm, radians)
                 /// \param edge_offset : normalized distance from center of edge
                 ///     in range [-1, 1], where -1 and 1 are the left and right
                 ///     corner respectively
-                explicit Action (
+                /// \param aspect_ratio : the aspect ratio of the side cozmo is
+                ///     pushing from, indicated by different side length.
+                explicit GenericAction (
                     const double& speed,
-                    const double& duration,
-                    const Eigen::Vector3d& start_pose,
-                    const double& edge_offset) : \
-                    speed(speed),
-                    duration(duration),
-                    start_pose(start_pose),
-                    edge_offset(edge_offset) {}
+                    const double& edge_offset,
+                    const double& aspect_ratio,
+                    const double& heading_offset) : \
+                    m_speed(speed),
+                    m_edge_offset(edge_offset),
+                    m_aspect_ratio(aspect_ratio),
+                    m_heading_offset(heading_offset) {}
 
-                double getSpeed() const { return speed; }
-
-                double getDuration() const { return duration; }
-
-                Eigen::Vector3d getStartPose() const { return start_pose; }
-
-                double getEdgeOffset() const { return edge_offset; }
+                double getSpeed() const { return m_speed; }
+                double getAspectRatio() const { return m_aspect_ratio; }
+                double getEdgeOffset() const { return m_edge_offset; }
+                double getHeadingOffset() const { return m_heading_offset; }
 
             private:
-                double speed;
-                double duration;
-                Eigen::Vector3d start_pose;
-                double edge_offset;
+                double m_speed;
+                double m_aspect_ratio;
+                double m_edge_offset;
+                double m_heading_offset;
 
-                void update_action(
+                friend class ObjectOrientedActionSpace;
+        };
+
+        class ObjectOrientedAction : public ActionSpace::Action {
+            public:
+                /// \param speed : the speed of cozmo, in mm / s, negative speed
+                ///     refers to backward movement
+                /// \param start_pose : starting pose of cozmo's action,
+                ///     its attributes are x(mm), y(mm), and theta(radian)
+                explicit ObjectOrientedAction (
                     const double& speed,
-                    const double& duration,
-                    const Eigen::Vector3d& start_pose,
-                    const double& edge_offset)
-                {
-                    this->speed = speed;
-                    this->duration = duration;
-                    this->start_pose = start_pose;
-                    this->edge_offset = edge_offset;
-                }
+                    const Eigen::Vector3d& start_pose) : \
+                    m_speed(speed),
+                    m_start_pose(start_pose) {}
+
+                double getSpeed() const { return m_speed; }
+                Eigen::Vector3d getStartPose() const { return m_start_pose; }
+
+            private:
+                double m_speed;
+                Eigen::Vector3d m_start_pose;
 
                 friend class ObjectOrientedActionSpace;
         };
@@ -112,18 +123,15 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
         ///     of the object; this value must always be odd
         ObjectOrientedActionSpace(
             const std::vector<double>& speeds,
-            const std::vector<double>& durations,
-            const int& num_offset) : \
-            speeds(speeds),
-            durations(durations),
-            num_offset(num_offset),
-            center_offset(60) {}
+            const std::vector<double>& ratios,
+            const double& edge_offset,
+            const int& num_offset);
 
         ~ObjectOrientedActionSpace() {
-            for (size_t i = 0; i < actions.size(); ++i) {
-                delete(actions[i]);
+            for (size_t i = 0; i < m_actions.size(); ++i) {
+                delete(m_actions[i]);
             }
-            actions.clear();
+            m_actions.clear();
         }
 
         /// Calculates the similarity between two actions in the action space
@@ -139,39 +147,40 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
             const int& action_id2,
             double* similarity) const;
 
-        /// Generates actions given another object's pose
-        ///
-        /// \param obj_pose : An (x, y, theta) coordinate in (mm, mm, radians)
-        ///     theta should be [0, 2pi]
-        /// \param edge_offset (optional) : The max distance, along the edge of
-        ///     the object, from the center of that edge
-        ///
-        /// This function will overwrite any previously generated actions in the
-        /// action space
-        void generate_actions(
-            const Eigen::Vector3d& obj_pose,
-            const double& edge_offset=40);
-
         /// Documentation inherited
         ActionSpace::Action* get_action(const int& action_id) const;
 
         /// Documentation inherited
         bool is_valid_action_id(const int& action_id) const;
 
+        /// Converts a generic action to an object oriented action with respect
+        /// to the pose of the cube, for both successor state calculation and
+        /// cozmo's action excution.
+        ///
+        /// \param _action The generic action
+        /// \param _state State of the cube indicating its pose
+        /// \param[out] action The object oriented action to modify
+        void generic_to_object(
+            const GenericAction& _action,
+            const aikido::statespace::StateSpace::State& _state,
+            ObjectOrientedAction* action) const;
+
         /// Documentation inherited
         bool publish_action(
             const int& action_id,
-            const ros::Publisher& publisher) const;
+            const ros::Publisher& publisher,
+            const aikido::statespace::StateSpace::State& _state) const;
 
         /// Documentation inherited
         int size() const;
 
     private:
-        std::vector<double> speeds;
-        std::vector<double> durations;
+        std::vector<double> m_speeds;
+        std::vector<double> m_ratios;
         int num_offset;
-        double center_offset;
-        std::vector<Action*> actions;
+        double m_center_offset;
+        double m_edge_offset;
+        std::vector<GenericAction*> m_actions;
 
         ros::Publisher action_publisher;
 
@@ -188,21 +197,6 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
         void find_headings(
             const double& theta_rad,
             std::vector<double>* headings) const;
-
-        /// Finds Cozmo's start position given an object's pose and edge offsets
-        ///
-        /// \param obj_pose : (x, y, theta) position of the object we are moving
-        ///     relative to, in (mm, mm, radians)
-        /// \param edge_offset : The max distance, along the edge of the object,
-        ///     from the center of that edge (mm)
-        /// \param heading : An orientation relative the orientation specified
-        ///     by obj_pose, (radians)
-        /// \param[out] start_pos : Cozmo's initial position, (x, y) in (mm, mm)
-        void find_start_pos(
-            const Eigen::Vector3d& obj_pose,
-            const double& edge_offset,
-            const double& heading,
-            Eigen::Vector2d* start_pos) const;
 };
 
 } // namespace actionspace

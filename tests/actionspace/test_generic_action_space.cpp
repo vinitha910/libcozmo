@@ -64,7 +64,7 @@ class GenericActionFixture: public ::testing::Test {
     }
 
     bool Publish(const int id) {
-        return m_actionspace.publish_action(id, m_action_publisher);
+        // return m_actionspace.publish_action(id, m_action_publisher);
     }
 
     void WaitForMessage() {

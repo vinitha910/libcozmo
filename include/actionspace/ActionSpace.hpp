@@ -30,6 +30,8 @@
 #ifndef LIBCOZMO_ACTIONSPACE_ACTIONSPACE_HPP_
 #define LIBCOZMO_ACTIONSPACE_ACTIONSPACE_HPP_
 
+#include "aikido/distance/SE2.hpp"
+
 namespace libcozmo {
 namespace actionspace {
 
@@ -64,7 +66,8 @@ class ActionSpace
     /// \return True if publish successful; false otherwise;
     virtual bool publish_action(
         const int& action_id,
-        const ros::Publisher& publisher) const = 0;
+        const ros::Publisher& publisher,
+        const aikido::statespace::StateSpace::State& _state) const = 0;
 
     /// Checks whether given action ID is valid
     ///

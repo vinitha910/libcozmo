@@ -126,7 +126,8 @@ class GenericActionSpace : public virtual ActionSpace {
     /// Documentation inherited
     bool publish_action(
         const int& action_id,
-        const ros::Publisher& publisher) const override;
+        const ros::Publisher& publisher,
+        const aikido::statespace::StateSpace::State& _state) const override;
 
     /// Documentation inherited
     bool is_valid_action_id(const int& action_id) const override;
