@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2019, Vinitha Ranganeni
+// Copyright (c) 2019,  Vinitha Ranganeni
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -27,41 +27,45 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef LIBCOZMO_MODELFRAMEWORK_MODELFRAMEWORK_HPP_
-#define LIBCOZMO_MODELFRAMEWORK_MODELFRAMEWORK_HPP_
-
+#include <gtest/gtest.h>
+#include "model/GPRModel.hpp"
+#include "model/ScikitLearnModel.hpp"
 #include <Python.h>
-#include <string>
 
 namespace libcozmo {
 namespace model {
+namespace test {
 
-/// Class for handling model of trained in a specific framework such as 
-/// scikit-learn, pytorch, etc.
-///
-/// Note, we do not define the inference function in this class as the 
-/// inputs and outputs for inference vary based on trained model (defined 
-/// in the dervied class)
-class ModelFramework {
+class GPRModelTest: public ::testing::Test {
  public:
-    ModelFramework() = default;
-    ~ModelFramework() = default;
-    /// This function compiles the embedded python code for loading a model
-    /// of a specific framework (defined by the derived class) and running 
-    /// inference. 
-    ///
-    /// \param model_path The path to the model file
-    virtual void initialize(const std::string& model_path) = 0;
+    GPRModelTest() :
+        m_framework(std::make_shared<ScikitLearnModel>("/home/vinitha/workspaces/curiosity_ws/src/curiosity_project/python/models/novel_uninformed/angle_regressor_12.pkl")),
+        m_model(m_framework) {
+    }
 
-    PyObject* get_model() const { return p_model; }
-    PyObject* get_module() const { return p_module; }
+    ~GPRModelTest() { }
 
-  protected:
-    PyObject* p_model;
-    PyObject* p_module;
+    std::shared_ptr<ScikitLearnModel> m_framework;
+    GPRModel m_model;
 };
 
+/// Check that model without anything loaded simply handles nullptr
+TEST_F(GPRModelTest, LoadModelTest) {
+    GPRModel::ModelInput input =
+        GPRModel::ModelInput(10, 0.75, 1);
+    GPRModel::ModelOutput output;
+    m_model.inference(input, &output);
+    EXPECT_NEAR(0.00012, output.distance, 0.01);
+}
+
+}  // namespace test
 }  // namespace model
 }  // namespace libcozmo
 
-#endif  // LIBCOZMO_MODELFRAMEWORK_MODELFRAMEWORK_HPP_
+int main(int argc, char **argv) {
+    Py_Initialize();
+    ::testing::InitGoogleTest(&argc, argv);
+    const auto results = RUN_ALL_TESTS();
+    Py_Finalize();
+    return results;
+}

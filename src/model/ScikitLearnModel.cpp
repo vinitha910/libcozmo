@@ -6,14 +6,12 @@ namespace libcozmo {
 namespace model {
 
 ScikitLearnModel::ScikitLearnModel(const std::string& model_path) {
-    // Py_Initialize();
     initialize(model_path);
 }
 
 ScikitLearnModel::~ScikitLearnModel() { 
     Py_DecRef(p_model);
     Py_DecRef(p_module);
-    // Py_Finalize();
 }
 
 void ScikitLearnModel::initialize(const std::string& model_path) {
@@ -22,7 +20,7 @@ void ScikitLearnModel::initialize(const std::string& model_path) {
         << "def load_model(filename):" << std::endl
         << "    return pickle.load(open(filename, 'rb'), encoding='latin1')" << std::endl
         << "def inference(model, input):" << std::endl
-        << "    return model.predict(input)[0]" << std::endl;
+        << "    return list(model.predict(input))" << std::endl;
 
     // Compile python code
     PyObject* p_compiled_fn = 
@@ -54,14 +52,3 @@ void ScikitLearnModel::initialize(const std::string& model_path) {
 
 }
 }
-
-// using namespace libcozmo::model;
-
-// int main() {
-//     Py_Initialize();
-// 	GPRModel::ScikitLearnModel model("/home/vinitha/workspaces/curiosity_ws/src/curiosity_project/python/models/novel_uninformed/angle_regressor_12.pkl");
-//     model.distance_prediction({0,2,2});
-//     model.distance_prediction({0,0,0});
-//     model.distance_prediction({0,6,2});
-//     Py_Finalize(); 
-// }

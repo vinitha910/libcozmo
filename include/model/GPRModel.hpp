@@ -39,15 +39,17 @@ class GPRModel : public virtual Model {
  		explicit ModelOutput(const double& distance, const double& dtheta) : 
  			distance(distance), dtheta(dtheta) {}
 
+ 		ModelOutput() : distance(0.0), dtheta(0.0) {}
+
  		/// The distance the object moved after applying an action 
- 		const double distance;
+ 		double distance;
 
  		/// The change in orientation of the object after applying an action 
- 		const double dtheta;
+ 		double dtheta;
  	};
 
- 	GPRModel(const ModelFramework& framework) : 
- 		m_framework(static_cast<const ScikitLearnModel&>(framework)) {}
+ 	GPRModel(const std::shared_ptr<ScikitLearnModel> framework) :
+ 		m_framework(framework) {}
  	
  	~GPRModel() = default;
 
@@ -55,7 +57,7 @@ class GPRModel : public virtual Model {
  		const Model::ModelInput& input, Model::ModelOutput* output) override;
 
  private:
- 	const ScikitLearnModel m_framework;
+ 	const std::shared_ptr<ScikitLearnModel> m_framework;
 
 };
 

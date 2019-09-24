@@ -30,12 +30,10 @@
 #ifndef LIBCOZMO_MODEL_MODEL_HPP_
 #define LIBCOZMO_MODEL_MODEL_HPP_
 
-#include "model/ModelFramework.hpp"
-
 namespace libcozmo {
 namespace model {
 
-class Model : public ModelFramework {
+class Model {
  public:
     /// Base class for model input
     class ModelInput;

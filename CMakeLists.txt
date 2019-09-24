@@ -112,6 +112,9 @@ target_link_libraries(test_linspace ${TEST_LIBS})
 catkin_add_gtest(test_distance tests/distance/test_distance.cpp)
 target_link_libraries(test_distance ${TEST_LIBS})
 
+catkin_add_gtest(test_model tests/model/test_GPRModel.cpp)
+target_link_libraries(test_model ${TEST_LIBS})
+
 ################################################################################
 # EXECUTABLES       
 ################################################################################
@@ -143,12 +146,6 @@ target_link_libraries(execute_traj
   cozmo
   ${aikido_LIBRARIES}
 )
-
-add_executable(gpr src/model/GPRModel.cpp)
-target_include_directories(gpr PRIVATE 
-  ${PYTHON_INCLUDE_DIRS}
-)
-target_link_libraries(gpr cozmo)
 
 ################################################################################
 # PYBIND 
