@@ -48,24 +48,22 @@ namespace actionspace {
 #define BACK M_PI
 #define RIGHT 3 * M_PI / 2
 
-/// An action space class that generates possible actions for Cozmo to execute
-/// relative to a rectangular object
+/// This class handles actions consisting of speed, edge offset, aspect ration,
+/// and heading offset. The actions are handled as generic, where each action is
+/// unique but not callibrated to the location of the cube.
 ///
-/// An Object Oriented Action Space is defined by the speed and duration of
-/// Cozmo at a location relative to a rectangular object
-///
-/// Each action contains a starting pose for cozmo along one of the sides of the
-/// object, from which the action will be executed. The are 4 main positions
-/// (each at a center along each side of the object); the user can specify n
-/// offsets from each center. The number of actions in the action space is 4 *
-/// num_offsets * num_speeds * num_durations
+/// When necessary, such as during successor calculation or action execution,
+/// the actionspace can convert the generic action to object oriented action
+/// given the pose of the cube.
 class ObjectOrientedActionSpace : public virtual ActionSpace {
  public:
     /// This class handles generic attributes to the action that can be
-    /// executed by cozmo, which are speed, edge offset, aspect ratio, and
-    /// heading offset
+    /// executed by cozmo, which are speed (mm / s), edge offset (m),
+    /// aspect ratio (mm), and heading offset (radian)
     class GenericAction : public ActionSpace::Action {
      public:
+        /// Constructs action with given attributes
+        ///
         /// \param speed : the speed of cozmo, in mm / s, negative speed
         ///     refers to backward movement
         /// \param edge_offset : normalized distance from center of edge
@@ -104,6 +102,9 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
     /// pose of the cube for execution/successor calculation
     class ObjectOrientedAction : public ActionSpace::Action {
      public:
+            /// Constructs object oriented action, indicating starting position
+            /// w.r.t the object pose
+            ///
             /// \param speed : the speed of cozmo, in mm / s, negative speed
             ///     refers to backward movement
             /// \param start_pose : starting pose of cozmo's action,
@@ -130,7 +131,7 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
     ///     rectangular object size(ratios) equals 2. The ratio refers to
     ///     numeric length (mm) of each unique side length.
     /// \param edge_offset : The max distance, along the edge of
-        ///     the object, from the center of that edge (mm)
+    ///     the object, from the center of that edge (mm)
     /// \param num_offset : number of starting position offsets on each side
     ///     of the object; this value must always be odd
     ObjectOrientedActionSpace(

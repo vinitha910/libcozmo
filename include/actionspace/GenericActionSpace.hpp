@@ -66,17 +66,14 @@ class GenericActionSpace : public virtual ActionSpace {
             m_duration(duration),
             m_heading(heading) {}
 
-        /// Speed of action (mm/s)
         const double m_speed;
-
-        /// Duration of action (s)
         const double m_duration;
-
-        /// Heading of action (rad)
         const double m_heading;
     };
-    /// Constructor
 
+    /// Constructs action space with given possible options for speed, duration
+    /// and heading
+    ///
     /// \param m_speeds Vector of available speeds
     /// \param m_durations Vector of available durations
     /// \param num heading Number of options for heading/direction (required:
