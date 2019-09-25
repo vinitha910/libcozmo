@@ -9,17 +9,18 @@ from visualization_msgs.msg import Marker
 
 class CornerDetector(object):
     """
-    A corner detector class that uses cozmo's sensor to map the dimensions of a
-    rectangular surface
+    A corner detector class that uses cozmo's built in edge detector to find
+    the corners of a rectangular surface
     """
     def __init__(self, robot, threshold):
         """
         Parameters
         ----------
         robot : cozmo.robot
-            the cozmo SDK robot handle
+            The cozmo SDK robot handle
         threshold : float
-            the distance away from an edge to be within bounds, in mm
+            The minimum distance (mm) from the table edge Cozmo must be when
+            moving around
         """
         self.robot = robot
         self.x_min = sys.maxsize
@@ -27,6 +28,7 @@ class CornerDetector(object):
         self.y_min = sys.maxsize
         self.y_max = -sys.maxsize - 1
         self.threshold = threshold
+        self.find_corners()
 
     def find_corners(self):
         """
@@ -58,7 +60,7 @@ class CornerDetector(object):
 
     def publish_plane(self, pub, height, boundary=False, color=(0, 0.5, 0.5)):
         """
-        Publish the surface found based on x and y dimensions
+        Publish the surface found based on corners of the surface
 
         Parameters
         ----------
@@ -66,7 +68,7 @@ class CornerDetector(object):
         height : float
             The height of the surface
         boundary : bool
-            whether to publish the surface or the boundary of the surface
+            False to publish the surface, True to publish the boundary of the surface
         color : tuple
             (r, g, b) values for the color of the surface
         All position and scale units are in mm
@@ -102,7 +104,6 @@ def cozmo_run(robot: cozmo.robot):
     plane_publisher = rospy.Publisher('plane_marker', Marker, queue_size=10)
     boundary_publisher = rospy.Publisher('boundary_marker', Marker, queue_size=10)
 
-    detector.find_corners()
     while not rospy.is_shutdown():
         detector.publish_plane(plane_publisher, 0, color=(1, 0.5, 0))
         detector.publish_plane(boundary_publisher, 2, True)
