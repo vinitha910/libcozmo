@@ -39,45 +39,63 @@ namespace libcozmo {
 namespace model {
 namespace test {
 
-// Check model inference is correct
-TEST(GPRModelTest, LoadModelTest) {
-    Py_Initialize();
-    auto framework = std::make_shared<ScikitLearnFramework>("SampleGPRModel.pkl");
-    auto statespace = std::make_shared<aikido::statespace::SE2>();
-    auto model = GPRModel(framework, statespace);
+class GPRModelTest: public ::testing::Test {
+ public:
+    GPRModelTest() : 
+        m_model(create_model()) {}
 
+    ~GPRModelTest() {}
+
+    GPRModel create_model() {
+        auto framework = std::make_shared<ScikitLearnFramework>("SampleGPRModel.pkl");
+        auto statespace = std::make_shared<aikido::statespace::SE2>();
+        return GPRModel(framework, statespace);
+    }
+
+    GPRModel m_model;
+};
+
+TEST_F(GPRModelTest, ModelInferenceTest) {
     GPRModel::ModelInput input = 
         GPRModel::ModelInput(30.0, -1.0, 1.0, Eigen::Vector2d(0,1));
     GPRModel::ModelOutput output;
-    model.inference(input, &output);
+    m_model.inference(input, &output);
     EXPECT_NEAR(0.0978534, output.distance, 0.001);
     EXPECT_NEAR(-0.0001391, output.dtheta, 0.001);
-    Py_Finalize();
 }
 
-TEST(GPRModelTest, IncorrectLoadModelTest) {
-    Py_Initialize();
-    try {
-        auto framework = ScikitLearnFramework("");
-    } catch(std::invalid_argument const& error) {
-        EXPECT_EQ(error.what(), 
-            std::string("[ScikitLearnFramework] Invalid model_path"));
-    }
-    Py_Finalize();
+TEST_F(GPRModelTest, GetPredictedStateTest) {
+    GPRModel::ModelInput input = 
+        GPRModel::ModelInput(30.0, -1.0, 1.0, Eigen::Vector2d(3.5,5.3));
+
+    aikido::statespace::SE2::State in; 
+    Eigen::Isometry2d t = Eigen::Isometry2d::Identity();
+    const Eigen::Rotation2D<double> rot(M_PI/4);
+    t.linear() = rot.toRotationMatrix();
+    t.translation() = Eigen::Vector2d(2.0, 3.0);
+    in.setIsometry(t);
+
+    aikido::statespace::SE2::State out;
+    m_model.predict_state(input, in, &out);
+
+    const auto transform = out.getIsometry();
+    Eigen::Rotation2Dd rotation = Eigen::Rotation2Dd::Identity();
+    rotation.fromRotationMatrix(transform.rotation());
+
+    EXPECT_NEAR(2.05392324, transform.translation().x(), 0.001);
+    EXPECT_NEAR(3.08165519, transform.translation().y(), 0.001);
+    EXPECT_NEAR(0.78525906, rotation.angle(), 0.001);
 }
 
-// Todo test predict state function
-// TEST(GPRModelTest, GetPredictedStateTest) {
-//     Py_Initialize();
-//     auto framework = std::make_shared<ScikitLearnFramework>("SampleGPRModel.pkl");
-//     auto statespace = std::make_shared<aikido::statespace::SE2>();
-//     auto model = GPRModel(framework, statespace);
-
-//     GPRModel::ModelInput input = 
-//         GPRModel::ModelInput(30.0, -1.0, 1.0, Eigen::Vector2d(0,1));
-
-
-//     Py_Finalize();
+// TEST_F(GPRModelTest, IncorrectLoadModelTest) {
+//     // Py_Initialize();
+//     try {
+//         auto framework = ScikitLearnFramework("");
+//     } catch(std::invalid_argument const& error) {
+//         EXPECT_EQ(error.what(), 
+//             std::string("[ScikitLearnFramework] Invalid model_path"));
+//     }
+//     // Py_Finalize();
 // }
 
 }  // namespace test
@@ -85,7 +103,9 @@ TEST(GPRModelTest, IncorrectLoadModelTest) {
 }  // namespace libcozmo
 
 int main(int argc, char **argv) {
+    Py_Initialize();
     ::testing::InitGoogleTest(&argc, argv);
     const auto results = RUN_ALL_TESTS();
+    Py_Finalize();
     return results;
 }

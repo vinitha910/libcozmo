@@ -41,17 +41,18 @@ void GPRModel::predict_state(
     // Calculate new position
     const ModelInput model_input = 
         static_cast<const ModelInput&>(model_input_);
-    const Eigen::Vector2d direction = model_input.direction.normalized();
+    const Eigen::Vector2d direction_norm = model_input.direction.normalized();
     const auto transform = in_state.getIsometry();
     const double x = 
-        transform.translation().x() + output.distance * direction.x();
+        transform.translation().x() + output.distance * direction_norm.x();
     const double y = 
-        transform.translation().y() + output.distance * direction.y();
+        transform.translation().y() + output.distance * direction_norm.y();
 
-    // Calculate new roation
+    // Calculate new rotation
     Eigen::Rotation2Dd rotation = Eigen::Rotation2Dd::Identity();
     rotation.fromRotationMatrix(transform.rotation());
-    const double theta = utils::angle_normalization(rotation.angle() + output.dtheta);
+    const double theta = 
+        utils::angle_normalization(rotation.angle() + output.dtheta);
 
     // Set out state
     aikido::statespace::SE2::State* out_state = 
@@ -59,9 +60,7 @@ void GPRModel::predict_state(
     Eigen::Isometry2d t = Eigen::Isometry2d::Identity();
     const Eigen::Rotation2D<double> rot(theta);
     t.linear() = rot.toRotationMatrix();
-    Eigen::Vector2d trans;
-    trans << x, y;
-    t.translation() = trans;
+    t.translation() = Eigen::Vector2d(x, y);
     out_state->setIsometry(t);
 }
 
