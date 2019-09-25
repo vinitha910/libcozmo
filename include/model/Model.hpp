@@ -30,6 +30,8 @@
 #ifndef LIBCOZMO_MODEL_MODEL_HPP_
 #define LIBCOZMO_MODEL_MODEL_HPP_
 
+#include "aikido/statespace/StateSpace.hpp"
+
 namespace libcozmo {
 namespace model {
 
@@ -43,6 +45,11 @@ class Model {
 
     /// Base class for model output
     class ModelOutput;
+
+    virtual void predict_state(
+        const ModelInput& input, 
+        const aikido::statespace::StateSpace::State& in_,
+        aikido::statespace::StateSpace::State* out_) = 0;
 
     /// Get the model's predicted output given then input
     ///

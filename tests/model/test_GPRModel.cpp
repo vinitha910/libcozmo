@@ -27,11 +27,13 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <Eigen/Geometry>
 #include <gtest/gtest.h>
 #include <stdexcept>
 #include <Python.h>
 #include "model/GPRModel.hpp"
 #include "model/ScikitLearnFramework.hpp"
+#include "statespace/SE2.hpp"
 
 namespace libcozmo {
 namespace model {
@@ -41,13 +43,15 @@ namespace test {
 TEST(GPRModelTest, LoadModelTest) {
     Py_Initialize();
     auto framework = std::make_shared<ScikitLearnFramework>("SampleGPRModel.pkl");
-    auto model = GPRModel(framework);
+    auto statespace = std::make_shared<aikido::statespace::SE2>();
+    auto model = GPRModel(framework, statespace);
 
-    GPRModel::ModelInput input = GPRModel::ModelInput(30, 1.0, 0);
+    GPRModel::ModelInput input = 
+        GPRModel::ModelInput(30.0, -1.0, 1.0, Eigen::Vector2d(0,1));
     GPRModel::ModelOutput output;
     model.inference(input, &output);
-    EXPECT_NEAR(0, output.distance, 0.001);
-    EXPECT_NEAR(0, output.dtheta, 0.001);
+    EXPECT_NEAR(0.0978534, output.distance, 0.001);
+    EXPECT_NEAR(-0.0001391, output.dtheta, 0.001);
     Py_Finalize();
 }
 
@@ -61,6 +65,20 @@ TEST(GPRModelTest, IncorrectLoadModelTest) {
     }
     Py_Finalize();
 }
+
+// Todo test predict state function
+// TEST(GPRModelTest, GetPredictedStateTest) {
+//     Py_Initialize();
+//     auto framework = std::make_shared<ScikitLearnFramework>("SampleGPRModel.pkl");
+//     auto statespace = std::make_shared<aikido::statespace::SE2>();
+//     auto model = GPRModel(framework, statespace);
+
+//     GPRModel::ModelInput input = 
+//         GPRModel::ModelInput(30.0, -1.0, 1.0, Eigen::Vector2d(0,1));
+
+
+//     Py_Finalize();
+// }
 
 }  // namespace test
 }  // namespace model
