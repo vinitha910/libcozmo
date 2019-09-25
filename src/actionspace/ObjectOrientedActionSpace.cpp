@@ -27,7 +27,6 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
 #include "actionspace/ObjectOrientedActionSpace.hpp"
 #include "statespace/SE2.hpp"
 #include "utils/utils.hpp"
@@ -49,17 +48,16 @@ ObjectOrientedActionSpace::ObjectOrientedActionSpace(
         std::vector<double>{0} :
         utils::linspace(-m_edge_offset, m_edge_offset, num_offset);
     int action_id = 0;
-    for (const auto& heading_offset :
-        std::vector<double>{FRONT, LEFT, BACK, RIGHT}) {
-        double ratio = m_ratios[0];
-        if (heading_offset == LEFT || heading_offset == RIGHT) {
-            ratio = m_ratios[1];
-        }
+    const std::vector<double> sides{FRONT, LEFT, BACK, RIGHT};
+
+    // Generate all possible generic actions given the heading offset, aspect
+    // ratio, and speed
+    for (const auto& heading_offset : sides) {
+        const double ratio =
+            (heading_offset == FRONT || heading_offset == BACK) ? 
+                m_ratios[0] : m_ratios[1];
         for (const auto& cube_offset : cube_offsets) {
             for (const auto& speed : speeds) {
-                ObjectOrientedActionSpace::GenericAction* action =
-                    static_cast<ObjectOrientedActionSpace::GenericAction*>(
-                        get_action(action_id));
                 m_actions.push_back(new GenericAction(
                     speed,
                     -cube_offset / m_edge_offset,
@@ -106,25 +104,35 @@ bool ObjectOrientedActionSpace::is_valid_action_id(
     return action_id < m_actions.size() && action_id >= 0;
 }
 
-void ObjectOrientedActionSpace::generic_to_object(
-    const GenericAction& _action,
+bool ObjectOrientedActionSpace::get_generic_to_object_oriented_action(
+    const int& action_id,
     const aikido::statespace::StateSpace::State& _state,
     ObjectOrientedAction* action) const {
+    auto _action = static_cast<GenericAction*>(get_action(action_id));
+
+    // handle segmentation fault in the case action is not valid
+    if (_action == nullptr) {
+        return false;
+    }
+
+    // Calculate action w.r.t position of the object
     auto state = static_cast<const aikido::statespace::SE2::State&>(_state);
     Eigen::Isometry2d transform = state.getIsometry();
     Eigen::Rotation2Dd rotation = Eigen::Rotation2Dd::Identity();
     rotation.fromRotationMatrix(transform.rotation());
     Eigen::Vector2d position = transform.translation();
     double angle = rotation.angle();
-    double heading = _action.getHeadingOffset();
+    double heading = _action->heading_offset();
     *action = ObjectOrientedAction(
-        _action.getSpeed(),
+        _action->speed(),
         Eigen::Vector3d(
             position[0] - m_center_offset * cos(heading) +
-                _action.getEdgeOffset() * m_edge_offset * sin(heading),
+                _action->edge_offset() * m_edge_offset * sin(heading),
             position[1] - m_center_offset * sin(heading) +
-                _action.getEdgeOffset() * m_edge_offset * cos(heading),
+                _action->edge_offset() * m_edge_offset * cos(heading),
             utils::angle_normalization(angle + heading)));
+
+    return true;
 }
 
 bool ObjectOrientedActionSpace::publish_action(
@@ -132,16 +140,13 @@ bool ObjectOrientedActionSpace::publish_action(
     const ros::Publisher& publisher,
     const aikido::statespace::StateSpace::State& _state) const {
     libcozmo::ObjectOrientedAction msg;
-    const GenericAction* action =
-        static_cast<GenericAction*>(get_action(action_id));
-    if (action == nullptr) {
+    ObjectOrientedAction OO_action(0.0, Eigen::Vector3d(0, 0, 0));
+    if (!get_generic_to_object_oriented_action(action_id, _state, &OO_action)) {
         return false;
     }
-    ObjectOrientedAction OO_action(0.0, Eigen::Vector3d(0, 0, 0));
-    generic_to_object(*action, _state, &OO_action);
-    msg.speed = OO_action.getSpeed();
+    msg.speed = OO_action.speed();
     msg.duration = 1;
-    Eigen::Vector3d start_pose = OO_action.getStartPose();
+    Eigen::Vector3d start_pose = OO_action.start_pose();
     msg.x = start_pose[0];
     msg.y = start_pose[1];
     msg.theta = start_pose[2];

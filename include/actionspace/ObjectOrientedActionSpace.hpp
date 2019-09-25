@@ -39,26 +39,37 @@
 namespace libcozmo {
 namespace actionspace {
 
-/// Macros indicating orientation (radian) correponding to each side of the cube
-///
-/// The side of the cube opposite to side with the screw at its bottom is
-/// identified by cozmo as the front, with 0 orientation.
-#define FRONT 0
+/// Macros defining Cozmo's heading offset (radians) to face the corresponding
+/// sides of the object
+#define FRONT 0.0
 #define LEFT M_PI / 2
 #define BACK M_PI
 #define RIGHT 3 * M_PI / 2
 
-/// This class handles actions consisting of speed, edge offset, aspect ration,
-/// and heading offset. The actions are handled as generic, where each action is
-/// unique but not callibrated to the location of the cube.
+/// An Object Oriented Action Space is defined by the speed and duration of
+/// Cozmo at a location relative to a rectangular object. We store the actions
+/// as generic actions (i.e. the action is not generated with respect to an
+/// object's pose). These generic actions can then be converted to object
+/// oriented actions as needed. The generic actions contains information of
+/// the action's speed (mm / s), offset from center of an edge (normalized to
+/// [-1,1]), aspect ratio of the side (mm) the object is pushing, and the
+/// heading offset indicating which side the action is pushing
+/// (front, left, back, right).
 ///
-/// When necessary, such as during successor calculation or action execution,
-/// the actionspace can convert the generic action to object oriented action
-/// given the pose of the cube.
+/// Each object oriented action contains a starting pose for Cozmo along one of
+/// the sides of the object, from which the action will be executed. The are 4
+/// main positions (each at a center along each side of the object); the user
+/// can specify n offsets from each center. The number of object oriented
+/// actions in the action space is 4 * num_offsets * num_speeds * num_durations
+/// Each object oriented action also contains the speed of the action (mm / s).
+///
+/// For efficiency, the class handles actions based on their unique ID. Each ID
+/// belongs to a generic action, and the object oreinted action equivalent of
+/// given ID can be calculated if necessary.
 class ObjectOrientedActionSpace : public virtual ActionSpace {
  public:
     /// This class handles generic attributes to the action that can be
-    /// executed by cozmo, which are speed (mm / s), edge offset (m),
+    /// executed by cozmo, which are speed (mm / s), edge offset (mm),
     /// aspect ratio (mm), and heading offset (radian)
     class GenericAction : public ActionSpace::Action {
      public:
@@ -70,10 +81,10 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
         ///     in range [-1, 1], where -1 and 1 are the left and right
         ///     corner respectively
         /// \param aspect_ratio : the aspect ratio of the side cozmo is
-        ///     pushing from, indicated by different side length.
+        ///     pushing from, indicated by different side length. (mm)
         /// \param heading_offset : The angular distance from front of
-        ///     the cube, indicating which side of the cube the action
-        ///     is being applied to
+        ///     the object, indicating which side of the object the action
+        ///     is being applied to (radians)
         explicit GenericAction(
             const double& speed,
             const double& edge_offset,
@@ -84,10 +95,10 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
             m_aspect_ratio(aspect_ratio),
             m_heading_offset(heading_offset) {}
 
-        double getSpeed() const { return m_speed; }
-        double getAspectRatio() const { return m_aspect_ratio; }
-        double getEdgeOffset() const { return m_edge_offset; }
-        double getHeadingOffset() const { return m_heading_offset; }
+        double speed() const { return m_speed; }
+        double aspect_ratio() const { return m_aspect_ratio; }
+        double edge_offset() const { return m_edge_offset; }
+        double heading_offset() const { return m_heading_offset; }
 
      private:
         double m_speed;
@@ -98,25 +109,26 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
         friend class ObjectOrientedActionSpace;
     };
 
-    /// This is an action class that obtains information related to the
-    /// pose of the cube for execution/successor calculation
+    /// This class contains the parameters for executing an objected oriented
+    /// action. These parameters are calculated from the corresponding generic
+    /// action parameters.
     class ObjectOrientedAction : public ActionSpace::Action {
      public:
             /// Constructs object oriented action, indicating starting position
-            /// w.r.t the object pose
+            /// w.r.t the object position
             ///
             /// \param speed : the speed of cozmo, in mm / s, negative speed
             ///     refers to backward movement
             /// \param start_pose : starting pose of cozmo's action,
-            ///     its attributes are x(mm), y(mm), and theta(radian)
+            ///     its attributes are x(mm), y(mm), and theta(radians)
         explicit ObjectOrientedAction(
             const double& speed,
             const Eigen::Vector3d& start_pose) : \
             m_speed(speed),
             m_start_pose(start_pose) {}
 
-        double getSpeed() const { return m_speed; }
-        Eigen::Vector3d getStartPose() const { return m_start_pose; }
+        double speed() const { return m_speed; }
+        Eigen::Vector3d start_pose() const { return m_start_pose; }
 
      private:
             double m_speed;
@@ -125,18 +137,21 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
             friend class ObjectOrientedActionSpace;
     };
 
+    /// Constructor assumes that the first element of the aspect ratio is the
+    /// long edge/length of the object.
+    ///
     /// \param speeds : all possible speeds (mm/s) for the actions
     ///     (duplicates persist)
-    /// \param ratios : The aspect ratio of sides of the cube, given a
-    ///     rectangular object size(ratios) equals 2. The ratio refers to
-    ///     numeric length (mm) of each unique side length.
+    /// \param aspect_ratio : The aspect ratio (mm) of the object.
+    ///     For example, if the size of the object is 100mm x 300mm then the
+    ///     aspect ratio = {100, 300}
     /// \param edge_offset : The max distance, along the edge of
     ///     the object, from the center of that edge (mm)
     /// \param num_offset : number of starting position offsets on each side
     ///     of the object; this value must always be odd
     ObjectOrientedActionSpace(
         const std::vector<double>& speeds,
-        const std::vector<double>& ratios,
+        const std::vector<double>& aspect_ratio,
         const double& edge_offset,
         const int& num_offset = 40);
 
@@ -167,14 +182,13 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
     bool is_valid_action_id(const int& action_id) const;
 
     /// Converts a generic action to an object oriented action with respect
-    /// to the pose of the cube, for both successor state calculation and
-    /// cozmo's action excution.
+    /// to the pose of the object.
     ///
     /// \param _action The generic action
     /// \param _state State of the cube indicating its pose
     /// \param[out] action The object oriented action to modify
-    void generic_to_object(
-        const GenericAction& _action,
+    bool get_generic_to_object_oriented_action(
+        const int& action_id,
         const aikido::statespace::StateSpace::State& _state,
         ObjectOrientedAction* action) const;
 
@@ -188,11 +202,11 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
     int size() const;
 
  private:
-    std::vector<double> m_speeds;
-    std::vector<double> m_ratios;
-    int num_offset;
-    double m_center_offset;
-    double m_edge_offset;
+    const std::vector<double> m_speeds;
+    const std::vector<double> m_ratios;
+    const int num_offset;
+    const double m_center_offset;
+    const double m_edge_offset;
     std::vector<GenericAction*> m_actions;
     ros::Publisher action_publisher;
 };

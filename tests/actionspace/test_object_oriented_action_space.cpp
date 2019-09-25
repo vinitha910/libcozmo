@@ -97,10 +97,10 @@ TEST_F(SimpleOOActionFixture, ActionGenerationTest) {
     as::ObjectOrientedActionSpace::GenericAction* action =
         static_cast<as::ObjectOrientedActionSpace::GenericAction*>(
             m_actionspace.get_action(4));
-    EXPECT_EQ(2.5, action->getSpeed());
-    EXPECT_NEAR(0, action->getHeadingOffset(), 0.001);
-    EXPECT_EQ(0.5, action->getEdgeOffset());
-    EXPECT_NEAR(4.0, action->getAspectRatio(), 0.01);
+    EXPECT_EQ(2.5, action->speed());
+    EXPECT_NEAR(0, action->heading_offset(), 0.001);
+    EXPECT_EQ(0.5, action->edge_offset());
+    EXPECT_NEAR(4.0, action->aspect_ratio(), 0.01);
 
     // Tests nullptr action
     action = static_cast<as::ObjectOrientedActionSpace::GenericAction*>(
