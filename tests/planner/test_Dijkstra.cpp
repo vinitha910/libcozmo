@@ -35,49 +35,71 @@ namespace libcozmo {
 namespace planner {
 namespace test {
 
-TEST(DijkstraTest, StartIsGoalTest) {
+class DijkstraTest: public ::testing::Test {
+ public:
+    DijkstraTest() : m_solver(create_planner(&m_start, &m_goal)) {}
+
+    ~DijkstraTest() {}
+
+    /// Construct a dijkstra planner
+    ///
+    /// \param[out] start The ID of start state
+    /// \param[out] goal The ID of goal state
+    Dijkstra create_planner(int* start, int* goal) {
+        std::shared_ptr<actionspace::GenericActionSpace> GAS_ptr =
+            std::make_shared<actionspace::GenericActionSpace>(
+                std::vector<double>{0, 150, 200, 250},
+                std::vector<double>{1},
+                4); 
+        
+        // Create statespace and add start/goal
+        std::shared_ptr<statespace::SE2> SE2_ptr =
+            std::make_shared<statespace::SE2>(10, 4);
+        *start = SE2_ptr->get_or_create_state(
+            libcozmo::statespace::SE2::State(0, 0, 0));
+        *goal = SE2_ptr->get_or_create_state(
+            libcozmo::statespace::SE2::State(35, 30, 3));
+
+        // Get shared pointer of model, actionspace, and distance metric for
+        // construction
+        auto type_ =
+            libcozmo::model::DeterministicModel::DeterministicModelType();
+        const std::shared_ptr<model::DeterministicModel> model_ptr =
+            std::make_shared<model::DeterministicModel>();
+        model_ptr->load_model(&type_);
+        const std::shared_ptr<distance::SE2> distance_ptr =
+            std::make_shared<distance::SE2>(SE2_ptr);
+
+        // Construct and return instance of a solver
+        libcozmo::planner::Dijkstra m_solver(
+            GAS_ptr,
+            SE2_ptr,
+            model_ptr,
+            distance_ptr,
+            1.0);
+
+        return m_solver;    
+    }
+
+    libcozmo::planner::Dijkstra m_solver;
+    int m_start;
+    int m_goal;
+};
+
+TEST_F(DijkstraTest, StartIsGoalTest) {
     /// Checking solver's base case where start is the same as goal
-    auto type_ = libcozmo::model::DeterministicModel::DeterministicModelType();
-    libcozmo::statespace::SE2 state_space(10, 4);
-    int start = state_space.get_or_create_state(
-        libcozmo::statespace::SE2::State(0, 0, 0));
-    libcozmo::actionspace::GenericActionSpace action_space(
-        std::vector<double>{0.1},
-        std::vector<double>{0.1},
-        4);
-    libcozmo::model::DeterministicModel model;
-    auto se2 = distance::SE2(std::make_shared<statespace::SE2>(0.1, 4));
-    model.load_model(&type_);
-    libcozmo::planner::Dijkstra m_solver(
-        &action_space, &state_space, &model, &se2, 0.01);
     std::vector<int> actions;
-    EXPECT_TRUE(m_solver.set_start(start));
-    EXPECT_TRUE(m_solver.set_goal(start));
+    EXPECT_TRUE(m_solver.set_start(m_start));
+    EXPECT_TRUE(m_solver.set_goal(m_start));
     bool solved  = m_solver.solve(&actions);
     EXPECT_TRUE(solved);
 }
 
-TEST(DijkstraTest, SimpleSolverTestCozmo) {
+TEST_F(DijkstraTest, SimpleSolverTestCozmo) {
     /// Checking solver in a medium-sized problem
-    auto type_ = libcozmo::model::DeterministicModel::DeterministicModelType();
-    libcozmo::statespace::SE2 state_space(10, 4);
-    int start = state_space.get_or_create_state(
-        libcozmo::statespace::SE2::State(0, 0, 0));
-    int goal = state_space.get_or_create_state(
-        libcozmo::statespace::SE2::State(35, 30, 3));
-    libcozmo::actionspace::GenericActionSpace action_space(
-        std::vector<double>{0, 150, 200, 250},
-        std::vector<double>{1},
-        4);
-    libcozmo::model::DeterministicModel model;
-    model.load_model(&type_);
-    auto distance_metric =
-        distance::SE2(std::make_shared<statespace::SE2>(10, 4));
-    libcozmo::planner::Dijkstra m_solver(
-        &action_space, &state_space, &model, &distance_metric, 1);
     std::vector<int> actions;
-    EXPECT_TRUE(m_solver.set_start(start));
-    EXPECT_TRUE(m_solver.set_goal(goal));
+    EXPECT_TRUE(m_solver.set_start(m_start));
+    EXPECT_TRUE(m_solver.set_goal(m_goal));
     bool solved  = m_solver.solve(&actions);
     EXPECT_TRUE(solved);
 }
