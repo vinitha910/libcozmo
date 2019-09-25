@@ -79,8 +79,8 @@ class GenericActionSpace : public virtual ActionSpace {
     /// \param num heading Number of options for heading/direction (required:
     /// power of 2 and >= 4)
     GenericActionSpace(
-        const std::vector<double>& m_speeds,
-        std::vector<double> m_durations,
+        const std::vector<double>& speeds,
+        const std::vector<double>& durations,
         const int& num_headings);
 
     ~GenericActionSpace() {

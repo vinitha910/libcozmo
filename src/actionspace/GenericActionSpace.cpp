@@ -33,23 +33,22 @@ namespace libcozmo {
 namespace actionspace {
 
 GenericActionSpace::GenericActionSpace(
-    const std::vector<double>& m_speeds,
-    std::vector<double> m_durations,
+    const std::vector<double>& speeds,
+    const std::vector<double>& durations,
     const int& num_headings) {
-    int num_speed = m_speeds.size();
-    int num_duration = m_durations.size();
-    std::vector<double> m_headings = utils::linspace(
+    std::vector<double> headings = utils::linspace(
         0.0, 2.0 * M_PI - 2.0 * M_PI / num_headings, num_headings);
-    m_actions = std::vector<Action*>(
-        num_speed * num_duration * num_headings, nullptr);
+    m_actions =
+        std::vector<Action*>(
+            speeds.size() * durations.size() * num_headings, nullptr);
 
-    for (int j = 0; j < num_speed; j++) {
-        for (int k = 0; k < num_duration; k++) {
+    for (int j = 0; j < speeds.size(); j++) {
+        for (int k = 0; k < durations.size(); k++) {
             for (int l = 0; l < num_headings; l++) {
                 const int id =
-                    (((j * num_duration) + k) * num_headings) + l;
-                m_actions[id] = new Action(
-                    m_speeds[j], m_durations[k], m_headings[l]);
+                    (((j * durations.size()) + k) * num_headings) + l;
+                m_actions[id] =
+                    new Action(speeds[j], durations[k], headings[l]);
             }
         }
     }
@@ -61,17 +60,16 @@ bool GenericActionSpace::action_similarity(
         return false;
     }
 
-    Action* action1 = m_actions[action_id1];
-    Action* action2 = m_actions[action_id2];
+    const Action* action1 = m_actions[action_id1];
     std::vector<double> action1_vector{
-        action1->m_speed,
-        action1->m_duration,
-        action1->m_heading};
+        action1->m_speed, action1->m_duration, action1->m_heading};
+
+    const Action* action2 = m_actions[action_id2];
     std::vector<double> action2_vector{
-        action2->m_speed,
-        action2->m_duration,
-        action2->m_heading};
+        action2->m_speed, action2->m_duration, action2->m_heading};
+    
     *similarity = utils::euclidean_distance(action1_vector, action2_vector);
+    
     return true;
 }
 
