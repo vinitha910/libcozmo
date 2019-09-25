@@ -115,6 +115,9 @@ target_link_libraries(test_distance ${TEST_LIBS})
 catkin_add_gtest(test_model tests/model/test_GPRModel.cpp)
 target_link_libraries(test_model ${TEST_LIBS})
 
+catkin_add_gtest(test_framework tests/model/test_ScikitLearnFramework.cpp)
+target_link_libraries(test_framework ${TEST_LIBS})
+
 ################################################################################
 # EXECUTABLES       
 ################################################################################

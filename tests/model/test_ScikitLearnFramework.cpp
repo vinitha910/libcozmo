@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2019, Vinitha Ranganeni
+// Copyright (c) 2019,  Vinitha Ranganeni
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -27,49 +27,33 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_MODEL_MODELFRAMEWORK_HPP_
-#define INCLUDE_MODEL_MODELFRAMEWORK_HPP_
-
+#include <Eigen/Geometry>
+#include <gtest/gtest.h>
+#include <stdexcept>
 #include <Python.h>
-#include <string>
+#include "model/ScikitLearnFramework.hpp"
 
 namespace libcozmo {
 namespace model {
+namespace test {
 
-/// Class for handling model of trained in a specific framework such as
-/// scikit-learn, pytorch, etc.
-///
-/// Note, we do not define the inference function in this class as the
-/// inputs and outputs for inference vary based on trained model (defined
-/// in the dervied class)
-///
-/// When using this class or its derived classes in a script you must wrap the
-/// code with Py_Initialize() and Py_Finalize()
-class ModelFramework {
- public:
-    ModelFramework() = default;
-    ~ModelFramework() = default;
-    /// This function compiles the embedded python code for loading a model
-    /// of a specific framework (defined by the derived class) and running
-    /// inference.
-    ///
-    /// \param model_path The path to the model file
-    /// \return True if initialized correctly; false otherwise
-    virtual bool initialize(const std::string& model_path) = 0;
+TEST(ScikitLearnFrameworkTest, ThrowingExeceptionTest) {
+    try {
+        auto framework = ScikitLearnFramework("");
+    } catch(std::invalid_argument const& error) {
+        EXPECT_EQ(error.what(),
+            std::string("[ScikitLearnFramework] Invalid model_path"));
+    }
+}
 
-    /// Returns pointer to python object (at C level) of the loaded model
-    PyObject* get_model() const { return p_model; }
-
-    /// Returns pointer to python object (at C level) of the compiled
-    /// python code
-    PyObject* get_module() const { return p_module; }
-
- protected:
-    PyObject* p_model;
-    PyObject* p_module;
-};
-
+}  // namespace test
 }  // namespace model
 }  // namespace libcozmo
 
-#endif  // INCLUDE_MODEL_MODELFRAMEWORK_HPP_
+int main(int argc, char **argv) {
+    Py_Initialize();
+    ::testing::InitGoogleTest(&argc, argv);
+    const auto results = RUN_ALL_TESTS();
+    Py_Finalize();
+    return results;
+}

@@ -27,15 +27,16 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef LIBCOZMO_SCIKITLEARNFRAMEWORK_SCIKITLEARNFRAMEWORK_HPP_
-#define LIBCOZMO_SCIKITLEARNFRAMEWORK_SCIKITLEARNFRAMEWORK_HPP_
+#ifndef INCLUDE_MODEL_SCIKITLEARNFRAMEWORK_HPP_
+#define INCLUDE_MODEL_SCIKITLEARNFRAMEWORK_HPP_
 
+#include <string>
 #include <model/ModelFramework.hpp>
 
 namespace libcozmo {
 namespace model {
 
-/// Class for handling model of trained in a specific framework such as 
+/// Class for handling model of trained in a specific framework such as
 /// scikit-learn, pytorch, etc
 class ScikitLearnFramework : public virtual ModelFramework {
  public:
@@ -43,7 +44,7 @@ class ScikitLearnFramework : public virtual ModelFramework {
     ///
     /// Throws an invalid_argument exception if the path is invalid or if the
     /// model can't be loaded correctly
-    ScikitLearnFramework(const std::string& model_path);
+    explicit ScikitLearnFramework(const std::string& model_path);
 
     /// Frees memory allocated by python interpreter
     ~ScikitLearnFramework();
@@ -55,4 +56,4 @@ class ScikitLearnFramework : public virtual ModelFramework {
 }  // namespace model
 }  // namespace libcozmo
 
-#endif  // LIBCOZMO_SCIKITLEARNFRAMEWORK_SCIKITLEARNFRAMEWORK_HPP_
+#endif  // INCLUDE_MODEL_SCIKITLEARNFRAMEWORK_HPP_
