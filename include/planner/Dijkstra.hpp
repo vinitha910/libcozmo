@@ -30,7 +30,7 @@
 #ifndef LIBCOZMO_PLANNER_DIJKSTRA_HPP_
 #define LIBCOZMO_PLANNER_DIJKSTRA_HPP_
 
-// #include <ros/ros.h>
+#include <memory>
 #include "actionspace/GenericActionSpace.hpp"
 #include "statespace/SE2.hpp"
 #include "model/DeterministicModel.hpp"
@@ -42,31 +42,27 @@ namespace planner {
 
 /// This class uses Dijkstra's algorithm to find a sequence of actions
 /// to get from start state to goal state
-///
-/// To search for a path the class implements an actionspace, a statespace,
-/// and a model
 class Dijkstra : public virtual Planner {
  public:
     /// Constructs a planner with given actionspace, statespace, model
     ///
-    /// Constructs distance metric and goal tolerance that defines the solver's
-    /// additional stopping condition.
+    /// Constructs distance metric and goal tolerance
     ///
-    /// \param actionspace The actionspace to get set of actions to explore
-    /// \param statespace The statespace to build graph representation with
-    /// \param model Model to generate successors
-    /// \param distance_metric The metric to calculate distance to goal
-    /// \param goal_tolerance Additional stopping condition for solver
+    /// \param actionspace Defines the set of all possible actions
+    /// \param statespace Defines the set of all possible states
+    /// \param model A model that has learnt f : (state, action) -> state'
+    /// \param distance_metric The metric used to calculate the distance between
+    ///     two states
+    /// \param goal_tolerance The threshold for being considered at the goal
     Dijkstra(
-        libcozmo::actionspace::ActionSpace* actionspace,
-        libcozmo::statespace::StateSpace* statespace,
-        libcozmo::model::Model* model,
-        distance::Distance* distance_metric,
+        std::shared_ptr<actionspace::ActionSpace> actionspace,
+        std::shared_ptr<statespace::StateSpace> statespace,
+        std::shared_ptr<model::Model> model,
+        std::shared_ptr<distance::Distance> distance_metric,
         const double& goal_tolerance) : \
         m_action_space(actionspace),
         m_state_space(statespace),
         m_model(model),
-        m_continuous_statespace(std::make_shared<aikido::statespace::SE2>()),
         m_distance_metric(distance_metric),
         m_goal_tolerance(goal_tolerance)  {
         m_start_id = -1;
@@ -87,7 +83,7 @@ class Dijkstra : public virtual Planner {
     /// Extracts sequence of actions from start to goal
     ///
     /// \param[out] actions Vector of action IDs
-    void extract_sequence(std::vector<int> *actions);
+    void extract_action_sequence(std::vector<int> *actions);
 
     /// Finds all successor states given input state
     ///
@@ -97,20 +93,19 @@ class Dijkstra : public virtual Planner {
         const statespace::SE2::State* state_,
         std::vector<statespace::SE2::State>* succesors);
 
-    /// Check whether the solver has reached the goal, which its defintion
-    /// varies based on distance metric
+    /// Check whether the solver has reached the goal (i.e. is within the
+    /// specified goal tolerance)
     ///
     /// \param curr_state_id The ID of current state
     /// \return True if goal condition is met; false otherwise
     bool is_goal(const int& curr_state_id) const;
 
-    libcozmo::actionspace::ActionSpace* m_action_space;
-    libcozmo::statespace::StateSpace* m_state_space;
+    std::shared_ptr<actionspace::ActionSpace> m_action_space;
+    std::shared_ptr<statespace::StateSpace> m_state_space;
     int m_start_id;
     int m_goal_id;
-    libcozmo::model::Model* m_model;
-    std::shared_ptr<aikido::statespace::SE2> m_continuous_statespace;
-    distance::Distance* m_distance_metric;
+    std::shared_ptr<model::Model> m_model;
+    std::shared_ptr<distance::Distance> m_distance_metric;
     const double m_goal_tolerance;
     ChildToParentMap m_child_to_parent_map;
 };

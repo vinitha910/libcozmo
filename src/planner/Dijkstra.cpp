@@ -19,7 +19,7 @@
 // IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
 // ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
 // LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// CONSEpriority_queueUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
 // SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
 // INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
 // CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
@@ -34,8 +34,12 @@ namespace libcozmo {
 namespace planner {
 
     bool Dijkstra::set_start(const int& start_id) {
-        if (m_state_space->is_valid_state(
-                *m_state_space->get_state(start_id))) {
+        auto state_ = m_state_space->get_state(start_id);
+        if (state_ == nullptr) {
+            return false;
+        }
+
+        if (m_state_space->is_valid_state(*state_)) {
             m_start_id = start_id;
             return true;
         }
@@ -43,8 +47,11 @@ namespace planner {
     }
 
     bool Dijkstra::set_goal(const int& goal_id) {
-        if (m_state_space->is_valid_state(
-                *m_state_space->get_state(goal_id))) {
+        auto state_ = m_state_space->get_state(goal_id);
+        if (state_ == nullptr) {
+            return false;
+        }
+        if (m_state_space->is_valid_state(*state_)) {
             m_goal_id = goal_id;
             return true;
         }
@@ -52,27 +59,37 @@ namespace planner {
     }
 
     bool Dijkstra::solve(std::vector<int>* actions) {
+        // Check that goal and start ID have been set
         if (m_goal_id == -1 || m_start_id == -1) {
             return false;
         }
+
+        // Initializing the priority priority_queueueue and cost map
         CostMap costmap;
         CostMapComparator comparator(costmap);
-        std::set<int, CostMapComparator> Q(comparator);
+        std::set<int, CostMapComparator> priority_queue(comparator);
         std::vector<int> path_ids;
-        Q.insert(m_start_id);
+        priority_queue.insert(m_start_id);
         costmap[m_start_id] = 0;
-        while (!Q.empty()) {
-            int curr_state_id = *(Q.begin());
-            Q.erase(Q.begin());
-            Q.erase(curr_state_id);
+
+        // While the priority queue is not empty, search for a path from the
+        // start state to the goal state
+        while (!priority_queue.empty()) {
+            int curr_state_id = *(priority_queue.begin());
+            priority_queue.erase(priority_queue.begin());
+            priority_queue.erase(curr_state_id);
+
+            // Check if the goal condition has been met
             if (is_goal(curr_state_id)) {
-                extract_sequence(actions);
+                extract_action_sequence(actions);
                 return true;
             }
             const statespace::StateSpace::State* curr_state =
                 m_state_space->get_state(curr_state_id);
             const auto curr_state_ =
                 static_cast<const statespace::SE2::State*>(curr_state);
+            
+            // Find successor states to the current state
             std::vector<statespace::SE2::State> succesor_states;
             get_successors(curr_state_, &succesor_states);
             for (int i = 0; i < succesor_states.size(); i++) {
@@ -84,18 +101,27 @@ namespace planner {
                         m_state_space->get_distance(
                             *curr_state_,
                             succesor_state);
+
+                    // Update the cost map if a successor state has not been
+                    // explored before, or if it has lower cost than previously
+                    // explored path
                     if (costmap.find(succesor_id) == costmap.end() ||
                         costmap[succesor_id] > new_cost) {
+
+                        // Add (parent ID, action ID) pair to child to parent
+                        // map if the explored succsor is being added
                         m_child_to_parent_map[succesor_id] =
                             std::make_pair(curr_state_id, i);
                         costmap[succesor_id] = new_cost;
-                        assert(Q.find(curr_state_id) == Q.end());
-                        Q.erase(succesor_id);
-                        Q.insert(succesor_id);
+                        assert(priority_queue.find(curr_state_id) ==
+                            priority_queue.end());
+                        priority_queue.erase(succesor_id);
+                        priority_queue.insert(succesor_id);
                     }
                 }
             }
         }
+        // If all possible states are explored with no solution, return false
         return false;
     }
 
@@ -113,9 +139,13 @@ namespace planner {
                 m_action_space->get_action(i);
             const auto action_ = static_cast<
                 const actionspace::GenericActionSpace::Action*>(action);
+            
+            // Convert current state and action into model input
             const model::DeterministicModel::DeterministicModelInput input(
                 *action_);
             model::DeterministicModel::DeterministicModelOutput output;
+            
+            // Given model input, get successor state in continuous space
             m_model->get_prediction(input, &output);
             aikido::statespace::SE2::State succesor;
             m_state_space->discrete_state_to_continuous(*curr_state, &succesor);
@@ -129,15 +159,18 @@ namespace planner {
             t.linear() = rot.toRotationMatrix();
             t.translation() = Eigen::Vector2d(x, y);
             succesor.setIsometry(t);
+            
+            // Append discretized successor state to vector of valid successors
             statespace::SE2::State succesor_state_;
             m_state_space->continuous_state_to_discrete(
                 succesor, &succesor_state_);
             succesors->push_back(succesor_state_);
         }
+        // Reverse the vector order as successors are appened in backwards order
         std::reverse(succesors->begin(), succesors->end());
     }
 
-    void Dijkstra::extract_sequence(std::vector<int>* actions) {
+    void Dijkstra::extract_action_sequence(std::vector<int>* actions) {
         if (m_goal_id == m_start_id) {
             return;
         }

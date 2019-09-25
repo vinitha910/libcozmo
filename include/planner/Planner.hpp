@@ -39,12 +39,12 @@ namespace planner {
 /// Maps state ID to it's appropiate cost
 typedef std::unordered_map<int, double> CostMap;
 
-/// Maps the child/successor state ID to its parent ID and to the action id
-/// that is taken to get to the child state from parent state
+/// Maps the child/successor state ID to its respective (parent ID, action ID)
+/// pair
 typedef std::unordered_map<int, std::pair<
     int, int>> ChildToParentMap;
 
-// Comparator orders state IDs based on their costs from start
+/// Comparator orders state IDs based on their costs-to-come from the start state
 class CostMapComparator {
  public:
     explicit CostMapComparator(const CostMap& cost_map): cost_map_(cost_map) {}
@@ -58,13 +58,17 @@ class CostMapComparator {
     const CostMap& cost_map_;
 };
 
-/// This class plans a sequence of actions required reach from given start to
-/// goal state. The strategy to which the solution is found will vary based on
-/// the derived classes.
+/// This class plans a sequence of actions required to get from the start to
+/// goal state. The planning method varies based on the derived class.
 ///
-/// For finding a solution the class utilizes an actionspace to get set of
+/// While searching, the class utilizes an actionspace to get set of
 /// actions to explore, statespace to build a graph representation, and
-/// a model to get successors.
+/// a model to generate successors. For successor generation the planner
+/// converts all discrete space to continuous, and the model predicts in a
+/// continuous space. Calculated successors are converted back to discrete for
+/// post-calculation handling.
+///
+/// For efficiency the planner handles all states and actions by their IDs.
 class Planner {
  public:
     /// Sets start ID
@@ -79,8 +83,7 @@ class Planner {
     /// \return true if goal_id valid; false otherwise
     virtual bool set_goal(const int& goal_id) = 0;
 
-    /// Solves given search problem and finds a sequence of actions from the
-    /// start to goal.
+    /// Finds a sequence of actions from the start to goal state
     ///
     /// \param[out] path Vector of action IDs
     /// \return true if solution is found; false otherwise
