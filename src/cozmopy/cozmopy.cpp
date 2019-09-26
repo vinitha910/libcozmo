@@ -2,6 +2,7 @@
 #include <pybind11/stl.h>
 #include <pybind11/chrono.h>
 #include <cozmo_description/cozmo.hpp>
+#include "actionspace/ObjectOrientedActionSpace.hpp"
 #include <chrono>
 #include <Eigen/Geometry>
 
@@ -45,6 +46,13 @@ PYBIND11_MODULE(cozmopy, m)
 			libcozmo::Waypoint w = {.x = x, .y = y, .th = th, .t = t};
 			return w;
 		}));
+
+	py::class_<libcozmo::actionspace::ObjectOrientedActionSpace>(m, "ObjectOrientedActionSpace")
+		.def(py::init<const std::vector<double>&, 
+					  const std::vector<double>&,
+					  const Eigen::Vector2d&,
+					  const Eigen::Vector2d&,
+					  const int&>());
 }
 
 }  // namespace python
