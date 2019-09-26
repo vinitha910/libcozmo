@@ -43,7 +43,7 @@ namespace actionspace {
 /// Actions are applicable regardless of Cozmo's state in the world
 ///
 /// Actions consist of speed, duration and heading
-/// The total number of possible actions = 
+/// The total number of possible actions =
 /// number of speeds * number of durations * number of headings
 ///
 /// Headings are represented as angles from [0, 2pi]. The difference between
@@ -66,43 +66,23 @@ class GenericActionSpace : public virtual ActionSpace {
             m_duration(duration),
             m_heading(heading) {}
 
-        /// Speed of action (mm/s)
         const double m_speed;
-
-        /// Duration of action (s)
         const double m_duration;
-
-        /// Heading of action (rad)
         const double m_heading;
     };
-    /// Constructor
 
+    /// Constructs action space with given possible options for speed, duration
+    /// and heading
+    ///
     /// \param m_speeds Vector of available speeds
     /// \param m_durations Vector of available durations
     /// \param num heading Number of options for heading/direction (required:
     /// power of 2 and >= 4)
     GenericActionSpace(
-        const std::vector<double>& m_speeds,
-        std::vector<double> m_durations,
-        const int& num_headings) {
-            int num_speed = m_speeds.size();
-            int num_duration = m_durations.size();
-            std::vector<double> m_headings = utils::linspace(
-                0.0, 2.0 * M_PI - 2.0 * M_PI / num_headings, num_headings);
-            m_actions = std::vector<Action*>(
-                num_speed * num_duration * num_headings, nullptr);
+        const std::vector<double>& speeds,
+        const std::vector<double>& durations,
+        const int& num_headings);
 
-            for (int j = 0; j < num_speed; j++) {
-                for (int k = 0; k < num_duration; k++) {
-                    for (int l = 0; l < num_headings; l++) {
-                        const int id = 
-                            (((j * num_duration) + k) * num_headings) + l;
-                        m_actions[id] = new Action(
-                            m_speeds[j], m_durations[k], m_headings[l]);
-                    }
-                }
-            }
-        }
     ~GenericActionSpace() {
         for (int i = 0; i < m_actions.size(); ++i) {
             delete(m_actions[i]);
@@ -126,7 +106,8 @@ class GenericActionSpace : public virtual ActionSpace {
     /// Documentation inherited
     bool publish_action(
         const int& action_id,
-        const ros::Publisher& publisher) const override;
+        const ros::Publisher& publisher,
+        const aikido::statespace::StateSpace::State& _state) const override;
 
     /// Documentation inherited
     bool is_valid_action_id(const int& action_id) const override;
