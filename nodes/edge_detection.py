@@ -50,6 +50,10 @@ class CornerDetector(object):
             self.y_max = max(y_curr, self.y_max)
             self.robot.drive_wheels(-100, -100, duration=1.5)
             self.robot.turn_in_place(degrees(angle)).wait_for_completed()
+        self.x_max = self.x_max - self.x_min
+        self.x_min = 0
+        self.y_max = self.y_max - self.y_min
+        self.y_min = 0
 
     def within_bounds(self, x_coord, y_coord):
         """
@@ -72,13 +76,14 @@ class CornerDetector(object):
         color : tuple
             (r, g, b) values for the color of the surface
         All position and scale units are in mm
+        X and Y are switched because of the way cozmo moves in rviz
         """
         plane_marker = Marker()
         plane_marker.header.frame_id = "base_link"
         plane_marker.type = Marker.CUBE
 
-        plane_marker.pose.position.x = 0
-        plane_marker.pose.position.y = 0
+        plane_marker.pose.position.x = self.y_max / 2000
+        plane_marker.pose.position.y = self.x_max / 2000
         plane_marker.pose.position.z = height / 1000
 
         plane_marker.pose.orientation.x = 0
@@ -88,8 +93,8 @@ class CornerDetector(object):
 
         x_scale = (self.x_max - self.x_min) / 1000
         y_scale = (self.y_max - self.y_min) / 1000
-        plane_marker.scale.x = x_scale if not boundary else x_scale - 2 * self.threshold / 1000
-        plane_marker.scale.y = y_scale if not boundary else y_scale - 2 * self.threshold / 1000
+        plane_marker.scale.y = x_scale if not boundary else x_scale - 2 * self.threshold / 1000
+        plane_marker.scale.x = y_scale if not boundary else y_scale - 2 * self.threshold / 1000
         plane_marker.scale.z = 1 / 1000
 
         plane_marker.color.r = color[0]
