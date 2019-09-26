@@ -77,7 +77,7 @@ PYBIND11_MODULE(cozmopy, m)
 				0.0, Eigen::Vector3d(0, 0, 0));
 			bool successful = actionspace.get_generic_to_object_oriented_action(
 				action_id, _state, &action);
-			return action, successful;
+			return action;
 		})
 		.def("publish_action",
 			 &actionspace::ObjectOrientedActionSpace::publish_action,
