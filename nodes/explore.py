@@ -77,12 +77,12 @@ def cozmo_run(robot: cozmo.robot):
 
     look_for_duration = float(input('How long to look for cubes? '))
     threshold = float(input('Boundary threshold? '))
-    #detector = CornerDetector(robot, threshold)
+    detector = CornerDetector(robot, threshold)
     input('Reset Cozmo to the bottom left of the surface for alignment')
 
     while not rospy.is_shutdown():
-        #detector.publish_plane(plane_publisher, 0, color=(1, 0.5, 0))
-        #detector.publish_plane(boundary_publisher, 2, True)
+        detector.publish_plane(plane_publisher, 0, color=(1, 0.5, 0))
+        detector.publish_plane(boundary_publisher, 2, True)
 
         custom_obj = look_for_object(robot, look_for_duration)
         custom_obj.publish_cube(object_publisher)
@@ -101,8 +101,14 @@ def cozmo_run(robot: cozmo.robot):
         y_coord = robot.pose.position.y
         
         # check if cozmo is within bounds:
-
+        if not detector.within_bounds(x_coord, y_coord):
+            print(detector.y_max, detector.x_max)
+            print(x_coord, y_coord)
+            input('Cozmo is out of bounds, please reset and press Enter to continue')
+        else:
+            print('within bounds')
             # update model 
+
         # Optional command that tells cozmo to move back a bit to detect cubes better
         robot.drive_straight(
             distance_mm(-100),
