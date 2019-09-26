@@ -224,6 +224,14 @@ void Cozmo::executeTrajectory(
     }
 }
 
+void Cozmo::setState(const double& x, const double& y, const Eigen::Quaterniond& orientation) {
+    Eigen::Isometry3d state = Eigen::Isometry3d::Identity();
+    state.linear() = orientation.normalized().toRotationMatrix();
+    state.translation() << x, y, 0.;
+    base->getParentJoint()->setPositions(
+        dart::dynamics::FreeJoint::convertToPositions(state));
+}
+
 SE2::State Cozmo::createState(const double x, const double y, const double th) 
 {
     SE2::State s;
