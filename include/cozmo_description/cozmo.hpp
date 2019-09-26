@@ -51,6 +51,8 @@ public:
     void executeTrajectory(std::chrono::milliseconds period,
   			 TrajectoryPtr traj);
 
+    void setState(const double& x, const double& y, const Eigen::Quaterniond& orientation);
+
     /// Return and SE2 State defined by the inputted x, y and theta
 
     /// \param x The x coordinate of the state
