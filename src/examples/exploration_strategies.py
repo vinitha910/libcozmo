@@ -14,4 +14,8 @@ class Random:
 	def action(self):
 		return random.choice([i for i in range(self.actionspace.size())])
 
-	def 
+class Novelty:
+	def __init__(actionspace):
+		self.actionspace = actionspace
+
+	
