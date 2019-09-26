@@ -38,8 +38,8 @@ def publish_cozmo(pub, robot, cozmo):
         q = robot.pose.rotation
         quat = [q.q0, q.q1, q.q2, q.q3]
         cozmo.setState(
-            robot.pose.position.x / 1000.0,
-            robot.pose.position.y / 1000.0,
+            (robot.pose.position.x - 45) / 999.0,
+            (robot.pose.position.y + 55 * 2) / 1000.0,
             quat)
         rospy.sleep(0.001)
 
