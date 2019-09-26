@@ -1,6 +1,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/chrono.h>
+#include <pybind11/eigen.h>
 #include <cozmo_description/cozmo.hpp>
 #include "actionspace/ObjectOrientedActionSpace.hpp"
 #include <chrono>
@@ -47,12 +48,46 @@ PYBIND11_MODULE(cozmopy, m)
 			return w;
 		}));
 
-	py::class_<libcozmo::actionspace::ObjectOrientedActionSpace>(m, "ObjectOrientedActionSpace")
-		.def(py::init<const std::vector<double>&, 
+	py::class_<actionspace::ObjectOrientedActionSpace>(m, "ObjectOrientedActionSpace")
+		.def(py::init<const std::vector<double>&,
 					  const std::vector<double>&,
 					  const Eigen::Vector2d&,
 					  const Eigen::Vector2d&,
-					  const int&>());
+					  const int&>())
+		.def("action_similarity",
+			 &actionspace::ObjectOrientedActionSpace::action_similarity,
+			 py::arg("action_id1"),
+			 py::arg("action_id2"),
+			 py::arg("similarity"))
+		.def("get_action", 
+			 &actionspace::ObjectOrientedActionSpace::get_action, 
+			 py::arg("action_id"))
+		.def("is_valid_action_id",
+			 &actionspace::ObjectOrientedActionSpace::is_valid_action_id,
+			 py::arg("action_id"))
+		.def("get_generic_to_object_oriented_action",
+			 &actionspace::ObjectOrientedActionSpace::get_generic_to_object_oriented_action,
+			 py::arg("action_id"),
+			 py::arg("_state"),
+			 py::arg("action"))
+		.def("publish_action",
+			 &actionspace::ObjectOrientedActionSpace::publish_action,
+			 py::arg("action_id"),
+			 py::arg("publisher"),
+			 py::arg("_state"))
+		.def("size", &actionspace::ObjectOrientedActionSpace::size);
+
+		py::class_<actionspace::ObjectOrientedActionSpace::GenericAction>(m, "GenericAction")
+			.def(py::init<const double&, const double&, const double&, const double&>())
+			.def("speed", &actionspace::ObjectOrientedActionSpace::GenericAction::speed)
+			.def("aspect_ratio", &actionspace::ObjectOrientedActionSpace::GenericAction::aspect_ratio)
+			.def("edge_offset", &actionspace::ObjectOrientedActionSpace::GenericAction::edge_offset)
+			.def("heading_offset", &actionspace::ObjectOrientedActionSpace::GenericAction::heading_offset);
+
+		py::class_<actionspace::ObjectOrientedActionSpace::ObjectOrientedAction>(m, "ObjectOrientedAction")
+			.def(py::init<const double&, const Eigen::Vector3d&>())
+			.def("speed", &actionspace::ObjectOrientedActionSpace::ObjectOrientedAction::speed)
+			.def("start_pose", &actionspace::ObjectOrientedActionSpace::ObjectOrientedAction::start_pose);
 }
 
 }  // namespace python
