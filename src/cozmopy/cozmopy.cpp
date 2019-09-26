@@ -54,22 +54,31 @@ PYBIND11_MODULE(cozmopy, m)
 					  const Eigen::Vector2d&,
 					  const Eigen::Vector2d&,
 					  const int&>())
-		.def("action_similarity",
-			 &actionspace::ObjectOrientedActionSpace::action_similarity,
-			 py::arg("action_id1"),
-			 py::arg("action_id2"),
-			 py::arg("similarity"))
+		.def("action_similarity", [](
+			const actionspace::ObjectOrientedActionSpace& actionspace,
+			const int& action_id1, 
+			const int& action_id2) {
+			double similarity = -1;
+			bool successful = 
+				actionspace.action_similarity(action_id1, action_id2, &similarity);
+			return similarity, successful;
+		})
 		.def("get_action", 
 			 &actionspace::ObjectOrientedActionSpace::get_action, 
 			 py::arg("action_id"))
 		.def("is_valid_action_id",
 			 &actionspace::ObjectOrientedActionSpace::is_valid_action_id,
 			 py::arg("action_id"))
-		.def("get_generic_to_object_oriented_action",
-			 &actionspace::ObjectOrientedActionSpace::get_generic_to_object_oriented_action,
-			 py::arg("action_id"),
-			 py::arg("_state"),
-			 py::arg("action"))
+		.def("get_generic_to_object_oriented_action",[](
+			const actionspace::ObjectOrientedActionSpace& actionspace,
+			const int& action_id,
+        	const aikido::statespace::StateSpace::State& _state){
+			actionspace::ObjectOrientedActionSpace::ObjectOrientedAction action(
+				0.0, Eigen::Vector3d(0, 0, 0));
+			bool successful = actionspace.get_generic_to_object_oriented_action(
+				action_id, _state, &action);
+			return action, successful;
+		})
 		.def("publish_action",
 			 &actionspace::ObjectOrientedActionSpace::publish_action,
 			 py::arg("action_id"),
