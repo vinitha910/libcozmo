@@ -79,10 +79,7 @@ int GenericActionSpace::size() const {
 
 ActionSpace::Action* GenericActionSpace::get_action(
     const int& action_id) const {
-    if (!is_valid_action_id(action_id)) {
-        return nullptr;
-    }
-    return m_actions[action_id];
+    return is_valid_action_id(action_id) ? m_actions[action_id] : nullptr;
 }
 
 bool GenericActionSpace::is_valid_action_id(const int& action_id) const {

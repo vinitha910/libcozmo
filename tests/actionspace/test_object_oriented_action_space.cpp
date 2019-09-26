@@ -31,26 +31,25 @@
 #include "actionspace/ObjectOrientedActionSpace.hpp"
 #include "utils/utils.hpp"
 
-namespace as = libcozmo::actionspace;
+using namespace libcozmo::actionspace;
 
-class SimpleOOActionFixture: public ::testing::Test {
+class OOActionSpaceFixture: public ::testing::Test {
  public:
-    SimpleOOActionFixture() : \
+    OOActionSpaceFixture() : \
          m_actionspace(
             libcozmo::utils::linspace(0.0, 5.0, 3.0),
             std::vector<double>{4.0, 1.1},
-            40,
-            5),
-         m_handle(),
-         m_action_publisher(
-            m_handle.advertise<libcozmo::ObjectOrientedAction>("Action", 10)),
-         m_action_subscriber(
-            m_handle.subscribe(
-                "Action",
-                10,
-                &SimpleOOActionFixture::Callback,
-                this)),
-         msg_recieved(false) {}
+            Eigen::Vector2d(6.0, 3.1),
+            Eigen::Vector2d(5.0, 2.1),
+            5) {
+            m_action_publisher =
+                m_handle.advertise<libcozmo::ObjectOrientedAction>("Action", 10);
+            m_action_subscriber =
+                m_handle.subscribe(
+                    "Action", 10, &OOActionSpaceFixture::Callback, this);
+            msg_recieved = false;
+            object_state = create_object_state();
+         }
 
     libcozmo::ObjectOrientedAction* get_action_msg() {
         return &msg;
@@ -62,12 +61,22 @@ class SimpleOOActionFixture: public ::testing::Test {
         }
     }
 
-    as::ObjectOrientedActionSpace m_actionspace;
+    aikido::statespace::SE2::State create_object_state() {
+        Eigen::Isometry2d transform(Eigen::Isometry2d::Identity());
+        transform.linear() = Eigen::Rotation2Dd(M_PI/4).matrix();
+        transform.translation() = Eigen::Vector2d(15, 15);
+        aikido::statespace::SE2::State state;
+        state.setIsometry(transform);
+        return state;
+    }
+
+    ObjectOrientedActionSpace m_actionspace;
     ros::NodeHandle m_handle;
     ros::Publisher m_action_publisher;
     ros::Subscriber m_action_subscriber;
     libcozmo::ObjectOrientedAction msg;
     bool msg_recieved;
+    aikido::statespace::SE2::State object_state;
 
  private:
     void Callback(const libcozmo::ObjectOrientedAction& event) {
@@ -80,35 +89,19 @@ class SimpleOOActionFixture: public ::testing::Test {
     }
 };
 
-TEST_F(SimpleOOActionFixture, ActionSpaceSizeTest) {
-    /// Check that correct amount of actions were generated
-    /// 4 sides, 5 edge offset, 3 speed --> 60 actions total
+/// Check that correct amount of actions were generated
+/// 4 sides, 5 edge offset, 3 speed --> 60 actions total
+TEST_F(OOActionSpaceFixture, ActionSpaceSizeTest) {
     EXPECT_EQ(60, m_actionspace.size());
 }
 
-TEST_F(SimpleOOActionFixture, IsValidActionIDTest) {
-    /// Check that valid/invalid IDs are handled correctly
+/// Check that valid/invalid IDs are handled correctly
+TEST_F(OOActionSpaceFixture, IsValidActionIDTest) {
     EXPECT_FALSE(m_actionspace.is_valid_action_id(-1));
     EXPECT_TRUE(m_actionspace.is_valid_action_id(10));
 }
 
-TEST_F(SimpleOOActionFixture, ActionGenerationTest) {
-    // Tests a valid action
-    as::ObjectOrientedActionSpace::GenericAction* action =
-        static_cast<as::ObjectOrientedActionSpace::GenericAction*>(
-            m_actionspace.get_action(4));
-    EXPECT_EQ(2.5, action->speed());
-    EXPECT_NEAR(0, action->heading_offset(), 0.001);
-    EXPECT_EQ(0.5, action->edge_offset());
-    EXPECT_NEAR(4.0, action->aspect_ratio(), 0.01);
-
-    // Tests nullptr action
-    action = static_cast<as::ObjectOrientedActionSpace::GenericAction*>(
-        m_actionspace.get_action(-1));
-    EXPECT_TRUE(action == nullptr);
-}
-
-TEST_F(SimpleOOActionFixture, ActionSimilarityTest) {
+TEST_F(OOActionSpaceFixture, ActionSimilarityTest) {
     double similarity;
     bool result = m_actionspace.action_similarity(0, 4, &similarity);
     ASSERT_TRUE(result);
@@ -118,30 +111,69 @@ TEST_F(SimpleOOActionFixture, ActionSimilarityTest) {
     ASSERT_FALSE(result);
 }
 
-TEST_F(SimpleOOActionFixture, PublishActionTest) {
+/// Check that actions on opposite sides of the object have the same speed and
+/// aspect ratio but opposite edge offsets and heading offsets that differ by pi
+TEST_F(OOActionSpaceFixture, UniqueActionTest) {
+    for (int i = 0; i < m_actionspace.size()/2; ++i) {
+        const auto action1 = 
+            static_cast<ObjectOrientedActionSpace::GenericAction*>(
+                m_actionspace.get_action(i));
+        const auto action2 = 
+            static_cast<ObjectOrientedActionSpace::GenericAction*>(
+                m_actionspace.get_action(i + m_actionspace.size()/2));
+
+        EXPECT_EQ(action1->speed(), action2->speed());
+        EXPECT_EQ(action1->aspect_ratio(), action2->aspect_ratio());
+        EXPECT_EQ(action1->edge_offset(), -1*action2->edge_offset());
+        EXPECT_EQ(action1->heading_offset(), action2->heading_offset() - M_PI);
+    }
+}
+
+TEST_F(OOActionSpaceFixture, ActionGenerationTest) {
+    // Tests a valid action
+    ObjectOrientedActionSpace::GenericAction* action =
+        static_cast<ObjectOrientedActionSpace::GenericAction*>(
+            m_actionspace.get_action(4));
+    EXPECT_EQ(2.5, action->speed());
+    EXPECT_NEAR(0, action->heading_offset(), 0.001);
+    EXPECT_EQ(-0.5, action->edge_offset());
+    EXPECT_NEAR(1.1, action->aspect_ratio(), 0.01);
+
+    // Tests nullptr action
+    action = static_cast<ObjectOrientedActionSpace::GenericAction*>(
+        m_actionspace.get_action(-1));
+    EXPECT_TRUE(action == nullptr);
+}
+
+TEST_F(OOActionSpaceFixture, GetObjectOrientedActionTest) {
+    ObjectOrientedActionSpace::ObjectOrientedAction action(0.0, Eigen::Vector3d(0, 0, 0));
+    m_actionspace.get_generic_to_object_oriented_action(4, object_state, &action);
+    EXPECT_NEAR(action.start_pose().x(), 8.989592, 0.001);
+    EXPECT_NEAR(action.start_pose().y(), 8.989592, 0.001);
+    EXPECT_NEAR(action.start_pose().z(), M_PI/4, 0.001);
+
+    m_actionspace.get_generic_to_object_oriented_action(40, object_state, &action);
+    EXPECT_NEAR(action.start_pose().x(), 12.52512, 0.001);
+    EXPECT_NEAR(action.start_pose().y(), 12.52512, 0.001);
+    EXPECT_NEAR(action.start_pose().z(), M_PI + M_PI/4, 0.001);
+}
+
+TEST_F(OOActionSpaceFixture, PublishActionTest) {
     /// Check that action published with updated cube pose is correct
-    Eigen::Isometry2d transform(Eigen::Isometry2d::Identity());
-    transform.linear() = Eigen::Rotation2Dd(M_PI/2).matrix();
-    transform.translation() = Eigen::Vector2d(15, 15);
-    aikido::statespace::SE2::State continuous_state;
-    continuous_state.setIsometry(transform);
-    bool result = m_actionspace.publish_action(
-        4,
-        m_action_publisher,
-        continuous_state);
+    bool result = 
+        m_actionspace.publish_action(4, m_action_publisher, object_state);
     ASSERT_TRUE(result);
     WaitForMessage();
+
     libcozmo::ObjectOrientedAction* action = get_action_msg();
-    EXPECT_NEAR(-45, action->x, 0.001);
-    EXPECT_NEAR(35, action->y, 0.001);
-    EXPECT_EQ(M_PI / 2, action->theta);
+    EXPECT_NEAR(8.989592, action->x, 0.001);
+    EXPECT_NEAR(8.989592, action->y, 0.001);
+    EXPECT_NEAR(M_PI/4, action->theta, 0.001);
     EXPECT_EQ(2.5, action->speed);
     EXPECT_EQ(1, action->duration);
     msg_recieved = false;
-    result = m_actionspace.publish_action(
-        -1,
-        m_action_publisher,
-        continuous_state);
+    
+    result = m_actionspace.publish_action(-1, m_action_publisher, object_state);
     ASSERT_FALSE(result);
 }
 

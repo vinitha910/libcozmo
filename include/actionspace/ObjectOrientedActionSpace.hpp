@@ -50,11 +50,7 @@ namespace actionspace {
 /// Cozmo at a location relative to a rectangular object. We store the actions
 /// as generic actions (i.e. the action is not generated with respect to an
 /// object's pose). These generic actions can then be converted to object
-/// oriented actions as needed. The generic actions contains information of
-/// the action's speed (mm / s), offset from center of an edge (normalized to
-/// [-1,1]), aspect ratio of the side (mm) the object is pushing, and the
-/// heading offset indicating which side the action is pushing
-/// (front, left, back, right).
+/// oriented actions as needed. 
 ///
 /// Each object oriented action contains a starting pose for Cozmo along one of
 /// the sides of the object, from which the action will be executed. The are 4
@@ -64,8 +60,25 @@ namespace actionspace {
 /// Each object oriented action also contains the speed of the action (mm / s).
 ///
 /// For efficiency, the class handles actions based on their unique ID. Each ID
-/// belongs to a generic action, and the object oreinted action equivalent of
-/// given ID can be calculated if necessary.
+/// belongs to a generic action, and the object oreinted action for a given ID
+/// can be calculated as well. Generally, the object oriented action is only
+/// calculated when Cozmo is executing a plan.
+///
+/// Below is an example object with its respective edge offset values and
+/// labelled sides. Note, opposite corners have the same edge offsets since 
+/// applying the action with the same parameters on opposite corners results in 
+/// the same movement of the object. 
+///
+///                  BACK        
+///       +1          0         -1
+///         --------------------
+///         |                  |
+/// LEFT  0 |                  | 0  RIGHT
+///         |                  |
+///         --------------------
+///       -1          0         +1
+///                 FRONT        
+///
 class ObjectOrientedActionSpace : public virtual ActionSpace {
  public:
     /// This class handles generic attributes to the action that can be
@@ -114,8 +127,7 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
     /// action parameters.
     class ObjectOrientedAction : public ActionSpace::Action {
      public:
-            /// Constructs object oriented action, indicating starting position
-            /// w.r.t the object position
+            /// Constructs object oriented action w.r.t the object position
             ///
             /// \param speed : the speed of cozmo, in mm / s, negative speed
             ///     refers to backward movement
@@ -137,23 +149,23 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
             friend class ObjectOrientedActionSpace;
     };
 
-    /// Constructor assumes that the first element of the aspect ratio is the
-    /// long edge/length of the object.
-    ///
+
+    /// TODO UPDATE COMMENTS
     /// \param speeds : all possible speeds (mm/s) for the actions
     ///     (duplicates persist)
     /// \param aspect_ratio : The aspect ratio (mm) of the object.
     ///     For example, if the size of the object is 100mm x 300mm then the
-    ///     aspect ratio = {100, 300}
+    ///     aspect ratio = {100, 300} = {width, length}
     /// \param edge_offset : The max distance, along the edge of
     ///     the object, from the center of that edge (mm)
     /// \param num_offset : number of starting position offsets on each side
     ///     of the object; this value must always be odd
     ObjectOrientedActionSpace(
         const std::vector<double>& speeds,
-        const std::vector<double>& aspect_ratio,
-        const double& edge_offset,
-        const int& num_offset = 40);
+        const std::vector<double>& ratios,
+        const Eigen::Vector2d& center_offsets,
+        const Eigen::Vector2d& max_edge_offsets,
+        const int& num_edge_offsets);
 
     ~ObjectOrientedActionSpace() {
         for (size_t i = 0; i < m_actions.size(); ++i) {
@@ -204,9 +216,8 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
  private:
     const std::vector<double> m_speeds;
     const std::vector<double> m_ratios;
-    const int num_offset;
-    const double m_center_offset;
-    const double m_edge_offset;
+    const Eigen::Vector2d m_center_offsets;
+    const Eigen::Vector2d m_max_edge_offsets;
     std::vector<GenericAction*> m_actions;
     ros::Publisher action_publisher;
 };

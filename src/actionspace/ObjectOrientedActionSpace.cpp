@@ -37,30 +37,47 @@ namespace actionspace {
 ObjectOrientedActionSpace::ObjectOrientedActionSpace(
     const std::vector<double>& speeds,
     const std::vector<double>& ratios,
-    const double& edge_offset,
-    const int& num_offset) : \
+    const Eigen::Vector2d& center_offsets,
+    const Eigen::Vector2d& max_edge_offsets,
+    const int& num_edge_offsets) : \
     m_speeds(speeds),
     m_ratios(ratios),
-    num_offset(num_offset),
-    m_center_offset(60),
-    m_edge_offset(edge_offset) {
-    std::vector<double> cube_offsets = num_offset == 1 ?
-        std::vector<double>{0} :
-        utils::linspace(-m_edge_offset, m_edge_offset, num_offset);
-    int action_id = 0;
-    const std::vector<double> sides{FRONT, LEFT, BACK, RIGHT};
+    m_center_offsets(center_offsets),
+    m_max_edge_offsets(max_edge_offsets) {
 
+    /// Get the edge offsets for the x and y axes
+    auto edge_offset_lambda = [&num_edge_offsets](const double max_edge_offset) {
+        return num_edge_offsets == 1 ? std::vector<double>{0} :
+            utils::linspace(-max_edge_offset, max_edge_offset, num_edge_offsets);
+    };
+    const std::vector<double> x_edge_offsets = 
+        edge_offset_lambda(m_max_edge_offsets.x());
+    const std::vector<double> y_edge_offsets = 
+        edge_offset_lambda(m_max_edge_offsets.y());
+
+    auto object_side_lambda = [](const double heading_offset) {
+        return heading_offset == FRONT || heading_offset == BACK;
+    };
     // Generate all possible generic actions given the heading offset, aspect
     // ratio, and speed
+    int action_id = 0;
+    const std::vector<double> sides{FRONT, LEFT, BACK, RIGHT};
     for (const auto& heading_offset : sides) {
         const double ratio =
-            (heading_offset == FRONT || heading_offset == BACK) ? 
-                m_ratios[0] : m_ratios[1];
-        for (const auto& cube_offset : cube_offsets) {
+            object_side_lambda(heading_offset) ? m_ratios[1] : m_ratios[0];
+        const double max_edge_offset =
+            object_side_lambda(heading_offset) ? 
+                m_max_edge_offsets.x() : m_max_edge_offsets.y();
+        const std::vector<double> edge_offsets = 
+            object_side_lambda(heading_offset) ? x_edge_offsets : y_edge_offsets;
+        const double offset_sign =
+            (heading_offset == FRONT || heading_offset == LEFT) ? 1 : -1; 
+
+        for (const auto& edge_offset : edge_offsets) {
             for (const auto& speed : speeds) {
                 m_actions.push_back(new GenericAction(
                     speed,
-                    -cube_offset / m_edge_offset,
+                    offset_sign * edge_offset / max_edge_offset,
                     ratio,
                     heading_offset));
                 action_id++;
@@ -73,34 +90,29 @@ bool ObjectOrientedActionSpace::action_similarity(
     const int& action_id1,
     const int& action_id2,
     double* similarity) const {
-    if (!(is_valid_action_id(action_id1) &&
-          is_valid_action_id(action_id2))) {
+    if (!(is_valid_action_id(action_id1) && is_valid_action_id(action_id2))) {
         return false;
     }
+
     GenericAction* action1 = m_actions[action_id1];
-    GenericAction* action2 = m_actions[action_id2];
     std::vector<double> action1_vector{
-        action1->m_speed,
-        action1->m_edge_offset,
-        action1->m_aspect_ratio};
+        action1->speed(), action1->edge_offset(), action1->aspect_ratio()};
+
+    GenericAction* action2 = m_actions[action_id2];
     std::vector<double> action2_vector{
-        action2->m_speed,
-        action2->m_edge_offset,
-        action2->m_aspect_ratio};
+        action2->speed(), action2->edge_offset(), action2->aspect_ratio()};
+    
     *similarity = utils::euclidean_distance(action1_vector, action2_vector);
+    
     return true;
 }
 
 ActionSpace::Action* ObjectOrientedActionSpace::get_action(
     const int& action_id) const {
-    if (!is_valid_action_id(action_id)) {
-        return nullptr;
-    }
-    return m_actions[action_id];
+    return is_valid_action_id(action_id) ? m_actions[action_id] : nullptr;
 }
 
-bool ObjectOrientedActionSpace::is_valid_action_id(
-    const int& action_id) const {
+bool ObjectOrientedActionSpace::is_valid_action_id(const int& action_id) const {
     return action_id < m_actions.size() && action_id >= 0;
 }
 
@@ -108,10 +120,10 @@ bool ObjectOrientedActionSpace::get_generic_to_object_oriented_action(
     const int& action_id,
     const aikido::statespace::StateSpace::State& _state,
     ObjectOrientedAction* action) const {
-    auto _action = static_cast<GenericAction*>(get_action(action_id));
 
-    // handle segmentation fault in the case action is not valid
-    if (_action == nullptr) {
+    const auto generic_action = 
+        static_cast<GenericAction*>(get_action(action_id));
+    if (generic_action == nullptr) {
         return false;
     }
 
@@ -120,17 +132,27 @@ bool ObjectOrientedActionSpace::get_generic_to_object_oriented_action(
     Eigen::Isometry2d transform = state.getIsometry();
     Eigen::Rotation2Dd rotation = Eigen::Rotation2Dd::Identity();
     rotation.fromRotationMatrix(transform.rotation());
-    Eigen::Vector2d position = transform.translation();
-    double angle = rotation.angle();
-    double heading = _action->heading_offset();
+    const Eigen::Vector2d position = transform.translation();
+    const double orientation = rotation.angle();
+
+    const double heading_offset = generic_action->heading_offset();
+    const double max_edge_offset =
+        (heading_offset == FRONT || heading_offset == BACK) ? 
+            m_max_edge_offsets.x() : m_max_edge_offsets.y();
+    const double center_offset =
+        (heading_offset == FRONT || heading_offset == BACK) ? 
+            m_center_offsets.x() : m_center_offsets.y();
+    const double offset_sign =
+            (heading_offset == FRONT || heading_offset == LEFT) ? 1 : -1; 
+
     *action = ObjectOrientedAction(
-        _action->speed(),
+        generic_action->speed(),
         Eigen::Vector3d(
-            position[0] - m_center_offset * cos(heading) +
-                _action->edge_offset() * m_edge_offset * sin(heading),
-            position[1] - m_center_offset * sin(heading) +
-                _action->edge_offset() * m_edge_offset * cos(heading),
-            utils::angle_normalization(angle + heading)));
+            position.x() - center_offset * cos(orientation) +
+                offset_sign * generic_action->edge_offset() * max_edge_offset * sin(orientation),
+            position.y() - center_offset * sin(orientation) +
+                offset_sign * generic_action->edge_offset() * max_edge_offset * cos(orientation),
+            utils::angle_normalization(orientation + heading_offset)));
 
     return true;
 }
