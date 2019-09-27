@@ -73,6 +73,7 @@ BodyNodePtr Cozmo::makeRootBody(const SkeletonPtr& cozmo,
     Eigen::Matrix3d R = Eigen::Matrix3d::Identity();
     
     R = Eigen::AngleAxisd(-M_PI/2, Eigen::Vector3d::UnitX());
+    tf.translation() << 0.035, 0, 0.058;
     tf.linear() = R;
 
     bn->getParentJoint()->setTransformFromChildBodyNode(tf);
@@ -85,7 +86,7 @@ BodyNodePtr Cozmo::addBody(const SkeletonPtr& cozmo,
 			   BodyNodePtr parent,
 			   const std::string& mesh_name,
 			   const std::string& mesh_dir,
-	                   Eigen::Vector3d transformFromParent,
+	           Eigen::Vector3d transformFromParent,
 			   Eigen::Vector3d transformFromChild)
 {
     RevoluteJoint::Properties properties;
