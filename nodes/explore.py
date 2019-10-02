@@ -52,8 +52,8 @@ def publish_cozmo(pub, robot, cozmo):
         q = robot.pose.rotation
         quat = [q.q0, q.q1, q.q2, q.q3]
         cozmo.setState(
-            (robot.pose.position.x - 45) / 1000.0,
-            (robot.pose.position.y + 60) / 1000.0,
+            robot.pose.position.x / 1000.0,
+            robot.pose.position.y / 1000.0,
             quat)
         rospy.sleep(0.001)
 
@@ -143,7 +143,7 @@ def publish_cozmo_start(publisher, cozmo_pose, color=(0, 0, 0, 1)):
     cozmo_marker.type = Marker.CUBE
 
     cozmo_marker.pose.position.x = (cozmo_pose[0]) / 1000
-    cozmo_marker.pose.position.y = (cozmo_pose[1] + 45) / 1000
+    cozmo_marker.pose.position.y = (cozmo_pose[1]) / 1000
     cozmo_marker.pose.position.z = 0
 
     cozmo_marker.pose.orientation.x = cozmo_pose[2][1]
