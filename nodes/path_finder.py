@@ -4,6 +4,7 @@ import rospy
 import cozmo
 from cozmo.util import degrees, pose_z_angle, radians
 import threading
+import math
 from math import pi
 from datetime import timedelta
 
@@ -61,8 +62,28 @@ def cozmo_run(robot: cozmo.robot):
         args=(robot, cozmo))
     t.start()
 
+    # path = [action1_id, action2_id]
+    # for action in path: 
+    #     GenericAction a = Actionspace.get_action(action)
+
+    # Create a path that is in the shape of a j
+    speed = 100
+    duration = 1
+    headings = [0, 0, 3 * pi / 2, pi]
+
+    current_pos = (0, 0, 0)
+    poses = []
+    poses.append(current_pos)
+    waypoints = []
+    waypoints.append(Waypoint(current_pos[0], current_pos[1], current_pos[2], 0))
+
+    for i in range(len(headings))[1:]:
+        current_pos = generic_action_to_xytheta(current_pos, speed, duration, headings[i])
+        poses.append(current_pos)
+        waypoints.append(Waypoint(current_pos[0], current_pos[1], current_pos[2], i*2))
+
     waypoints = [
-            Waypoint(0.0, 0.0, 0, 0),
+        Waypoint(0.0, 0.0, 0, 0),
         Waypoint(0.3, 0.0, 0, 2),
         Waypoint(0.3, 0.0, pi/2, 3),
         Waypoint(0.3, 0.3, pi/2, 5),
@@ -73,15 +94,20 @@ def cozmo_run(robot: cozmo.robot):
         Waypoint(0.0, 0.0, 0, 12),
     ]
 
-    #traj = cozmo.createInterpolatedTraj(waypoints);
-    # cozmo.executeTrajectory(timedelta(milliseconds=6), traj)
+    print(waypoints)
+    print(poses)
+    traj = cozmo.createInterpolatedTraj(waypoints);
+    cozmo.executeTrajectory(timedelta(milliseconds=6), traj)
 
-    for waypoint in waypoints:
-        print([method_name for method_name in dir(waypoint)
-                      if callable(getattr(waypoint, method_name))])
-        robot.go_to_pose(pose_z_angle(waypoint[0], waypoint[1], 0, radians(waypoint[2]))).wait_for_completed()
+    #for waypoint in waypoints:
+    #    robot.go_to_pose(pose_z_angle(waypoint[0], waypoint[1], 0, radians(waypoint[2]))).wait_for_completed()
     #path_finder = PathFinder(robot)
 
+def generic_action_to_xytheta(current_pos, speed, duration, heading):
+    # x, in mm
+    return (current_pos[0] + math.cos(heading) * speed * duration,
+            current_pos[1] + math.sin(heading) * speed * duration,
+            heading)
 
 
 if __name__ == '__main__':
