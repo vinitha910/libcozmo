@@ -8,10 +8,17 @@ Install [ROS Kinetic](http://wiki.ros.org/kinetic/Installation/Ubuntu) and then 
 ```shell
 $ sudo add-apt-repository ppa:personalrobotics/ppa
 $ sudo apt-get update
-$ sudo apt-get install cmake build-essential libboost-filesystem-dev libmicrohttpd-dev libompl-dev libtinyxml2-dev libyaml-cpp-dev pr-control-msgs
+# DART Dependencies
+$ sudo apt-get install cmake build-essential libboost-filesystem-dev libmicrohttpd-dev libompl-dev libtinyxml2-dev libyaml-cpp-dev
+$ sudo apt-get install libopenscenegraph-dev
 $ sudo apt-get install libnlopt-dev coinor-libipopt-dev libbullet-dev libode-dev
-$ sudo apt-get install ros-kinetic-rospy ros-kinetic-pybind11-catkin ros-kinetic-octomap-ros libeigen3-dev python-catkin-tools python-catkin-pkg
 $ sudo apt-get install libassimp-dev libccd-dev libfcl-dev libboost-regex-dev libboost-system-dev doxygen
+# libcozmo Dependencies
+$ sudo apt-get install ros-kinetic-rospy ros-kinetic-pybind11-catkin ros-kinetic-octomap-ros libeigen3-dev python-catkin-tools python-catkin-pkg
+$ sudo apt-get install python3-yaml
+$ sudo pip3 install rospkg catkin_pkg
+# roscpp_initializer Dependencies
+$ sudo apt-get install libboost-all-dev python3-dev libpython3-dev 
 ```
 
 Install [DART](https://dartsim.github.io/install_dart_on_ubuntu.html#build-and-install-dart) from source:
@@ -47,6 +54,14 @@ instructions with this `.rosinstall` file:
     version: master
 ```
 
+Run `catkin build` to build your workspace. The build might fail if your `PYTHONPATH` is not up-to-date. Run `echo $PYTHONPATH` if you see something like this (i.e. no path to `python3`)
+```
+<PATH_TO_COZMO_WORKSPACE>/devel/lib/python2.7/dist-packages:/opt/ros/kinetic/lib/python2.7/dist-packages
+```
+you'll need to add `export PYTHONPATH="<PATH_TO_COZMO_WORKSPACE>/devel/lib/python3/dist-packages":"${PYTHONPATH}"` to your `.bashrc`
+
+If you have multiple versions of python follow these [instructions](https://github.com/vinitha910/roscpp_initializer#handling-multiple-python-versions) so that you can build `roscpp_initializer`.
+
 ## Usage
 To load Cozmo into the Rviz viewer in a catkin and ros environment, run the following commands:
 ```shell
@@ -68,7 +83,7 @@ This script allows you to enter angles (in radians) for the forklift position; t
 
 To load Cozmo in the DART viewer in a non-catkin/ros environment, run:
 ```shell
-$ rosrun libcozmo dart_example `catkin locate -s libcozmo`/src/cozmo_description/meshes`
+$ rosrun libcozmo dart_example `catkin locate -s libcozmo`/src/cozmo_description/meshes
 ```
 
 ## Trajectory Execution in Simulation
@@ -110,13 +125,13 @@ $ python
 A python sample script for trajectory execution in similation has been provided as well. Follow the instructions in the previous section but replace the last command with
 
 ```shell
-$ rosrun libcozmo execute_traj.py `catkin locate -s libcozmo`/src/cozmo_description/meshes` 
+$ rosrun libcozmo execute_traj.py `catkin locate -s libcozmo`/src/cozmo_description/meshes 
 ```
 
 Similarily, to run the forklift simulation, run:
 
 ```shell
-rosrun libcozmo rviz_example.py `catkin locate -s libcozmo`/src/cozmo_description/meshes` 
+rosrun libcozmo rviz_example.py `catkin locate -s libcozmo`/src/cozmo_description/meshes 
 ```
 
 Before running the commands, make sure the python script is executable. If it is not, run `chmod +x <SCRIPT_NAME>` in the appropiate directory. 
