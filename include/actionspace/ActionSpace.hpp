@@ -31,12 +31,12 @@
 #define LIBCOZMO_ACTIONSPACE_ACTIONSPACE_HPP_
 
 #include <ros/ros.h>
+#include "aikido/distance/SE2.hpp"
 
 namespace libcozmo {
 namespace actionspace {
 
-class ActionSpace
-{
+class ActionSpace {
  public:
     /// Base class for all Actions
     class Action;
@@ -46,7 +46,7 @@ class ActionSpace
     ///
     /// \param action_id1, actionid2 IDs of actions to compare
     /// \param[out] similarity value
-    /// \return True if calculation successful; false otherwise 
+    /// \return True if calculation successful; false otherwise
     virtual bool action_similarity(
         const int& action_id1,
         const int& action_id2,
@@ -60,13 +60,15 @@ class ActionSpace
     virtual Action* get_action(const int& action_id) const = 0;
 
     /// Publishes action msg for given action ID
-    /// 
+    ///
     /// \param action_id Action ID
     /// \param publisher ROS publisher
+    /// \param _state The aikido state of the cube
     /// \return True if publish successful; false otherwise;
     virtual bool publish_action(
         const int& action_id,
-        const ros::Publisher& publisher) const = 0;
+        const ros::Publisher& publisher,
+        const aikido::statespace::StateSpace::State& _state) const = 0;
 
     /// Checks whether given action ID is valid
     ///
@@ -80,8 +82,7 @@ class ActionSpace
     virtual int size() const = 0;
 };
 
-class ActionSpace::Action
-{
+class ActionSpace::Action {
  protected:
     // This is a base class that should only be used in derived classes.
     Action() = default;

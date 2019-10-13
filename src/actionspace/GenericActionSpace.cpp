@@ -28,11 +28,31 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include <actionspace/GenericActionSpace.hpp>
-#include <exception>
-#include <iostream>
 
 namespace libcozmo {
 namespace actionspace {
+
+GenericActionSpace::GenericActionSpace(
+    const std::vector<double>& speeds,
+    const std::vector<double>& durations,
+    const int& num_headings) {
+    std::vector<double> headings = utils::linspace(
+        0.0, 2.0 * M_PI - 2.0 * M_PI / num_headings, num_headings);
+    m_actions =
+        std::vector<Action*>(
+            speeds.size() * durations.size() * num_headings, nullptr);
+
+    for (int j = 0; j < speeds.size(); j++) {
+        for (int k = 0; k < durations.size(); k++) {
+            for (int l = 0; l < num_headings; l++) {
+                const int id =
+                    (((j * durations.size()) + k) * num_headings) + l;
+                m_actions[id] =
+                    new Action(speeds[j], durations[k], headings[l]);
+            }
+        }
+    }
+}
 
 bool GenericActionSpace::action_similarity(
     const int& action_id1, const int& action_id2, double* similarity) const {
@@ -40,17 +60,16 @@ bool GenericActionSpace::action_similarity(
         return false;
     }
 
-    Action* action1 = m_actions[action_id1];
-    Action* action2 = m_actions[action_id2];
+    const Action* action1 = m_actions[action_id1];
     std::vector<double> action1_vector{
-        action1->m_speed,
-        action1->m_duration,
-        action1->m_heading};
+        action1->m_speed, action1->m_duration, action1->m_heading};
+
+    const Action* action2 = m_actions[action_id2];
     std::vector<double> action2_vector{
-        action2->m_speed,
-        action2->m_duration,
-        action2->m_heading};
+        action2->m_speed, action2->m_duration, action2->m_heading};
+    
     *similarity = utils::euclidean_distance(action1_vector, action2_vector);
+    
     return true;
 }
 
@@ -58,11 +77,9 @@ int GenericActionSpace::size() const {
     return m_actions.size();
 }
 
-ActionSpace::Action* GenericActionSpace::get_action(const int& action_id) const {
-    if (!is_valid_action_id(action_id)) {
-        return nullptr;
-    }
-    return m_actions[action_id];
+ActionSpace::Action* GenericActionSpace::get_action(
+    const int& action_id) const {
+    return is_valid_action_id(action_id) ? m_actions[action_id] : nullptr;
 }
 
 bool GenericActionSpace::is_valid_action_id(const int& action_id) const {
@@ -70,7 +87,8 @@ bool GenericActionSpace::is_valid_action_id(const int& action_id) const {
 }
 
 bool GenericActionSpace::publish_action(
-    const int& action_id, const ros::Publisher& publisher) const {
+    const int& action_id, const ros::Publisher& publisher,
+    const aikido::statespace::StateSpace::State& _state) const {
     libcozmo::ActionMsg msg;
     Action* action = static_cast<Action*>(get_action(action_id));
     if (action == nullptr) {
