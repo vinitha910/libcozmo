@@ -33,7 +33,8 @@
 #include <memory>
 #include "actionspace/GenericActionSpace.hpp"
 #include "statespace/SE2.hpp"
-#include "model/DeterministicModel.hpp"
+#include "model/ModelFramework.hpp"
+#include "model/GPRModel.hpp"
 #include "planner/Planner.hpp"
 #include "distance/distance.hpp"
 
@@ -44,9 +45,8 @@ namespace planner {
 /// to get from start state to goal state
 class Dijkstra : public virtual Planner {
  public:
-    /// Constructs a planner with given actionspace, statespace, model
-    ///
-    /// Constructs distance metric and goal tolerance
+    /// Constructs a planner with given actionspace, statespace, model,
+    /// distance metric and goal tolerance
     ///
     /// \param actionspace Defines the set of all possible actions
     /// \param statespace Defines the set of all possible states
@@ -55,9 +55,9 @@ class Dijkstra : public virtual Planner {
     ///     two states
     /// \param goal_tolerance The threshold for being considered at the goal
     Dijkstra(
-        std::shared_ptr<actionspace::ActionSpace> actionspace,
-        std::shared_ptr<statespace::StateSpace> statespace,
-        std::shared_ptr<model::Model> model,
+        std::shared_ptr<actionspace::GenericActionSpace> actionspace,
+        std::shared_ptr<statespace::SE2> statespace,
+        std::shared_ptr<model::GPRModel> model,
         std::shared_ptr<distance::Distance> distance_metric,
         const double& goal_tolerance) : \
         m_action_space(actionspace),
@@ -87,11 +87,11 @@ class Dijkstra : public virtual Planner {
 
     /// Finds all successor states given input state
     ///
-    /// \param state_ The current state (in continuous space)
+    /// \param state_ The current state (in discrete space)
     /// \param[out] successors Vector of succesor states
     void get_successors(
         const statespace::SE2::State* state_,
-        std::vector<statespace::SE2::State>* succesors);
+        std::vector<statespace::SE2::State*>* succesors);
 
     /// Check whether the solver has reached the goal (i.e. is within the
     /// specified goal tolerance)
@@ -100,12 +100,12 @@ class Dijkstra : public virtual Planner {
     /// \return True if goal condition is met; false otherwise
     bool is_goal(const int& curr_state_id) const;
 
-    std::shared_ptr<actionspace::ActionSpace> m_action_space;
-    std::shared_ptr<statespace::StateSpace> m_state_space;
+    std::shared_ptr<actionspace::GenericActionSpace> m_action_space;
+    std::shared_ptr<statespace::SE2> m_state_space;
     int m_start_id;
     int m_goal_id;
-    std::shared_ptr<model::Model> m_model;
-    std::shared_ptr<distance::Distance> m_distance_metric;
+    const std::shared_ptr<model::GPRModel> m_model;
+    const std::shared_ptr<distance::Distance> m_distance_metric;
     const double m_goal_tolerance;
     ChildToParentMap m_child_to_parent_map;
 };

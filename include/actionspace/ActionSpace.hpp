@@ -30,6 +30,8 @@
 #ifndef LIBCOZMO_ACTIONSPACE_ACTIONSPACE_HPP_
 #define LIBCOZMO_ACTIONSPACE_ACTIONSPACE_HPP_
 
+#include <ros/ros.h>
+
 namespace libcozmo {
 namespace actionspace {
 

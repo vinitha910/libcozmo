@@ -63,10 +63,7 @@ class CostMapComparator {
 ///
 /// While searching, the class utilizes an actionspace to get set of
 /// actions to explore, statespace to build a graph representation, and
-/// a model to generate successors. For successor generation the planner
-/// converts all discrete space to continuous, and the model predicts in a
-/// continuous space. Calculated successors are converted back to discrete for
-/// post-calculation handling.
+/// a model to generate successors.
 ///
 /// For efficiency the planner handles all states and actions by their IDs.
 class Planner {

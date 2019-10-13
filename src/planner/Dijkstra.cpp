@@ -35,25 +35,22 @@ namespace planner {
 
     bool Dijkstra::set_start(const int& start_id) {
         auto state_ = m_state_space->get_state(start_id);
-        if (state_ == nullptr) {
-            return false;
-        }
-
-        if (m_state_space->is_valid_state(*state_)) {
-            m_start_id = start_id;
-            return true;
+        if (state_ != nullptr) {
+            if (m_state_space->is_valid_state(*state_)) {
+                m_start_id = start_id;
+                return true;
+            }
         }
         return false;
     }
 
     bool Dijkstra::set_goal(const int& goal_id) {
         auto state_ = m_state_space->get_state(goal_id);
-        if (state_ == nullptr) {
-            return false;
-        }
-        if (m_state_space->is_valid_state(*state_)) {
-            m_goal_id = goal_id;
-            return true;
+        if (state_ != nullptr) {
+            if (m_state_space->is_valid_state(*state_)) {
+                m_goal_id = goal_id;
+                return true;
+            }    
         }
         return false;
     }
@@ -64,7 +61,7 @@ namespace planner {
             return false;
         }
 
-        // Initializing the priority priority_queueueue and cost map
+        // Initializing the priority queue and cost map
         CostMap costmap;
         CostMapComparator comparator(costmap);
         std::set<int, CostMapComparator> priority_queue(comparator);
@@ -84,32 +81,30 @@ namespace planner {
                 extract_action_sequence(actions);
                 return true;
             }
-            const statespace::StateSpace::State* curr_state =
-                m_state_space->get_state(curr_state_id);
-            const auto curr_state_ =
-                static_cast<const statespace::SE2::State*>(curr_state);
-            
+            const statespace::SE2::State* curr_state =
+                static_cast<const statespace::SE2::State*>(
+                    m_state_space->get_state(curr_state_id));
+
             // Find successor states to the current state
-            std::vector<statespace::SE2::State> succesor_states;
-            get_successors(curr_state_, &succesor_states);
+            std::vector<statespace::SE2::State*> succesor_states;
+            get_successors(curr_state, &succesor_states);
             for (int i = 0; i < succesor_states.size(); i++) {
                 auto succesor_state = succesor_states[i];
-                if (m_state_space->is_valid_state(succesor_state)) {
+                if (m_state_space->is_valid_state(*succesor_state)) {
                     const int succesor_id =
-                        m_state_space->get_or_create_state(succesor_state);
+                        m_state_space->get_or_create_state(*succesor_state);
                     const double new_cost = costmap[curr_state_id] +
                         m_state_space->get_distance(
-                            *curr_state_,
-                            succesor_state);
+                            *curr_state,
+                            *succesor_state);
 
                     // Update the cost map if a successor state has not been
-                    // explored before, or if it has lower cost than previously
-                    // explored path
+                    // explored before, or if it has a lower cost than that in
+                    // the priority queue
                     if (costmap.find(succesor_id) == costmap.end() ||
                         costmap[succesor_id] > new_cost) {
 
-                        // Add (parent ID, action ID) pair to child to parent
-                        // map if the explored succsor is being added
+                        // Map successor ID -> (parent ID, action ID) 
                         m_child_to_parent_map[succesor_id] =
                             std::make_pair(curr_state_id, i);
                         costmap[succesor_id] = new_cost;
@@ -133,38 +128,34 @@ namespace planner {
 
     void Dijkstra::get_successors(
         const statespace::SE2::State* curr_state,
-        std::vector<statespace::SE2::State>* succesors) {
+        std::vector<statespace::SE2::State*>* succesors) {
         for (int i = 0; i < m_action_space->size(); i++) {
-            const actionspace::ActionSpace::Action* action =
-                m_action_space->get_action(i);
-            const auto action_ = static_cast<
-                const actionspace::GenericActionSpace::Action*>(action);
+            const actionspace::GenericActionSpace::Action* action =
+                static_cast<actionspace::GenericActionSpace::Action*>(
+                    m_action_space->get_action(i));
+
+            // Compute Model input based on action
+            model::GPRModel::ModelInput model_input(
+                action->m_speed,
+                0.0,
+                1.1,
+                Eigen::Vector2d(
+                    cos(action->m_heading),
+                    sin(action->m_heading)));
             
-            // Convert current state and action into model input
-            const model::DeterministicModel::DeterministicModelInput input(
-                *action_);
-            model::DeterministicModel::DeterministicModelOutput output;
-            
-            // Given model input, get successor state in continuous space
-            m_model->get_prediction(input, &output);
+            // Given model input, input state predict output state, and populate
+            // initialized output state object
+            aikido::statespace::SE2::State input_state;
+            m_state_space->discrete_state_to_continuous(
+                *curr_state, &input_state);
             aikido::statespace::SE2::State succesor;
-            m_state_space->discrete_state_to_continuous(*curr_state, &succesor);
-            auto curr_state_isometry = succesor.getIsometry();
-            const double x = curr_state_isometry.translation()[0]
-                + output.getX();
-            const double y = curr_state_isometry.translation()[1]
-                + output.getY();
-            Eigen::Isometry2d t = Eigen::Isometry2d::Identity();
-            const Eigen::Rotation2D<double> rot(output.getTheta());
-            t.linear() = rot.toRotationMatrix();
-            t.translation() = Eigen::Vector2d(x, y);
-            succesor.setIsometry(t);
-            
+            m_model->predict_state(model_input, input_state, &succesor);
+
             // Append discretized successor state to vector of valid successors
             statespace::SE2::State succesor_state_;
             m_state_space->continuous_state_to_discrete(
                 succesor, &succesor_state_);
-            succesors->push_back(succesor_state_);
+            succesors->push_back(&succesor_state_);
         }
         // Reverse the vector order as successors are appened in backwards order
         std::reverse(succesors->begin(), succesors->end());
