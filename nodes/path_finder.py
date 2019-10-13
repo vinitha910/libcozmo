@@ -67,40 +67,40 @@ def cozmo_run(robot: cozmo.robot):
     #     GenericAction a = Actionspace.get_action(action)
 
     # Create a path that is in the shape of a j
-    speed = 100
+    # speed is in m/s
+    speed = 0.1
     duration = 1
     headings = [0, 0, 3 * pi / 2, pi]
 
+    # if heading is different from previous: add to waypoint / pose
     current_pos = (0, 0, 0)
     poses = []
     poses.append(current_pos)
     waypoints = []
     waypoints.append(Waypoint(current_pos[0], current_pos[1], current_pos[2], 0))
 
-    for i in range(len(headings))[1:]:
+    for i in range(len(headings)):
+        if headings[i] != 0:
+            poses.append((current_pos[0], current_pos[1], headings[i]))
+            waypoints.append(Waypoint(current_pos[0], current_pos[1], headings[i], i*2 -1))
         current_pos = generic_action_to_xytheta(current_pos, speed, duration, headings[i])
         poses.append(current_pos)
+        print('here', poses)
         waypoints.append(Waypoint(current_pos[0], current_pos[1], current_pos[2], i*2))
-
-    waypoints = [
-        Waypoint(0.0, 0.0, 0, 0),
-        Waypoint(0.3, 0.0, 0, 2),
-        Waypoint(0.3, 0.0, pi/2, 3),
-        Waypoint(0.3, 0.3, pi/2, 5),
-        Waypoint(0.3, 0.3, pi, 6),
-        Waypoint(0.0, 0.3, pi, 8),
-        Waypoint(0.0, 0.3, -pi/2, 9),
-        Waypoint(0.0, 0.0, -pi/2, 11),
-        Waypoint(0.0, 0.0, 0, 12),
-    ]
 
     print(waypoints)
     print(poses)
     traj = cozmo.createInterpolatedTraj(waypoints);
     cozmo.executeTrajectory(timedelta(milliseconds=6), traj)
 
-    #for waypoint in waypoints:
-    #    robot.go_to_pose(pose_z_angle(waypoint[0], waypoint[1], 0, radians(waypoint[2]))).wait_for_completed()
+    #for i in range(len(headings)):
+    #    if headings[i] != 0:
+    #        robot.turn_in_place(radians(headings[i]), is_absolute=True).wait_for_completed()
+    #    robot.drive_wheels(speed * 1000, speed * 1000, duration=duration)
+    for pose in poses:
+        print('going to pose: ', pose[0] * 1000, pose[1] * 1000, pose[2])
+        robot.go_to_pose(pose_z_angle(pose[0] * 1000, pose[1] * 1000, 0, radians(pose[2]))).wait_for_completed()
+
     #path_finder = PathFinder(robot)
 
 def generic_action_to_xytheta(current_pos, speed, duration, heading):
