@@ -38,57 +38,57 @@ namespace test {
 
 class DijkstraTest: public ::testing::Test {
  public:
-    DijkstraTest() : m_solver(create_planner(&m_start, &m_goal)) {}
+    // DijkstraTest() : m_solver(create_planner(&m_start, &m_goal)) {}
 
-    ~DijkstraTest() {}
+    // ~DijkstraTest() {}
 
-    /// Construct a dijkstra planner
-    ///
-    /// \param[out] start The ID of start state
-    /// \param[out] goal The ID of goal state
-    Dijkstra create_planner(int* start, int* goal) {
-        std::shared_ptr<actionspace::GenericActionSpace> GAS_ptr =
-            std::make_shared<actionspace::GenericActionSpace>(
-                std::vector<double>{0, 150, 200, 250},
-                std::vector<double>{1},
-                4); 
+    // /// Construct a dijkstra planner
+    // ///
+    // /// \param[out] start The ID of start state
+    // /// \param[out] goal The ID of goal state
+    // Dijkstra create_planner(int* start, int* goal) {
+    //     std::shared_ptr<actionspace::GenericActionSpace> GAS_ptr =
+    //         std::make_shared<actionspace::GenericActionSpace>(
+    //             std::vector<double>{0, 150, 200, 250},
+    //             std::vector<double>{1},
+    //             4); 
         
-        // Create statespace and add start/goal
-        std::shared_ptr<statespace::SE2> SE2_ptr =
-            std::make_shared<statespace::SE2>(10, 4);
-        *start = SE2_ptr->get_or_create_state(
-            libcozmo::statespace::SE2::State(0, 0, 0));
-        *goal = SE2_ptr->get_or_create_state(
-            libcozmo::statespace::SE2::State(35, 30, 3));
+    //     // Create statespace and add start/goal
+    //     std::shared_ptr<statespace::SE2> SE2_ptr =
+    //         std::make_shared<statespace::SE2>(10, 4);
+    //     *start = SE2_ptr->get_or_create_state(
+    //         libcozmo::statespace::SE2::State(0, 0, 0));
+    //     *goal = SE2_ptr->get_or_create_state(
+    //         libcozmo::statespace::SE2::State(35, 30, 3));
 
-        // Get shared pointer of model, actionspace, and distance metric for
-        // construction
-        auto framework =
-            std::make_shared<model::ScikitLearnFramework>("SampleGPRModel.pkl");
-        auto statespace = std::make_shared<aikido::statespace::SE2>();
-        // auto model = model::GPRModel();
+    //     // Get shared pointer of model, actionspace, and distance metric for
+    //     // construction
+    //     auto framework =
+    //         std::make_shared<model::ScikitLearnFramework>("SampleGPRModel.pkl");
+    //     auto statespace = std::make_shared<aikido::statespace::SE2>();
+    //     // auto model = model::GPRModel();
 
-        auto model_ptr = 
-            std::make_shared<model::GPRModel>(framework, statespace);
-        // model_ptr->load_model(&type_);
-        auto distance_ptr =
-            std::make_shared<distance::SE2>(SE2_ptr);
+    //     auto model_ptr = 
+    //         std::make_shared<model::GPRModel>(framework, statespace);
+    //     // model_ptr->load_model(&type_);
+    //     auto distance_ptr =
+    //         std::make_shared<distance::SE2>(SE2_ptr);
 
-        // Construct and return instance of a solver
-        std::cout << "constructing planner \n";
-        libcozmo::planner::Dijkstra m_solver(
-            GAS_ptr,
-            SE2_ptr,
-            model_ptr,
-            distance_ptr,
-            1.0);
+    //     // Construct and return instance of a solver
+    //     std::cout << "constructing planner \n";
+    //     libcozmo::planner::Dijkstra m_solver(
+    //         GAS_ptr,
+    //         SE2_ptr,
+    //         model_ptr,
+    //         distance_ptr,
+    //         1.0);
 
-        return m_solver;  
-    }
+    //     return m_solver;  
+    // }
 
-    libcozmo::planner::Dijkstra m_solver;
-    int m_start;
-    int m_goal;
+    // libcozmo::planner::Dijkstra m_solver;
+    // int m_start;
+    // int m_goal;
 };
 
 // TEST_F(DijkstraTest, StartIsGoalTest) {

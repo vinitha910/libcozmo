@@ -27,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_MODEL_GPRMODEL_HPP_
-#define INCLUDE_MODEL_GPRMODEL_HPP_
+#ifndef INCLUDE_MODEL_LATTICEGRAPHMODEL_HPP_
+#define INCLUDE_MODEL_LATTICEGRAPHMODEL_HPP_
 
 #include <Python.h>
 #include <Eigen/Geometry>
@@ -37,85 +37,68 @@
 #include "model/ModelFramework.hpp"
 #include "model/ScikitLearnFramework.hpp"
 #include "statespace/StateSpace.hpp"
+#include "actionspace/GenericActionSpace.hpp"
 
 namespace libcozmo {
 namespace model {
 
-/// Note: the model makes an assumption that input used is of Object-oriented
-///       actionspace.
-class GPRModel : public virtual WorldRepresentation {
+class LatticeGraphModel : public virtual WorldRepresentation {
  public:
-    /// The input into the Guassian Process Regressor Model is the
-    /// object-oriented action being executed by cozmo
-    class ModelInput {
+    /// The input into LatticeGraphModel for Generic action handling
+    /// Actions are performed w.r.t. to Cozmo
+    class ModelInput : public WorldRepresentation::ModelInput {
      public:
         explicit ModelInput(
             const double& speed,
-            const double& edge_offset_ratio,
-            const double& aspect_ratio,
-            const Eigen::Vector2d& direction) :
-            speed(speed),
-            edge_offset_ratio(edge_offset_ratio),
-            aspect_ratio(aspect_ratio),
-            direction(direction) {}
+            const double& direction) :
+            m_speed(speed),
+            m_direction(direction) {}
+        
+        double get_speed() { return m_speed; }
+        double get_heading() { return m_direction; }
 
-        /// The speed in mm/s
-        const double speed;
+        /// The speed (mm/s)
+        const double m_speed;
 
-        /// Normalized distance from center of edge in range [-1, 1], where -1
-        /// and 1 are the left and right corner of the object respectively
-        const double edge_offset_ratio;
-
-        /// Either the width or height in the aspect ratio of the object
-        const double aspect_ratio;
-
-        /// The direction vector of the action
-        const Eigen::Vector2d direction;
+        /// The direction angle of action (radians)
+        const double m_direction;
     };
 
+    /// Do I need this for LatticeGraph?
     /// The output of the Guassian Process Regressor Model is the delta state
     /// (i.e. the distance the object moved and the change in orientation)
-    class ModelOutput {
+    class ModelOutput : public WorldRepresentation::ModelOutput {
      public:
         explicit ModelOutput(const double& distance, const double& dtheta) :
-            distance(distance), dtheta(dtheta) {}
+            m_distance(distance), m_dtheta(dtheta) {}
 
-        ModelOutput() : distance(0.0), dtheta(0.0) {}
+        ModelOutput() : m_distance(0.0), m_dtheta(0.0) {}
 
         /// The distance the object moved after applying an action
-        double distance;
+        double m_distance;
 
         /// The change in orientation of the object after applying an action
-        double dtheta;
+        double m_dtheta;
     };
 
     /// Constructs this class given the framework where the GPR was trained and
     /// the statespace in which the model operates
-    GPRModel(
-        const std::shared_ptr<ModelFramework> framework,
+    LatticeGraphModel(
+        const std::shared_ptr<actionspace::GenericActionSpace> actionspace,
         const std::shared_ptr<aikido::statespace::StateSpace> statespace) :
-        m_framework(framework),
+        m_actionspace(framework),
         m_statespace(statespace) {}
 
-    ~GPRModel() = default;
-
-    /// Model inference function
-    /// Helper for get_successor
-    ///
-    /// \param input GPR model input (speed, edge, aspect, direction)
-    /// \param output GPR model output (distance, dtheta)
-    void inference(
-        const ModelInput& input,
-        ModelOutput* output);
+    ~LatticeGraphModel() = default;
 
     /// Documentation inherited
     void get_successor(
-        const actionspace::ActionSpace::Action& action,
+        const WorldRepresentation::ModelInput& input,
         const aikido::statespace::StateSpace::State& in_,
         aikido::statespace::StateSpace::State* out_) override;
 
  private:
-    const std::shared_ptr<ModelFramework> m_framework;
+    const std::shared_ptr<actionspace::GenericActionSpace> m_actionspace;
     const std::shared_ptr<aikido::statespace::StateSpace> m_statespace;
 };
 

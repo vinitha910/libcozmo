@@ -55,12 +55,13 @@ add_library(cozmo SHARED
   src/actionspace/ObjectOrientedActionSpace.cpp
   src/actionspace/GenericActionSpace.cpp
   src/statespace/SE2.cpp
-  src/planner/Dijkstra.cpp
+  #src/planner/Dijkstra.cpp
   src/distance/SE2.cpp
   src/distance/translation.cpp
   src/distance/orientation.cpp
   src/model/GPRModel.cpp
   src/model/ScikitLearnFramework.cpp
+  #src/model/LatticeGraphModel.cpp
 )
 
 target_include_directories(cozmo PUBLIC

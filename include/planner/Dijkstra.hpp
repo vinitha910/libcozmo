@@ -31,7 +31,7 @@
 #define LIBCOZMO_PLANNER_DIJKSTRA_HPP_
 
 #include <memory>
-#include "actionspace/GenericActionSpace.hpp"
+#include "actionspace/ObjectOrientedActionSpace.hpp"
 #include "statespace/SE2.hpp"
 #include "model/ModelFramework.hpp"
 #include "model/GPRModel.hpp"
@@ -55,7 +55,7 @@ class Dijkstra : public virtual Planner {
     ///     two states
     /// \param goal_tolerance The threshold for being considered at the goal
     Dijkstra(
-        std::shared_ptr<actionspace::GenericActionSpace> actionspace,
+        std::shared_ptr<actionspace::ObjectOrientedActionSpace> actionspace,
         std::shared_ptr<statespace::SE2> statespace,
         std::shared_ptr<model::GPRModel> model,
         std::shared_ptr<distance::Distance> distance_metric,
@@ -100,7 +100,7 @@ class Dijkstra : public virtual Planner {
     /// \return True if goal condition is met; false otherwise
     bool is_goal(const int& curr_state_id) const;
 
-    std::shared_ptr<actionspace::GenericActionSpace> m_action_space;
+    std::shared_ptr<actionspace::ObjectOrientedActionSpace> m_action_space;
     std::shared_ptr<statespace::SE2> m_state_space;
     int m_start_id;
     int m_goal_id;

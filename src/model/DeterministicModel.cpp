@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2019,  Brian Lee, Vinitha Ranganeni
+// Copyright (c) 2019,  Vinitha Ranganeni
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,33 +28,41 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "model/DeterministicModel.hpp"
+#include <sstream>
+#include <iostream>
+#include "aikido/statespace/SE2.hpp"
+#include "utils/utils.hpp"
 
 namespace libcozmo {
 namespace model {
 
-    bool DeterministicModel::load_model(Model::ModelType* model) {
-        if (model != nullptr) {
-            m_model = model;
-            return true;
-        }
-        return false;
-    }
+void LatticeGraphModel::get_successor_state(
+    const WorldRepresentation::ModelInput& model_input_,
+    const aikido::statespace::StateSpace::State& in_,
+    aikido::statespace::StateSpace::State* out_) {
+        
+    // Casting to access attributes specific to LatticeGraph
+    const ModelInput model_input =
+        static_cast<const ModelInput&>(model_input_);
+    const aikido::statespace::SE2::State in_state =
+        static_cast<const aikido::statespace::SE2::State&>(in_);
+    aikido::statespace::SE2::State succesor;
+    
+    // Get Isometry from current State
+    auto curr_state_isometry = in_.getIsometry();
 
-    bool DeterministicModel::get_prediction(
-        const Model::ModelInput& input,
-        Model::ModelOutput* output) const {
-        if (m_model != nullptr) {
-            auto input_ =
-                static_cast<const DeterministicModelInput&>(input);
-            double distance = input_.get_speed() * input_.get_duration();
-            double angle = input_.get_heading();
-            DeterministicModelOutput* output_ =
-                static_cast<DeterministicModelOutput*>(output);
-            *output_ =  DeterministicModelOutput(
-                distance * cos(angle), distance * sin(angle), angle);
-            return true;
-        }
-        return false;
-    }
+    // Apply actions to current state to get output state
+    const double x = curr_state_isometry.translation()[0]
+        + model_input.getX();
+    const double y = curr_state_isometry.translation()[1]
+        + model_input.getY();
+    Eigen::Isometry2d t = Eigen::Isometry2d::Identity();
+    const Eigen::Rotation2D<double> rot(model_input.getTheta());
+    t.linear() = rot.toRotationMatrix();
+    t.translation() = Eigen::Vector2d(x, y);
+    succesor.setIsometry(t);
+    *out_ = successor;
+}
+
 }  // namespace model
 }  // namespace libcozmo

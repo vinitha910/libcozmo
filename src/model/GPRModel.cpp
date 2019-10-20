@@ -31,15 +31,16 @@
 #include <sstream>
 #include <iostream>
 #include "aikido/statespace/SE2.hpp"
+#include "actionspace/ObjectOrientedActionSpace.hpp"
 #include "utils/utils.hpp"
 
 namespace libcozmo {
 namespace model {
 
 void GPRModel::inference(
-    const Model::ModelInput& input_, Model::ModelOutput* output_) {
-    const ModelInput input =
-        static_cast<const ModelInput&>(input_);
+    const ModelInput& input, ModelOutput* output_) {
+    // const ModelInput input =
+        // static_cast<const ModelInput&>(input_);
     PyObject* p_list = PyList_New(3);
     PyList_SetItem(p_list, 0, Py_BuildValue("f", input.speed));
     PyList_SetItem(p_list, 1, Py_BuildValue("f", input.edge_offset_ratio));
@@ -58,18 +59,33 @@ void GPRModel::inference(
     output->dtheta = PyFloat_AsDouble(PyList_GetItem(p_result, 1));
 }
 
-void GPRModel::predict_state(
-    const Model::ModelInput& model_input_,
+void GPRModel::get_successor(
+    const actionspace::ActionSpace::Action& model_input_,
     const aikido::statespace::StateSpace::State& in_,
     aikido::statespace::StateSpace::State* out_) {
+    
+    // Get ModelInput from action
+    const actionspace::ObjectOrientedActionSpace::GenericAction& action = 
+        static_cast<const actionspace::ObjectOrientedActionSpace::GenericAction&>(
+            model_input_);
+    
+    const double angle = action.heading_offset();
+
+    ModelInput model_input(
+        action.speed(),
+        action.edge_offset(),
+        action.aspect_ratio(),
+        Eigen::Vector2d{cos(angle), sin(angle)}
+        );
+
     ModelOutput output;
-    inference(model_input_, &output);
+    inference(model_input, &output);
     const aikido::statespace::SE2::State in_state =
         static_cast<const aikido::statespace::SE2::State&>(in_);
 
     // Calculate new position
-    const ModelInput model_input =
-        static_cast<const ModelInput&>(model_input_);
+    // const ModelInput model_input =
+    //     static_cast<const ModelInput&>(model_input_);
     const Eigen::Vector2d direction_norm = model_input.direction.normalized();
     const auto transform = in_state.getIsometry();
     const double x =
