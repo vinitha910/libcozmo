@@ -69,7 +69,7 @@ ObjectOrientedActionSpace::ObjectOrientedActionSpace(
             object_side_lambda(heading_offset) ? 
                 m_max_edge_offsets.x() : m_max_edge_offsets.y();
         const std::vector<double> edge_offsets = 
-            object_side_lambda(heading_offset) ? x_edge_offsets : y_edge_offsets;
+            object_side_lambda(heading_offset) ? y_edge_offsets : x_edge_offsets;
         const double offset_sign =
             (heading_offset == FRONT || heading_offset == LEFT) ? 1 : -1; 
 
