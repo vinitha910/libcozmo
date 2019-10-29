@@ -52,8 +52,7 @@ class DeterministicModelTest: public ::testing::Test {
             std::make_shared<actionspace::GenericActionSpace>(
                 std::vector<double>{30.0},
                 std::vector<double>{1.0},
-                4
-            );
+                4);
         auto statespace = std::make_shared<aikido::statespace::SE2>();
         return DeterministicModel(framework, statespace);
     }
@@ -64,7 +63,7 @@ class DeterministicModelTest: public ::testing::Test {
 TEST_F(DeterministicModelTest, GetPredictedStateTest) {
     // Check that given an action and current state, the successor is calculated
     // accurately.
-    
+
     actionspace::GenericActionSpace::Action input(30.0, 1.0, M_PI / 2.0);
     // Fails if heading = M_PI?
     aikido::statespace::SE2::State in;

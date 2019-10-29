@@ -41,6 +41,9 @@
 namespace libcozmo {
 namespace model {
 
+/// Representation based on Gaussian Process regressor to predict output state
+/// given input state and an action.
+///
 /// Note: the model makes an assumption that input used is of Object-oriented
 ///       actionspace.
 class GPRModel : public virtual WorldRepresentation {

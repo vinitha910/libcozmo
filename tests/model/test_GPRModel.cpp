@@ -49,7 +49,8 @@ class GPRModelTest: public ::testing::Test {
 
     GPRModel create_model() {
         auto framework =
-            std::make_shared<ScikitLearnFramework>("/home/joonh/cozmo_ws/src/libcozmo/tests/model/SampleGPRModel.pkl");
+            std::make_shared<ScikitLearnFramework>(
+                "/home/joonh/cozmo_ws/src/libcozmo/tests/model/SampleGPRModel.pkl");
         auto statespace = std::make_shared<aikido::statespace::SE2>();
         return GPRModel(framework, statespace);
     }

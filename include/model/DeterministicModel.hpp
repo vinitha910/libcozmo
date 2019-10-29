@@ -27,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_MODEL_LATTICEGRAPHMODEL_HPP_
-#define INCLUDE_MODEL_LATTICEGRAPHMODEL_HPP_
+#ifndef INCLUDE_MODEL_DETERMINISTICMODEL_HPP_
+#define INCLUDE_MODEL_DETERMINISTICMODEL_HPP_
 
 #include <Python.h>
 #include <Eigen/Geometry>
@@ -46,7 +46,6 @@ namespace model {
 ///       actionspace, and the outcome of an action is deterministic.
 class DeterministicModel : public virtual WorldRepresentation {
  public:
-    
     /// Constructs this class given the framework where the GPR was trained and
     /// the statespace in which the model operates
     DeterministicModel(
@@ -71,4 +70,4 @@ class DeterministicModel : public virtual WorldRepresentation {
 }  // namespace model
 }  // namespace libcozmo
 
-#endif  // INCLUDE_MODEL_GPRMODEL_HPP_
+#endif  // INCLUDE_MODEL_DETERMINISTICMODEL_HPP_

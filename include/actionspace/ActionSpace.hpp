@@ -27,10 +27,9 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef LIBCOZMO_ACTIONSPACE_ACTIONSPACE_HPP_
-#define LIBCOZMO_ACTIONSPACE_ACTIONSPACE_HPP_
+#ifndef INCLUDE_MODEL_DETERMINISTICMODEL_HPP_
+#define INCLUDE_MODEL_DETERMINISTICMODEL_HPP_
 
-#include <ros/ros.h>
 #include "aikido/distance/SE2.hpp"
 
 namespace libcozmo {
@@ -93,4 +92,4 @@ class ActionSpace::Action {
 }  // namespace actionspace
 }  // namespace libcozmo
 
-#endif
+#endif  // INCLUDE_MODEL_DETERMINISTICMODEL_HPP_

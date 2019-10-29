@@ -41,15 +41,15 @@ void DeterministicModel::get_successor(
     const actionspace::ActionSpace::Action& input,
     const aikido::statespace::StateSpace::State& in_,
     aikido::statespace::StateSpace::State* out_) {
-        
+
     // Casting to access attributes specific to LatticeGraph
     const actionspace::GenericActionSpace::Action& model_input =
         static_cast<const actionspace::GenericActionSpace::Action&>(input);
     const aikido::statespace::SE2::State in_state =
         static_cast<const aikido::statespace::SE2::State&>(in_);
-    aikido::statespace::SE2::State* successor = 
+    aikido::statespace::SE2::State* successor =
         static_cast<aikido::statespace::SE2::State*>(out_);
-    
+
     // Get Isometry from current State
     auto curr_state_isometry = in_state.getIsometry();
 
@@ -58,7 +58,7 @@ void DeterministicModel::get_successor(
 
     const double delta_x = distance * cos(angle);
     const double delta_y = distance * sin(angle);
-    
+
     // Apply actions to current state to get output state
     double x = curr_state_isometry.translation()[0] + delta_x;
     double y = curr_state_isometry.translation()[1] + delta_y;

@@ -62,20 +62,19 @@ void GPRModel::get_successor(
     const actionspace::ActionSpace::Action& model_input_,
     const aikido::statespace::StateSpace::State& in_,
     aikido::statespace::StateSpace::State* out_) {
-    
+
     // Get ModelInput from action
-    const actionspace::ObjectOrientedActionSpace::GenericAction& action = 
+    const actionspace::ObjectOrientedActionSpace::GenericAction& action =
         static_cast<const actionspace::ObjectOrientedActionSpace::GenericAction&>(
             model_input_);
-    
+
     const double angle = action.heading_offset();
 
     ModelInput model_input(
         action.speed(),
         action.edge_offset(),
         action.aspect_ratio(),
-        Eigen::Vector2d{cos(angle), sin(angle)}
-        );
+        Eigen::Vector2d{cos(angle), sin(angle)});
 
     ModelOutput output;
     inference(model_input, &output);

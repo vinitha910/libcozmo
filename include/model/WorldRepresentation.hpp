@@ -43,8 +43,8 @@ class WorldRepresentation {
     /// Get the output state given the input and the current state
     ///
     /// \param action the Action being applied to object
-    /// \param in The in/current state
-    /// \param[out] The predicted output state given the action
+    /// \param in The current state
+    /// \param[out] out_ The predicted output state given the action
     virtual void get_successor(
         const actionspace::ActionSpace::Action& action,
         const aikido::statespace::StateSpace::State& in_,
