@@ -148,13 +148,13 @@ TEST_F(OOActionSpaceFixture, ActionGenerationTest) {
 TEST_F(OOActionSpaceFixture, GetObjectOrientedActionTest) {
     ObjectOrientedActionSpace::ObjectOrientedAction action(0.0, Eigen::Vector3d(0, 0, 0));
     m_actionspace.get_generic_to_object_oriented_action(4, object_state, &action);
-    EXPECT_NEAR(action.start_pose().x(), 8.989592, 0.001);
-    EXPECT_NEAR(action.start_pose().y(), 8.989592, 0.001);
+    EXPECT_NEAR(action.start_pose().x(), 11.040202, 0.001);
+    EXPECT_NEAR(action.start_pose().y(), 11.040202, 0.001);
     EXPECT_NEAR(action.start_pose().z(), M_PI/4, 0.001);
 
     m_actionspace.get_generic_to_object_oriented_action(40, object_state, &action);
-    EXPECT_NEAR(action.start_pose().x(), 12.52512, 0.001);
-    EXPECT_NEAR(action.start_pose().y(), 12.52512, 0.001);
+    EXPECT_NEAR(action.start_pose().x(), 14.57573, 0.001);
+    EXPECT_NEAR(action.start_pose().y(), 14.57573, 0.001);
     EXPECT_NEAR(action.start_pose().z(), M_PI + M_PI/4, 0.001);
 }
 
@@ -166,8 +166,8 @@ TEST_F(OOActionSpaceFixture, PublishActionTest) {
     WaitForMessage();
 
     libcozmo::ObjectOrientedAction* action = get_action_msg();
-    EXPECT_NEAR(8.989592, action->x, 0.001);
-    EXPECT_NEAR(8.989592, action->y, 0.001);
+    EXPECT_NEAR(11.040202, action->x, 0.001);
+    EXPECT_NEAR(11.040202, action->y, 0.001);
     EXPECT_NEAR(M_PI/4, action->theta, 0.001);
     EXPECT_EQ(2.5, action->speed);
     EXPECT_EQ(1, action->duration);
