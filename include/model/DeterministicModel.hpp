@@ -42,58 +42,24 @@
 namespace libcozmo {
 namespace model {
 
-class LatticeGraphModel : public virtual WorldRepresentation {
+/// Note: the model makes an assumption that input used is of generic
+///       actionspace, and the outcome of an action is deterministic.
+class DeterministicModel : public virtual WorldRepresentation {
  public:
-    /// The input into LatticeGraphModel for Generic action handling
-    /// Actions are performed w.r.t. to Cozmo
-    class ModelInput : public WorldRepresentation::ModelInput {
-     public:
-        explicit ModelInput(
-            const double& speed,
-            const double& direction) :
-            m_speed(speed),
-            m_direction(direction) {}
-        
-        double get_speed() { return m_speed; }
-        double get_heading() { return m_direction; }
-
-        /// The speed (mm/s)
-        const double m_speed;
-
-        /// The direction angle of action (radians)
-        const double m_direction;
-    };
-
-    /// Do I need this for LatticeGraph?
-    /// The output of the Guassian Process Regressor Model is the delta state
-    /// (i.e. the distance the object moved and the change in orientation)
-    class ModelOutput : public WorldRepresentation::ModelOutput {
-     public:
-        explicit ModelOutput(const double& distance, const double& dtheta) :
-            m_distance(distance), m_dtheta(dtheta) {}
-
-        ModelOutput() : m_distance(0.0), m_dtheta(0.0) {}
-
-        /// The distance the object moved after applying an action
-        double m_distance;
-
-        /// The change in orientation of the object after applying an action
-        double m_dtheta;
-    };
-
+    
     /// Constructs this class given the framework where the GPR was trained and
     /// the statespace in which the model operates
-    LatticeGraphModel(
+    DeterministicModel(
         const std::shared_ptr<actionspace::GenericActionSpace> actionspace,
         const std::shared_ptr<aikido::statespace::StateSpace> statespace) :
-        m_actionspace(framework),
+        m_actionspace(actionspace),
         m_statespace(statespace) {}
 
-    ~LatticeGraphModel() = default;
+    ~DeterministicModel() = default;
 
     /// Documentation inherited
     void get_successor(
-        const WorldRepresentation::ModelInput& input,
+        const actionspace::ActionSpace::Action& input,
         const aikido::statespace::StateSpace::State& in_,
         aikido::statespace::StateSpace::State* out_) override;
 

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2019,  Vinitha Ranganeni
+// Copyright (c) 2019,  Vinitha Ranganeni, Brian Lee
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,7 @@
 #include "model/GPRModel.hpp"
 #include "model/ScikitLearnFramework.hpp"
 #include "statespace/SE2.hpp"
+#include "actionspace/ObjectOrientedActionSpace.hpp"
 
 namespace libcozmo {
 namespace model {
@@ -53,10 +54,12 @@ class GPRModelTest: public ::testing::Test {
         return GPRModel(framework, statespace);
     }
 
+    // actionspace::ObjectOrientedActionSpace actionspace;
     GPRModel m_model;
 };
 
 TEST_F(GPRModelTest, ModelInferenceTest) {
+    // Check that model has same weight, bias as it did in python
     GPRModel::ModelInput input =
         GPRModel::ModelInput(30.0, -1.0, 1.0, Eigen::Vector2d(0, 1));
     GPRModel::ModelOutput output;
@@ -66,9 +69,12 @@ TEST_F(GPRModelTest, ModelInferenceTest) {
 }
 
 TEST_F(GPRModelTest, GetPredictedStateTest) {
-    GPRModel::ModelInput input =
-        GPRModel::ModelInput(30.0, -1.0, 1.0, Eigen::Vector2d(3.5, 5.3));
-
+    // Check that given same action, the model outputs successor correctly
+    actionspace::ObjectOrientedActionSpace::GenericAction input(
+        30.0,
+        -1.0,
+        1.0,
+        M_PI / 2.0);
     aikido::statespace::SE2::State in;
     Eigen::Isometry2d t = Eigen::Isometry2d::Identity();
     const Eigen::Rotation2D<double> rot(M_PI/4);
@@ -77,14 +83,14 @@ TEST_F(GPRModelTest, GetPredictedStateTest) {
     in.setIsometry(t);
 
     aikido::statespace::SE2::State out;
-    m_model.predict_state(input, in, &out);
+    m_model.get_successor(input, in, &out);
 
     const auto transform = out.getIsometry();
     Eigen::Rotation2Dd rotation = Eigen::Rotation2Dd::Identity();
     rotation.fromRotationMatrix(transform.rotation());
 
-    EXPECT_NEAR(2.05392324, transform.translation().x(), 0.001);
-    EXPECT_NEAR(3.08165519, transform.translation().y(), 0.001);
+    EXPECT_NEAR(2.0, transform.translation().x(), 0.05);
+    EXPECT_NEAR(3.1, transform.translation().y(), 0.05);
     EXPECT_NEAR(0.78525906, rotation.angle(), 0.001);
 }
 

@@ -61,7 +61,7 @@ add_library(cozmo SHARED
   src/distance/orientation.cpp
   src/model/GPRModel.cpp
   src/model/ScikitLearnFramework.cpp
-  #src/model/LatticeGraphModel.cpp
+  src/model/DeterministicModel.cpp
 )
 
 target_include_directories(cozmo PUBLIC
@@ -117,8 +117,11 @@ target_link_libraries(test_dijkstra ${TEST_LIBS})
 catkin_add_gtest(test_distance tests/distance/test_distance.cpp)
 target_link_libraries(test_distance ${TEST_LIBS})
 
-catkin_add_gtest(test_model tests/model/test_GPRModel.cpp)
-target_link_libraries(test_model ${TEST_LIBS})
+catkin_add_gtest(test_gpr_model tests/model/test_GPRModel.cpp)
+target_link_libraries(test_gpr_model ${TEST_LIBS})
+
+catkin_add_gtest(test_deterministic_model tests/model/test_DeterministicModel.cpp)
+target_link_libraries(test_deterministic_model ${TEST_LIBS})
 
 catkin_add_gtest(test_framework tests/model/test_ScikitLearnFramework.cpp)
 target_link_libraries(test_framework ${TEST_LIBS})

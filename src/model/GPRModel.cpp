@@ -39,8 +39,7 @@ namespace model {
 
 void GPRModel::inference(
     const ModelInput& input, ModelOutput* output_) {
-    // const ModelInput input =
-        // static_cast<const ModelInput&>(input_);
+
     PyObject* p_list = PyList_New(3);
     PyList_SetItem(p_list, 0, Py_BuildValue("f", input.speed));
     PyList_SetItem(p_list, 1, Py_BuildValue("f", input.edge_offset_ratio));
@@ -83,9 +82,6 @@ void GPRModel::get_successor(
     const aikido::statespace::SE2::State in_state =
         static_cast<const aikido::statespace::SE2::State&>(in_);
 
-    // Calculate new position
-    // const ModelInput model_input =
-    //     static_cast<const ModelInput&>(model_input_);
     const Eigen::Vector2d direction_norm = model_input.direction.normalized();
     const auto transform = in_state.getIsometry();
     const double x =

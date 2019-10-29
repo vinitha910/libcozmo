@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2019,  Vinitha Ranganeni
+// Copyright (c) 2019,  Brian Lee, Vinitha Ranganeni
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -27,48 +27,71 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <Eigen/Geometry>
+#include <gtest/gtest.h>
+#include <stdexcept>
+#include <Python.h>
 #include "model/DeterministicModel.hpp"
-#include <sstream>
-#include <iostream>
-#include "aikido/statespace/SE2.hpp"
+#include "model/ScikitLearnFramework.hpp"
+#include "statespace/SE2.hpp"
 #include "actionspace/GenericActionSpace.hpp"
-#include "utils/utils.hpp"
 
 namespace libcozmo {
 namespace model {
+namespace test {
 
-void DeterministicModel::get_successor(
-    const actionspace::ActionSpace::Action& input,
-    const aikido::statespace::StateSpace::State& in_,
-    aikido::statespace::StateSpace::State* out_) {
-        
-    // Casting to access attributes specific to LatticeGraph
-    const actionspace::GenericActionSpace::Action& model_input =
-        static_cast<const actionspace::GenericActionSpace::Action&>(input);
-    const aikido::statespace::SE2::State in_state =
-        static_cast<const aikido::statespace::SE2::State&>(in_);
-    aikido::statespace::SE2::State* successor = 
-        static_cast<aikido::statespace::SE2::State*>(out_);
+class DeterministicModelTest: public ::testing::Test {
+ public:
+    DeterministicModelTest() :
+        m_model(create_model()) {}
+
+    ~DeterministicModelTest() {}
+
+    DeterministicModel create_model() {
+        auto framework =
+            std::make_shared<actionspace::GenericActionSpace>(
+                std::vector<double>{30.0},
+                std::vector<double>{1.0},
+                4
+            );
+        auto statespace = std::make_shared<aikido::statespace::SE2>();
+        return DeterministicModel(framework, statespace);
+    }
+
+    DeterministicModel m_model;
+};
+
+TEST_F(DeterministicModelTest, GetPredictedStateTest) {
+    // Check that given an action and current state, the successor is calculated
+    // accurately.
     
-    // Get Isometry from current State
-    auto curr_state_isometry = in_state.getIsometry();
-
-    double angle = model_input.m_heading;
-    double distance = model_input.m_speed * model_input.m_duration;
-
-    const double delta_x = distance * cos(angle);
-    const double delta_y = distance * sin(angle);
-    
-    // Apply actions to current state to get output state
-    double x = curr_state_isometry.translation()[0] + delta_x;
-    double y = curr_state_isometry.translation()[1] + delta_y;
+    actionspace::GenericActionSpace::Action input(30.0, 1.0, M_PI / 2.0);
+    // Fails if heading = M_PI?
+    aikido::statespace::SE2::State in;
     Eigen::Isometry2d t = Eigen::Isometry2d::Identity();
-    const Eigen::Rotation2D<double> rot(angle);
+    const Eigen::Rotation2D<double> rot(M_PI/4);
     t.linear() = rot.toRotationMatrix();
-    t.translation() = Eigen::Vector2d(x, y);
-    successor->setIsometry(t);
-    // *out_ = successor;
+    t.translation() = Eigen::Vector2d(20.0, 30.0);
+    in.setIsometry(t);
+
+    aikido::statespace::SE2::State out;
+    m_model.get_successor(input, in, &out);
+
+    const auto transform = out.getIsometry();
+    Eigen::Rotation2Dd rotation = Eigen::Rotation2Dd::Identity();
+    rotation.fromRotationMatrix(transform.rotation());
+
+    EXPECT_NEAR(20, transform.translation().x(), 0.05);
+    EXPECT_NEAR(60.0, transform.translation().y(), 0.05);
+    EXPECT_NEAR(M_PI / 2.0, rotation.angle(), 0.001);
 }
 
+}  // namespace test
 }  // namespace model
 }  // namespace libcozmo
+
+int main(int argc, char **argv) {
+    ::testing::InitGoogleTest(&argc, argv);
+    const auto results = RUN_ALL_TESTS();
+    return results;
+}
