@@ -152,6 +152,8 @@ class SE2 : public virtual StateSpace {
     /// \param _vector_2 The second vector to sum
     /// \param[out] _vector_out Output vector
     /// \return _vector_1 + _vector_2
+
+    // TODO add bool return type for exception handling
     void addition(
         const Eigen::VectorXd& _vector_1,
         const Eigen::VectorXd& _vector_2,

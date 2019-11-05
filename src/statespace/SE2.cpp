@@ -149,7 +149,7 @@ void SE2::addition(
         for (int i = 0; i < _vector_1.size(); i++) {
             (*_vector_out)[i] = _vector_1[i] + _vector_2[i];
         }
-    }
+}
 
 double SE2::get_resolution() const { return m_resolution; }
 
