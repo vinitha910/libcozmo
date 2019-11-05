@@ -30,7 +30,7 @@
 #ifndef OBJECT_ORIENTED_ACTION_SPACE
 #define OBJECT_ORIENTED_ACTION_SPACE
 
-#include "ObjectOrientedAction.h"
+#include <libcozmo/ObjectOrientedAction.h>
 #include <Eigen/Dense>
 #include <ros/ros.h>
 #include <vector>
