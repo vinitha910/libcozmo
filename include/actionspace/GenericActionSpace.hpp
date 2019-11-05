@@ -31,7 +31,7 @@
 #define LIBCOZMO_ACTIONSPACE_GENERICACTIONSPACE_HPP
 
 #include <ros/ros.h>
-#include <libcozmo/ActionMsg.h>
+#include "ActionMsg.h"
 #include <Eigen/Dense>
 #include <cmath>
 #include "utils/utils.hpp"
