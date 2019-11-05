@@ -30,7 +30,7 @@ int main(int argc, char* argv[])
     static const std::string execTopicName = topicName + "/forklift_sim";
 
     aikido::rviz::InteractiveMarkerViewer viewer(topicName, baseFrameName);
-    viewer.addSkeleton(cozmo.getCozmoSkeleton());
+    viewer.addSkeletonMarker(cozmo.getCozmoSkeleton());
     viewer.setAutoUpdate(true);
 
     std::string input = "";
