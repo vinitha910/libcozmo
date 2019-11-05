@@ -2,7 +2,6 @@
 #include "ros/ros.h"
 #include <cstdlib>
 #include <aikido/rviz/InteractiveMarkerViewer.hpp>
-#include <aikido/rviz/WorldInteractiveMarkerViewer.hpp>
 
 static const std::string topicName("dart_markers");
 static const std::string baseFrameName("map");
