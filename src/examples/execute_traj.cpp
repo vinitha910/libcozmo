@@ -35,28 +35,6 @@ int main(int argc, char* argv[])
 
   aikido::rviz::InteractiveMarkerViewer viewer(topicName, baseFrameName);
   viewer.addSkeletonMarker(skeleton);
-
-  auto body = skeleton->getBodyNode(0);
-  // Create x-axis
-  auto frameShapeFrameX = dart::dynamics::SimpleFrame(body, "axis x");
-  auto arrowX = std::make_shared<dart::dynamics::ArrowShape>(Eigen::Vector3d::Zero(), Eigen::Vector3d::UnitX());
-  frameShapeFrameX.setShape(arrowX);
-
-  auto frameShapeFrameY = dart::dynamics::SimpleFrame(body, "axis y");
-  auto arrowY = std::make_shared<dart::dynamics::ArrowShape>(Eigen::Vector3d::Zero(), Eigen::Vector3d::UnitY());
-  frameShapeFrameY.setShape(arrowY);
-
-  auto frameShapeFrameZ = dart::dynamics::SimpleFrame(body, "axis z");
-  auto arrowZ = std::make_shared<dart::dynamics::ArrowShape>(Eigen::Vector3d::Zero(), Eigen::Vector3d::UnitZ());
-  frameShapeFrameZ.setShape(arrowZ);
-  viewer.addFrame(&frameShapeFrameX);
-  viewer.addFrame(&frameShapeFrameY);
-  viewer.addFrame(&frameShapeFrameZ);
-  // Eigen::Isometry3d tf = frame->getWorldTransform();
-  // auto world = dart::dynamics::Frame::World();
-  // dart::dynamics::SimpleFrame simple_frame(world, "target", tf);
-  // viewer.addFrame(&simple_frame);
-
   viewer.setAutoUpdate(true);
 
   std::vector<libcozmo::Waypoint> waypoints = {
