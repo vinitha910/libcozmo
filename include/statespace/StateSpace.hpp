@@ -27,29 +27,27 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef LIBCOZMO_STATESPACE_STATESPACE_HPP_
-#define LIBCOZMO_STATESPACE_STATESPACE_HPP_
+#ifndef INCLUDE_STATESPACE_STATESPACE_HPP_
+#define INCLUDE_STATESPACE_STATESPACE_HPP_
 
 #include "aikido/distance/SE2.hpp"
 
 namespace libcozmo {
 namespace statespace {
 
-class StateSpace
-{
+class StateSpace {
  public:
-
     /// Base class for all discrete states
     class State;
 
-    /// Checks if given (discrete) state exists in the statespace; if not, 
+    /// Checks if given (discrete) state exists in the statespace; if not,
     /// creates and adds the state to the statespace
     ///
     /// \param _state Input state (assumption: state is valid)
     /// \return state ID
     virtual int get_or_create_state(const State& _state) = 0;
-    
-    /// Checks if given (continuous) state exists in the statespace; if not, 
+
+    /// Checks if given (continuous) state exists in the statespace; if not,
     /// creates and adds the state to the statespace
     ///
     /// \param _state Input state
@@ -67,10 +65,10 @@ class StateSpace
 
     /// Converts the given continuous state into a discrete state
     ///
-    /// \param _state Input discrete state 
+    /// \param _state Input discrete state
     /// \param[out] _discrete_state Output continuous state
     virtual void continuous_state_to_discrete(
-        const aikido::statespace::StateSpace::State& _state, 
+        const aikido::statespace::StateSpace::State& _state,
         State* _discrete_state) const = 0;
 
     /// Gets the state ID for the given state if the state exists in the
@@ -87,7 +85,7 @@ class StateSpace
     /// \return Pointer to the discrete state
     virtual State* get_state(const int& _state_id) const = 0;
 
-    /// Checks if the given state is a valid state; validity of state varies 
+    /// Checks if the given state is a valid state; validity of state varies
     /// based on state type
     ///
     /// \param _state Input discrete state
@@ -102,7 +100,7 @@ class StateSpace
     /// Gets the distance between two SE2 states
     ///
     /// \param _state_1, _state_2 The discrete states to calculate the distance
-    /// between; distance metric varies based on states (assumption: states are 
+    /// between; distance metric varies based on states (assumption: states are
     /// valid)
     /// \return Distance between the states
     virtual double get_distance(
@@ -110,7 +108,7 @@ class StateSpace
 
     /// Gets the distance between two SE2 states
     ///
-    /// \param _state_1, _state_2 The continuous states to calculate the 
+    /// \param _state_1, _state_2 The continuous states to calculate the
     /// distance between; distance metric varies based on states
     /// \return Distance between the states
     virtual double get_distance(
@@ -118,23 +116,44 @@ class StateSpace
         const aikido::statespace::StateSpace::State& _state_2) const = 0;
 
     /// Copies a discrete state
-    /// 
+    ///
     /// \param _source Input state (state to copy)
     /// \param[out] _destination Output state
-    virtual void copy_state(const State& _source, State* _destination) const = 0;
+    virtual void copy_state(
+        const State& _source,
+        State* _destination) const = 0;
 
     /// Gets the resolution of statespace
     ///
     /// \return Resolution
     virtual double get_resolution() const = 0;
 
+    /// Adds pairwise elements in the given vectors
+    ///
+    /// \param _vector_1 The first vector to add
+    /// \param _vector_2 The second vector to add
+    /// \param[out] _vector_out Output vector
+    /// \return True if calculation successful, false otherwise
+    /// (i.e. input vectors must be the same size)
+    virtual bool add(
+        const Eigen::VectorXd& _vector_1,
+        const Eigen::VectorXd& _vector_2,
+        Eigen::VectorXd* _vector_out) const {
+        if (_vector_1.size() != _vector_2.size()) {
+            return false;
+        }
+        for (int i = 0; i < _vector_1.size(); i++) {
+            (*_vector_out)[i] = _vector_1[i] + _vector_2[i];
+        }
+        return true;
+    }
+
  private:
     virtual State* create_state() = 0;
 };
 
 
-class StateSpace::State
-{
+class StateSpace::State {
  protected:
     // This is a base class that should only only be used in derived classes.
     State() = default;
@@ -145,4 +164,4 @@ class StateSpace::State
 }  // namespace statespace
 }  // namespace libcozmo
 
-#endif
+#endif  // INCLUDE_STATESPACE_STATESPACE_HPP_
