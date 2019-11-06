@@ -34,6 +34,7 @@
 #include "model/GPRModel.hpp"
 #include "model/ScikitLearnFramework.hpp"
 #include "statespace/SE2.hpp"
+#include <ros/package.h>
 
 namespace libcozmo {
 namespace model {
@@ -47,8 +48,9 @@ class GPRModelTest: public ::testing::Test {
     ~GPRModelTest() {}
 
     GPRModel create_model() {
+        std::string path = ros::package::getPath("libcozmo"); 
         auto framework =
-            std::make_shared<ScikitLearnFramework>("SampleGPRModel.pkl");
+            std::make_shared<ScikitLearnFramework>(path + "/tests/model/SampleGPRModel.pkl");
         auto statespace = std::make_shared<aikido::statespace::SE2>();
         return GPRModel(framework, statespace);
     }

@@ -10,6 +10,7 @@ find_package(PythonLibs 3.5 REQUIRED)
 
 find_package(catkin REQUIRED COMPONENTS 
   roscpp 
+  roslib
   pybind11_catkin 
   std_msgs 
   message_generation 
@@ -41,6 +42,8 @@ catkin_package(
       pybind11_catkin 
       message_runtime  
       geometry_msgs 
+      roscpp
+      roslib
 )
 
 include_directories(
@@ -60,6 +63,10 @@ add_library(cozmo SHARED
   src/distance/orientation.cpp
   src/model/GPRModel.cpp
   src/model/ScikitLearnFramework.cpp
+)
+
+add_dependencies(cozmo
+  libcozmo_generate_messages_cpp
 )
 
 target_include_directories(cozmo PUBLIC
@@ -89,8 +96,8 @@ target_link_libraries(
 ################################################################################
 set(TEST_LIBS cozmo ${catkin_LIBRARIES} ${aikido_LIBRARIES})
 
-catkin_add_gtest(test_libcozmo tests/statespace/test_statespace.cpp)
-target_link_libraries(test_libcozmo ${TEST_LIBS})
+catkin_add_gtest(test_statespace tests/statespace/test_SE2.cpp)
+target_link_libraries(test_statespace ${TEST_LIBS})
 
 catkin_add_gtest(test_generic_action_space tests/actionspace/test_generic_action_space.cpp )
 target_link_libraries(test_generic_action_space ${TEST_LIBS})
