@@ -2,7 +2,6 @@
 #include "ros/ros.h"
 #include <cstdlib>
 #include <aikido/rviz/InteractiveMarkerViewer.hpp>
-#include <aikido/rviz/WorldInteractiveMarkerViewer.hpp>
 
 static const std::string topicName("dart_markers");
 static const std::string baseFrameName("map");
@@ -30,7 +29,7 @@ int main(int argc, char* argv[])
     static const std::string execTopicName = topicName + "/forklift_sim";
 
     aikido::rviz::InteractiveMarkerViewer viewer(topicName, baseFrameName);
-    viewer.addSkeleton(cozmo.getCozmoSkeleton());
+    viewer.addSkeletonMarker(cozmo.getCozmoSkeleton());
     viewer.setAutoUpdate(true);
 
     std::string input = "";
