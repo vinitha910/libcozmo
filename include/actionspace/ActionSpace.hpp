@@ -27,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef LIBCOZMO_ACTIONSPACE_ACTIONSPACE_HPP_
-#define LIBCOZMO_ACTIONSPACE_ACTIONSPACE_HPP_
+#ifndef INCLUDE_ACTIONSPACE_ACTIONSPACE_HPP_
+#define INCLUDE_ACTIONSPACE_ACTIONSPACE_HPP_
 
 #include "aikido/distance/SE2.hpp"
 
@@ -92,4 +92,4 @@ class ActionSpace::Action {
 }  // namespace actionspace
 }  // namespace libcozmo
 
-#endif
+#endif  // INCLUDE_ACTIONSPACE_ACTIONSPACE_HPP_

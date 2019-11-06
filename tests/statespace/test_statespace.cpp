@@ -85,7 +85,7 @@ TEST_F(SE2StatespaceTest, ContinuousToDiscreteStateConversion) {
     aikido::statespace::SE2::State in_state;
     continuous_statespace.expMap(
         Eigen::Vector3d(0.17, 0.257, M_PI/5), &in_state);
-    
+
     SE2::State out_state;
     statespace.continuous_state_to_discrete(in_state, &out_state);
 
@@ -100,9 +100,9 @@ TEST_F(SE2StatespaceTest, GetsStateID) {
     EXPECT_EQ(state_id, 0);
 
     EXPECT_TRUE(statespace.get_state_id(SE2::State(1, 3, 3), &state_id));
-    EXPECT_EQ(state_id, 1);   
+    EXPECT_EQ(state_id, 1);
 
-    EXPECT_FALSE(statespace.get_state_id(SE2::State(1, 0, 3), &state_id));       
+    EXPECT_FALSE(statespace.get_state_id(SE2::State(1, 0, 3), &state_id));
 }
 
 TEST_F(SE2StatespaceTest, GetsState) {
@@ -131,11 +131,11 @@ TEST_F(SE2StatespaceTest, StateSpaceSize) {
 
 TEST_F(SE2StatespaceTest, GetsDistanceBetweenDiscreteStates) {
     EXPECT_DOUBLE_EQ(
-        sqrt(0.02), 
+        sqrt(0.02),
         statespace.get_distance(SE2::State(1, 1, 1), SE2::State(2, 2, 1)));
 
     EXPECT_NEAR(
-        0.798, 
+        0.798,
         statespace.get_distance(SE2::State(1, 1, 0), SE2::State(2, 2, 1)),
         0.0001);
 }
@@ -146,7 +146,7 @@ TEST_F(SE2StatespaceTest, CopyState) {
 
     EXPECT_EQ(1, dest.getX());
     EXPECT_EQ(1, dest.getY());
-    EXPECT_EQ(1, dest.getTheta());    
+    EXPECT_EQ(1, dest.getTheta());
 }
 
 TEST_F(SE2StatespaceTest, GetResolution) {
@@ -155,7 +155,7 @@ TEST_F(SE2StatespaceTest, GetResolution) {
 }
 
 }  // namespace test
-}  // namspace statespace
+}  // namespace statespace
 }  // namespace libcozmo
 
 int main(int argc, char **argv) {
