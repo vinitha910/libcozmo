@@ -52,7 +52,7 @@ int SE2::get_or_create_state(const StateSpace::State& _state) {
     StateSpace::State* new_state = create_state();
     copy_state(state, new_state);
     m_state_to_id_map[state] = m_state_map.size() - 1;
-    return m_state_map.size() - 1;    
+    return m_state_map.size() - 1;
 }
 
 int SE2::get_or_create_state(
@@ -65,8 +65,8 @@ int SE2::get_or_create_state(
 void SE2::discrete_state_to_continuous(
     const StateSpace::State& _state,
     aikido::statespace::StateSpace::State* _continuous_state) const {
-    const State state = static_cast<const State&>(_state);   
-    
+    const State state = static_cast<const State&>(_state);
+
     Eigen::VectorXd state_log(3);
     state_log.head<2>() =
         discrete_position_to_continuous(Eigen::Vector2i(state.x, state.y));
@@ -76,15 +76,15 @@ void SE2::discrete_state_to_continuous(
 }
 
 void SE2::continuous_state_to_discrete(
-    const aikido::statespace::StateSpace::State& _state, 
+    const aikido::statespace::StateSpace::State& _state,
     StateSpace::State* _discrete_state) const {
     Eigen::VectorXd log_state;
     m_statespace->logMap(&_state, log_state);
 
-    const Eigen::Vector2i position = 
+    const Eigen::Vector2i position =
         continuous_position_to_discrete(log_state.head<2>());
     const int theta = continuous_angle_to_discrete(log_state[2]);
-    
+
     State* discrete_state = static_cast<State*>(_discrete_state);
     *discrete_state = State(position.x(), position.y(), theta);
 }
@@ -123,9 +123,9 @@ double SE2::get_distance(
     const StateSpace::State& _state_1,
     const StateSpace::State& _state_2) const {
     aikido::statespace::SE2::State continuous_state_1;
-    discrete_state_to_continuous(_state_1, &continuous_state_1);  
-    aikido::statespace::SE2::State continuous_state_2;  
-    discrete_state_to_continuous(_state_2, &continuous_state_2);  
+    discrete_state_to_continuous(_state_1, &continuous_state_1);
+    aikido::statespace::SE2::State continuous_state_2;
+    discrete_state_to_continuous(_state_2, &continuous_state_2);
     return m_distance_metric.distance(&continuous_state_1, &continuous_state_2);
 }
 
@@ -140,20 +140,6 @@ void SE2::copy_state(
     const State& source = static_cast<const State&>(_source);
     State* destination = static_cast<State*>(_destination);
     *destination = State(source.x, source.y, source.theta);
-}
-
-bool SE2::add(
-    const Eigen::VectorXd& _vector_1,
-    const Eigen::VectorXd& _vector_2,
-    Eigen::VectorXd* _vector_out) const {
-
-        if (_vector_1.size() != _vector_2.size()) {
-            return false;
-        }
-        for (int i = 0; i < _vector_1.size(); i++) {
-            (*_vector_out)[i] = _vector_1[i] + _vector_2[i];
-        }
-        return true;
 }
 
 double SE2::get_resolution() const { return m_resolution; }
@@ -198,7 +184,7 @@ Eigen::Vector2d SE2::discrete_position_to_continuous(
 
 Eigen::Vector2i SE2::continuous_position_to_discrete(
     const Eigen::Vector2d& position) const {
-        
+
     const int x = static_cast<int>(floor(position.x() / m_resolution));
     const int y = static_cast<int>(floor(position.y() / m_resolution));
     return Eigen::Vector2i(x, y);

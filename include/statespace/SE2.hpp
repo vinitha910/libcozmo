@@ -27,15 +27,16 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef LIBCOZMO_STATESPACE_SE2_HPP_
-#define LIBCOZMO_STATESPACE_SE2_HPP_
+#ifndef INCLUDE_STATESPACE_SE2_HPP_
+#define INCLUDE_STATESPACE_SE2_HPP_
 
-#include "StateSpace.hpp"
-#include <boost/functional/hash.hpp>
 #include <Eigen/Dense>
 #include <vector>
-#include <utility>
 #include <unordered_map>
+#include <memory>
+#include <utility>
+#include <boost/functional/hash.hpp>
+#include "StateSpace.hpp"
 
 namespace libcozmo {
 namespace statespace {
@@ -44,18 +45,17 @@ namespace statespace {
 // group SE(2), i.e. the space of planar rigid body transformations.
 class SE2 : public virtual StateSpace {
  public:
-    class State : public StateSpace::State 
-    {
+    class State : public StateSpace::State {
      public:
         /// Constructs identity state
-        State() : x(0), y(0), theta(0) {};
+        State() : x(0), y(0), theta(0) {}
 
         ~State() = default;
 
         /// Constructs state with given parameters
         explicit State(const int& x, const int& y, const int& theta) : \
-            x(x), y(y), theta(theta) {};
-        
+            x(x), y(y), theta(theta) {}
+
         /// Equality operator
         bool operator== (const State& state) const {
             return x == state.x && y == state.y && theta == state.theta;
@@ -72,7 +72,7 @@ class SE2 : public virtual StateSpace {
 
         int getX() const { return x; }
         int getY() const { return y; }
-        int getTheta() const { return theta; } 
+        int getTheta() const { return theta; }
 
      private:
         int x;
@@ -82,10 +82,10 @@ class SE2 : public virtual StateSpace {
         friend class SE2;
     };
 
-    /// Constructs a discretized SE2 state space 
+    /// Constructs a discretized SE2 state space
     ///
     /// \param resolution_m Resolution of the environment (mm)
-    /// \param num_theta_vals Number of discretized theta values; Must be a 
+    /// \param num_theta_vals Number of discretized theta values; Must be a
     /// power of 2
     SE2(
         const double& resolution_m,
@@ -103,15 +103,16 @@ class SE2 : public virtual StateSpace {
     /// Documentation inherited
     int get_or_create_state(
         const aikido::statespace::StateSpace::State& _state) override;
-    
-    /// Documentation inherited    
+
+    /// Documentation inherited
     void discrete_state_to_continuous(
         const StateSpace::State& _state,
-        aikido::statespace::StateSpace::State* _continuous_state) const override;
+        aikido::statespace::StateSpace::State*
+            _continuous_state) const override;
 
     /// Documentation inherited
     void continuous_state_to_discrete(
-        const aikido::statespace::StateSpace::State& _state, 
+        const aikido::statespace::StateSpace::State& _state,
         StateSpace::State* _discrete_state) const override;
 
     /// Documentation inherited
@@ -132,30 +133,19 @@ class SE2 : public virtual StateSpace {
     double get_distance(
         const StateSpace::State& _state_1,
         const StateSpace::State& _state_2) const override;
-    
+
     /// Documentation inherited
     double get_distance(
         const aikido::statespace::StateSpace::State& _state_1,
         const aikido::statespace::StateSpace::State& _state_2) const override;
-    
+
     /// Documentation inherited
     void copy_state(
-        const StateSpace::State& _source, 
+        const StateSpace::State& _source,
         StateSpace::State* _destination) const override;
 
     /// Documentation inherited
     double get_resolution() const override;
-
-    /// Adds two dynamic Eigen vectors together
-    ///
-    /// \param _vector_1 The first vector to add
-    /// \param _vector_2 The second vector to add
-    /// \param[out] _vector_out Output vector
-    /// \return True if calculation successful, false otherwise
-    bool add(
-        const Eigen::VectorXd& _vector_1,
-        const Eigen::VectorXd& _vector_2,
-        Eigen::VectorXd* _vector_out) const;
 
  private:
     /// Creates a new state and adds it to the statespace
@@ -215,5 +205,5 @@ class SE2 : public virtual StateSpace {
 }  // namespace statespace
 }  // namespace libcozmo
 
-#endif  // LIBCOZMO_STATESPACE_SE2_HPP_
+#endif  // INCLUDE_STATESPACE_SE2_HPP_
 
