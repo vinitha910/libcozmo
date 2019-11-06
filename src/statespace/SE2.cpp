@@ -142,13 +142,18 @@ void SE2::copy_state(
     *destination = State(source.x, source.y, source.theta);
 }
 
-void SE2::addition(
+bool SE2::add(
     const Eigen::VectorXd& _vector_1,
     const Eigen::VectorXd& _vector_2,
     Eigen::VectorXd* _vector_out) const {
+
+        if (_vector_1.size() != _vector_2.size()) {
+            return false;
+        }
         for (int i = 0; i < _vector_1.size(); i++) {
             (*_vector_out)[i] = _vector_1[i] + _vector_2[i];
         }
+        return true;
 }
 
 double SE2::get_resolution() const { return m_resolution; }

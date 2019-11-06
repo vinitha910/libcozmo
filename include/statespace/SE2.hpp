@@ -146,15 +146,13 @@ class SE2 : public virtual StateSpace {
     /// Documentation inherited
     double get_resolution() const override;
 
-    /// Sums two dynamic Eigen vectors together
+    /// Adds two dynamic Eigen vectors together
     ///
-    /// \param _vector_1 The first vector to sum
-    /// \param _vector_2 The second vector to sum
+    /// \param _vector_1 The first vector to add
+    /// \param _vector_2 The second vector to add
     /// \param[out] _vector_out Output vector
-    /// \return _vector_1 + _vector_2
-
-    // TODO add bool return type for exception handling
-    void addition(
+    /// \return True if calculation successful, false otherwise
+    bool add(
         const Eigen::VectorXd& _vector_1,
         const Eigen::VectorXd& _vector_2,
         Eigen::VectorXd* _vector_out) const;
