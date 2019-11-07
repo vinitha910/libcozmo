@@ -54,13 +54,14 @@ instructions with this `.rosinstall` file:
     version: master
 ```
 Put the `.rosinstall` file in the src directory of your cozmo workspace and run `rosinstall .` in the same directory.
-Run `catkin build` to build your workspace. The build might fail if your `PYTHONPATH` is not up-to-date. Run `echo $PYTHONPATH` if you see something like this (i.e. no path to `python3`)
+Now run `catkin build` to build your workspace. The build might fail if your `PYTHONPATH` is not up-to-date. Run `echo $PYTHONPATH` if you see something like this (i.e. no path to `python3`)
 ```
 <PATH_TO_COZMO_WORKSPACE>/devel/lib/python2.7/dist-packages:/opt/ros/kinetic/lib/python2.7/dist-packages
 ```
 you'll need to add `export PYTHONPATH="<PATH_TO_COZMO_WORKSPACE>/devel/lib/python3/dist-packages":"${PYTHONPATH}"` to your `.bashrc`
 
 If you have multiple versions of python follow these [instructions](https://github.com/vinitha910/roscpp_initializer#handling-multiple-python-versions) so that you can build `roscpp_initializer`.
+
 Once you finish building, source the `setup.bash` file by running `source <PATH_TO_COZMO_WORKSPACE>/devel/setup.bash`
 ## Usage
 To load Cozmo into the Rviz viewer in a catkin and ros environment, run the following commands:
