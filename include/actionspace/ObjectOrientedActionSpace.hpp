@@ -30,7 +30,7 @@
 #ifndef INCLUDE_ACTIONSPACE_OBJECTORIENTEDACTIONSPACE_HPP_
 #define INCLUDE_ACTIONSPACE_OBJECTORIENTEDACTIONSPACE_HPP_
 
-#include <libcozmo/ObjectOrientedAction.h>
+#include "libcozmo/ObjectOrientedAction.h"
 #include <Eigen/Dense>
 #include <ros/ros.h>
 #include <vector>

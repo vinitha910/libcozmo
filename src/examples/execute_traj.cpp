@@ -5,11 +5,12 @@
 #include <math.h>
 #include "aikido/trajectory/Interpolated.hpp"
 #include <aikido/rviz/InteractiveMarkerViewer.hpp>
+#include "aikido/rviz/FrameMarker.hpp"
 
 using Interpolated = aikido::trajectory::Interpolated;
 
 static const std::string topicName("dart_markers");
-static const std::string baseFrameName("map");
+static const std::string baseFrameName("base_link");
 
 int main(int argc, char* argv[])
 {
@@ -33,7 +34,7 @@ int main(int argc, char* argv[])
 	    << "' InteractiveMarker topic in RViz." << std::endl;
 
   aikido::rviz::InteractiveMarkerViewer viewer(topicName, baseFrameName);
-  viewer.addSkeleton(skeleton);
+  viewer.addSkeletonMarker(skeleton);
   viewer.setAutoUpdate(true);
 
   std::vector<libcozmo::Waypoint> waypoints = {
