@@ -213,6 +213,13 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
     /// Documentation inherited
     int size() const;
 
+    /// Documentation inherited
+    /// In this class it is assumed that the action vector is in format
+    /// [speed, aspect_ratio, edge_offset, heading_offset]
+    bool to_action_vector(
+        const ActionSpace::Action& action,
+        Eigen::VectorXd* action_vector) const override;
+
  private:
     const std::vector<double> m_speeds;
     const std::vector<double> m_ratios;

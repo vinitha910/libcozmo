@@ -115,6 +115,13 @@ class GenericActionSpace : public virtual ActionSpace {
     /// Documentation inherited
     int size() const override;
 
+    /// Documentation inherited
+    /// In this class it is assumed that the action vector is in format
+    /// [speed, duration, heading]
+    bool to_action_vector(
+        const ActionSpace::Action& action,
+        Eigen::VectorXd* action_vector) const override;
+
  private:
     /// Vector of actions
     std::vector<Action*> m_actions;

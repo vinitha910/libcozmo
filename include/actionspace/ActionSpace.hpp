@@ -79,6 +79,16 @@ class ActionSpace {
     ///
     /// \return Number of actions
     virtual int size() const = 0;
+
+    /// Converts given Action object into dynamic 1-D vector representing
+    /// action. Note that length of action vector depends on class.
+    ///
+    /// \param action Action to convert
+    /// \param action_vector Eigen vector
+    /// \return True if conversion successful; false otherwise;
+    virtual bool to_action_vector(
+        const Action& action,
+        Eigen::VectorXd* action_vector) const = 0;
 };
 
 class ActionSpace::Action {

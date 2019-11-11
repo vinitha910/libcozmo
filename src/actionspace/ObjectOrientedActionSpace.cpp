@@ -180,5 +180,20 @@ int ObjectOrientedActionSpace::size() const {
     return m_actions.size();
 }
 
+bool ObjectOrientedActionSpace::to_action_vector(
+    const ActionSpace::Action& action,
+    Eigen::VectorXd* action_vector) const {
+        const GenericAction& generic_action = static_cast<const GenericAction&>(action);
+        if ((*action_vector).size() != 4) {
+            return false;
+        }
+        (*action_vector) <<
+            generic_action.speed(),
+            generic_action.aspect_ratio(),
+            generic_action.edge_offset(),
+            generic_action.heading_offset();
+        return true;
+    }
+
 }  // namespace actionspace
 }  // namespace libcozmo
