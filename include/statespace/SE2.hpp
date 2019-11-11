@@ -147,6 +147,13 @@ class SE2 : public virtual StateSpace {
     /// Documentation inherited
     double get_resolution() const override;
 
+    /// Documentation inherited
+    ///
+    /// In SE2, state vector is formatted as [x(mm), y(mm), theta(radians)]
+    bool get_state_vector(
+        const StateSpace::State& state,
+        Eigen::VectorXd* state_vector) const override;
+
  private:
     /// Creates a new state and adds it to the statespace
     ///

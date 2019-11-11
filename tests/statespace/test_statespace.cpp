@@ -177,6 +177,16 @@ TEST_F(SE2StatespaceTest, AddFail) {
     EXPECT_FALSE(sum);
 }
 
+TEST_F(SE2StatespaceTest, StateVector) {
+    Eigen::VectorXd a(3);
+    SE2::State dest;
+    statespace.copy_state(SE2::State(1, 2, 3), &dest);
+    EXPECT_TRUE(statespace.get_state_vector(dest, &a));
+    EXPECT_EQ(1, a[0]);
+    EXPECT_EQ(2, a[1]);
+    EXPECT_EQ(3, a[2]); 
+}
+
 }  // namespace test
 }  // namspace statespace
 }  // namespace libcozmo

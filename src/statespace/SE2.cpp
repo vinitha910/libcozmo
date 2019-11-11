@@ -190,6 +190,20 @@ Eigen::Vector2i SE2::continuous_position_to_discrete(
     return Eigen::Vector2i(x, y);
 }
 
+bool SE2::get_state_vector(
+    const StateSpace::State& state,
+    Eigen::VectorXd* state_vector) const {
+    const State& se2_state = static_cast<const State&>(state);
+    if ((*state_vector).size() != 3) {
+        return false;
+    }
+    (*state_vector) << 
+        se2_state.getX(),
+        se2_state.getY(),
+        se2_state.getTheta();
+    return true;
+    }
+
 }  // namespace statespace
 }  // namespace libcozmo
 
