@@ -40,17 +40,17 @@ namespace model {
 /// Py_Finalize();
 class Model {
  public:
-    /// Base class for model input
-    class ModelInput;
+    // /// Base class for model input
+    // class ModelInput;
 
-    /// Base class for model output
-    class ModelOutput;
+    // /// Base class for model output
+    // class ModelOutput;
 
-    /// Get the model's predicted output given then input
-    ///
-    /// \param input The model input, dependent on model type
-    /// \param[out] output The ouput after running inference
-    virtual void inference(const ModelInput& input, ModelOutput* output) = 0;
+    // /// Get the model's predicted output given then input
+    // ///
+    // /// \param input The model input, dependent on model type
+    // /// \param[out] output The ouput after running inference
+    // virtual void inference(const ModelInput& input, ModelOutput* output) = 0;
 
     /// Get the output state given the input and the current state
     ///
