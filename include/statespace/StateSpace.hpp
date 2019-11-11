@@ -158,6 +158,15 @@ class StateSpace {
         const State& state,
         Eigen::VectorXd* state_vector) const = 0;
 
+    /// Converts state vector representation to state
+    ///
+    /// \param state State
+    /// \param state_vector State vector
+    /// \return True if conversion successful; false otherwise;
+    virtual bool from_state_vector(
+        StateSpace::State* state,
+        const Eigen::VectorXd& state_vector) const = 0;
+
  private:
     virtual State* create_state() = 0;
 };

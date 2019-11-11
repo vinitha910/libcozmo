@@ -154,6 +154,11 @@ class SE2 : public virtual StateSpace {
         const StateSpace::State& state,
         Eigen::VectorXd* state_vector) const override;
 
+    /// Documentation inherited
+    bool from_state_vector(
+        StateSpace::State* state,
+        const Eigen::VectorXd& state_vector) const override;
+
  private:
     /// Creates a new state and adds it to the statespace
     ///

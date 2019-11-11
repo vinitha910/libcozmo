@@ -103,7 +103,6 @@ StateSpace::State* SE2::get_state(const int& _state_id) const {
     if (_state_id >= size()) {
         return nullptr;
     }
-
     return m_state_map[_state_id];
 }
 
@@ -184,7 +183,6 @@ Eigen::Vector2d SE2::discrete_position_to_continuous(
 
 Eigen::Vector2i SE2::continuous_position_to_discrete(
     const Eigen::Vector2d& position) const {
-
     const int x = static_cast<int>(floor(position.x() / m_resolution));
     const int y = static_cast<int>(floor(position.y() / m_resolution));
     return Eigen::Vector2i(x, y);
@@ -197,12 +195,25 @@ bool SE2::get_state_vector(
     if ((*state_vector).size() != 3) {
         return false;
     }
-    (*state_vector) << 
+    (*state_vector) <<
         se2_state.getX(),
         se2_state.getY(),
         se2_state.getTheta();
     return true;
+}
+
+bool SE2::from_state_vector(
+    StateSpace::State* state,
+    const Eigen::VectorXd& state_vector) const {
+    if (state_vector.size() != 3) {
+        return false;
     }
+    *state = SE2::State(
+        state_vector[0],
+        state_vector[1],
+        state_vector[2]);
+    return true;
+}
 
 }  // namespace statespace
 }  // namespace libcozmo
