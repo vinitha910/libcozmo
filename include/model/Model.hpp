@@ -40,12 +40,6 @@ namespace model {
 /// Py_Finalize();
 class Model {
  public:
-    // /// Base class for model input
-    // class ModelInput;
-
-    // /// Base class for model output
-    // class ModelOutput;
-
     // /// Get the model's predicted output given then input
     // ///
     // /// \param input The model input, dependent on model type
@@ -54,30 +48,14 @@ class Model {
 
     /// Get the output state given the input and the current state
     ///
-    /// \param in The in/current state
-    /// \param[out] The predicted output state given the model input
-    virtual void predict_state(
-        const ModelInput& input,
-        const aikido::statespace::StateSpace::State& in_,
-        aikido::statespace::StateSpace::State* out_) = 0;
-};
-
-/// Class for handling input of the model; varies based on model
-class Model::ModelInput {
- protected:
-    /// This is a base class that should only be used in derived classes
-    ModelInput() = default;
-
-    ~ModelInput() = default;
-};
-
-/// Class for handling output of the model; varies based on model type
-class Model::ModelOutput {
- protected:
-    /// This is a base class that should only be used in derived classes
-    ModelOutput() = default;
-
-    ~ModelOutput() = default;
+    /// \param model_input Input to model
+    /// \param state_input Input state
+    /// \param[out] state_output The predicted output state
+    /// \return True if prediction successfully calculated; false otherwise;
+    virtual bool predict_state(
+        const Eigen::VectorXd& model_input,
+        const Eigen::VectorXd& state_input,
+        Eigen::VectorXd* state_output) const = 0;
 };
 
 }  // namespace model

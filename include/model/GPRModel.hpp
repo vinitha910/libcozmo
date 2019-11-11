@@ -41,75 +41,28 @@
 namespace libcozmo {
 namespace model {
 
+/// This model assumes it using SE2-based state vector as its state input and
+/// object oriented-based action vector as its model input.
+/// Addtionally, path to model.pkl passed in as construction argument
+/// needs to be the absolute path.
 class GPRModel : public virtual Model {
  public:
-    /// The input into the Guassian Process Regressor Model is the
-    /// object-oriented action being executed by cozmo
-    class ModelInput : public Model::ModelInput {
-     public:
-        explicit ModelInput(
-            const double& speed,
-            const double& edge_offset_ratio,
-            const double& aspect_ratio,
-            const Eigen::Vector2d& direction) :
-            speed(speed),
-            edge_offset_ratio(edge_offset_ratio),
-            aspect_ratio(aspect_ratio),
-            direction(direction) {}
-
-        /// The speed in mm/s
-        const double speed;
-
-        /// Normalized distance from center of edge in range [-1, 1], where -1
-        /// and 1 are the left and right corner of the object respectively
-        const double edge_offset_ratio;
-
-        /// Either the width or height in the aspect ratio of the object
-        const double aspect_ratio;
-
-        /// The direction vector of the action
-        const Eigen::Vector2d direction;
-    };
-
-    /// The output of the Guassian Process Regressor Model is the delta state
-    /// (i.e. the distance the object moved and the change in orientation)
-    class ModelOutput : public Model::ModelOutput {
-     public:
-        explicit ModelOutput(const double& distance, const double& dtheta) :
-            distance(distance), dtheta(dtheta) {}
-
-        ModelOutput() : distance(0.0), dtheta(0.0) {}
-
-        /// The distance the object moved after applying an action
-        double distance;
-
-        /// The change in orientation of the object after applying an action
-        double dtheta;
-    };
-
-    /// Constructs this class given the framework where the GPR was trained and
-    /// the statespace in which the model operates
+    /// Constructs this class given the framework where the GPR was trained in
     GPRModel(
-        const std::shared_ptr<ModelFramework> framework,
-        const std::shared_ptr<aikido::statespace::StateSpace> statespace) :
-        m_framework(framework),
-        m_statespace(statespace) {}
+        const std::shared_ptr<ModelFramework> framework) :
+        m_framework(framework) {}
 
     ~GPRModel() = default;
 
     /// Documentation inherited
-    void inference(
-        const Model::ModelInput& input, Model::ModelOutput* output) override;
-
-    /// Documentation inherited
-    void predict_state(
-        const Model::ModelInput& input,
-        const aikido::statespace::StateSpace::State& in_,
-        aikido::statespace::StateSpace::State* out_) override;
+    /// Model input format in [speed, aspect_ratio, edge_offset, heading_offset]
+    bool predict_state(
+        const Eigen::VectorXd& model_input,
+        const Eigen::VectorXd& state_input,
+        Eigen::VectorXd* state_output) const override;
 
  private:
     const std::shared_ptr<ModelFramework> m_framework;
-    const std::shared_ptr<aikido::statespace::StateSpace> m_statespace;
 };
 
 }  // namespace model

@@ -49,43 +49,28 @@ class GPRModelTest: public ::testing::Test {
     GPRModel create_model() {
         auto framework =
             std::make_shared<ScikitLearnFramework>("SampleGPRModel.pkl");
-        auto statespace = std::make_shared<aikido::statespace::SE2>();
-        return GPRModel(framework, statespace);
+        return GPRModel(framework);
     }
 
     GPRModel m_model;
 };
 
-TEST_F(GPRModelTest, ModelInferenceTest) {
-    GPRModel::ModelInput input =
-        GPRModel::ModelInput(30.0, -1.0, 1.0, Eigen::Vector2d(0, 1));
-    GPRModel::ModelOutput output;
-    m_model.inference(input, &output);
-    EXPECT_NEAR(0.0978534, output.distance, 0.001);
-    EXPECT_NEAR(-0.0001391, output.dtheta, 0.001);
-}
+TEST_F(GPRModelTest, ModelPredictionTest) {
+    Eigen::VectorXd model_input(4);
+    model_input << 30.0, 1.0, -1.0, 0;
+    Eigen::VectorXd state_input(3);
+    state_input << 1, 1, 0;
+    Eigen::VectorXd state_output(3);
 
-TEST_F(GPRModelTest, GetPredictedStateTest) {
-    GPRModel::ModelInput input =
-        GPRModel::ModelInput(30.0, -1.0, 1.0, Eigen::Vector2d(3.5, 5.3));
+    EXPECT_TRUE(m_model.predict_state(model_input, state_input, &state_output));
 
-    aikido::statespace::SE2::State in;
-    Eigen::Isometry2d t = Eigen::Isometry2d::Identity();
-    const Eigen::Rotation2D<double> rot(M_PI/4);
-    t.linear() = rot.toRotationMatrix();
-    t.translation() = Eigen::Vector2d(2.0, 3.0);
-    in.setIsometry(t);
+    double x = 1 + 0.0978534 * cos(-0.0001391);
+    double y = 1 + 0.0978534 * sin(-0.0001391);
+    double theta = -0.0001391;
 
-    aikido::statespace::SE2::State out;
-    m_model.predict_state(input, in, &out);
-
-    const auto transform = out.getIsometry();
-    Eigen::Rotation2Dd rotation = Eigen::Rotation2Dd::Identity();
-    rotation.fromRotationMatrix(transform.rotation());
-
-    EXPECT_NEAR(2.05392324, transform.translation().x(), 0.001);
-    EXPECT_NEAR(3.08165519, transform.translation().y(), 0.001);
-    EXPECT_NEAR(0.78525906, rotation.angle(), 0.001);
+    EXPECT_NEAR(x, state_output[0], 0.001);
+    EXPECT_NEAR(y, state_output[1], 0.001);
+    EXPECT_NEAR(theta, state_output[2], 0.001);
 }
 
 }  // namespace test
