@@ -27,13 +27,13 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef OBJECT_ORIENTED_ACTION_SPACE
-#define OBJECT_ORIENTED_ACTION_SPACE
+#ifndef INCLUDE_ACTIONSPACE_OBJECTORIENTEDACTIONSPACE_HPP_
+#define INCLUDE_ACTIONSPACE_OBJECTORIENTEDACTIONSPACE_HPP_
 
-#include "libcozmo/ObjectOrientedAction.h"
 #include <Eigen/Dense>
 #include <ros/ros.h>
 #include <vector>
+#include "libcozmo/ObjectOrientedAction.h"
 #include "ActionSpace.hpp"
 
 namespace libcozmo {
@@ -50,7 +50,7 @@ namespace actionspace {
 /// Cozmo at a location relative to a rectangular object. We store the actions
 /// as generic actions (i.e. the action is not generated with respect to an
 /// object's pose). These generic actions can then be converted to object
-/// oriented actions as needed. 
+/// oriented actions as needed.
 ///
 /// Each object oriented action contains a starting pose for Cozmo along one of
 /// the sides of the object, from which the action will be executed. The are 4
@@ -65,11 +65,11 @@ namespace actionspace {
 /// calculated when Cozmo is executing a plan.
 ///
 /// Below is an example object with its respective edge offset values and
-/// labelled sides. Note, opposite corners have the same edge offsets since 
-/// applying the action with the same parameters on opposite corners results in 
-/// the same movement of the object. 
+/// labelled sides. Note, opposite corners have the same edge offsets since
+/// applying the action with the same parameters on opposite corners results in
+/// the same movement of the object.
 ///
-///                  BACK        
+///                  BACK
 ///       +1          0         -1
 ///         --------------------
 ///         |                  |
@@ -77,7 +77,7 @@ namespace actionspace {
 ///         |                  |
 ///         --------------------
 ///       -1          0         +1
-///                 FRONT        
+///                 FRONT
 ///
 class ObjectOrientedActionSpace : public virtual ActionSpace {
  public:
@@ -232,4 +232,4 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
 }  // namespace actionspace
 }  // namespace libcozmo
 
-#endif
+#endif  // INCLUDE_ACTIONSPACE_OBJECTORIENTEDACTIONSPACE_HPP_

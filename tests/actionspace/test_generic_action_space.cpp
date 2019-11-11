@@ -41,11 +41,11 @@ class GenericActionFixture: public ::testing::Test {
             "Action", 10)),
         m_action_subscriber(m_handle.subscribe(
             "Action", 10, &GenericActionFixture::Callback, this)) {}
-    
+
     /// Necessary step because it takes a while for the subscriber
     /// and publisher to start up.
     void SetUp() {
-        while(!IsReady()) {
+        while (!IsReady()) {
             ros::spinOnce();
         }
     }
@@ -91,7 +91,7 @@ class GenericActionFixture: public ::testing::Test {
     bool m_msg_received;
 };
 
-/// Tests action similarity 
+/// Tests action similarity
 TEST_F(GenericActionFixture, ActionSimilarityTest) {
     double similarity = 0;
     ASSERT_TRUE(m_actionspace.action_similarity(0, 12, &similarity));
@@ -101,7 +101,7 @@ TEST_F(GenericActionFixture, ActionSimilarityTest) {
 /// Check actions generated, along with get_action
 /// Testing get_action also tests is_valid_action_id
 TEST_F(GenericActionFixture, ActionGenerationTest) {
-    libcozmo::actionspace::GenericActionSpace::Action* action = 
+    libcozmo::actionspace::GenericActionSpace::Action* action =
         static_cast<libcozmo::actionspace::GenericActionSpace::Action*>(
             m_actionspace.get_action(0));
     EXPECT_NEAR(0, action->m_speed, 0.00001);
@@ -130,7 +130,7 @@ TEST_F(GenericActionFixture, GetActionOOR) {
 
 /// Check size method
 TEST_F(GenericActionFixture, GetSize) {
-    EXPECT_TRUE(m_actionspace.size() == 16);
+    EXPECT_EQ(m_actionspace.size(), 16);
 }
 
 /// Action publisher

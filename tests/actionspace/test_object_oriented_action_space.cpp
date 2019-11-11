@@ -43,7 +43,8 @@ class OOActionSpaceFixture: public ::testing::Test {
             Eigen::Vector2d(5.0, 2.1),
             5) {
             m_action_publisher =
-                m_handle.advertise<libcozmo::ObjectOrientedAction>("Action", 10);
+                m_handle.advertise<
+                    libcozmo::ObjectOrientedAction>("Action", 10);
             m_action_subscriber =
                 m_handle.subscribe(
                     "Action", 10, &OOActionSpaceFixture::Callback, this);
@@ -115,13 +116,15 @@ TEST_F(OOActionSpaceFixture, ActionSimilarityTest) {
 /// aspect ratio but opposite edge offsets and heading offsets that differ by pi
 TEST_F(OOActionSpaceFixture, UniqueActionTest) {
     for (int i = 0; i < m_actionspace.size()/2; ++i) {
-        const auto action1 = 
+        const auto action1 =
             static_cast<
-                libcozmo::actionspace::ObjectOrientedActionSpace::GenericAction*>(
+                libcozmo::actionspace::
+                    ObjectOrientedActionSpace::GenericAction*>(
                     m_actionspace.get_action(i));
-        const auto action2 = 
+        const auto action2 =
             static_cast<
-                libcozmo::actionspace::ObjectOrientedActionSpace::GenericAction*>(
+                libcozmo::actionspace::
+                    ObjectOrientedActionSpace::GenericAction*>(
                     m_actionspace.get_action(i + m_actionspace.size()/2));
 
         EXPECT_EQ(action1->speed(), action2->speed());
@@ -134,7 +137,8 @@ TEST_F(OOActionSpaceFixture, UniqueActionTest) {
 TEST_F(OOActionSpaceFixture, ActionGenerationTest) {
     // Tests a valid action
     libcozmo::actionspace::ObjectOrientedActionSpace::GenericAction* action =
-        static_cast<libcozmo::actionspace::ObjectOrientedActionSpace::GenericAction*>(
+        static_cast<
+            libcozmo::actionspace::ObjectOrientedActionSpace::GenericAction*>(
             m_actionspace.get_action(4));
     EXPECT_EQ(2.5, action->speed());
     EXPECT_NEAR(0, action->heading_offset(), 0.001);
@@ -142,19 +146,27 @@ TEST_F(OOActionSpaceFixture, ActionGenerationTest) {
     EXPECT_NEAR(1.1, action->aspect_ratio(), 0.01);
 
     // Tests nullptr action
-    action = static_cast<libcozmo::actionspace::ObjectOrientedActionSpace::GenericAction*>(
+    action = static_cast<
+        libcozmo::actionspace::ObjectOrientedActionSpace::GenericAction*>(
         m_actionspace.get_action(-1));
     EXPECT_TRUE(action == nullptr);
 }
 
 TEST_F(OOActionSpaceFixture, GetObjectOrientedActionTest) {
-    libcozmo::actionspace::ObjectOrientedActionSpace::ObjectOrientedAction action(0.0, Eigen::Vector3d(0, 0, 0));
-    m_actionspace.get_generic_to_object_oriented_action(4, object_state, &action);
+    libcozmo::actionspace::ObjectOrientedActionSpace::ObjectOrientedAction
+        action(0.0, Eigen::Vector3d(0, 0, 0));
+    m_actionspace.get_generic_to_object_oriented_action(
+        4,
+        object_state,
+        &action);
     EXPECT_NEAR(action.start_pose().x(), 8.989592, 0.001);
     EXPECT_NEAR(action.start_pose().y(), 8.989592, 0.001);
     EXPECT_NEAR(action.start_pose().z(), M_PI/4, 0.001);
 
-    m_actionspace.get_generic_to_object_oriented_action(40, object_state, &action);
+    m_actionspace.get_generic_to_object_oriented_action(
+        40,
+        object_state,
+        &action);
     EXPECT_NEAR(action.start_pose().x(), 12.52512, 0.001);
     EXPECT_NEAR(action.start_pose().y(), 12.52512, 0.001);
     EXPECT_NEAR(action.start_pose().z(), M_PI + M_PI/4, 0.001);
@@ -162,7 +174,7 @@ TEST_F(OOActionSpaceFixture, GetObjectOrientedActionTest) {
 
 TEST_F(OOActionSpaceFixture, PublishActionTest) {
     /// Check that action published with updated cube pose is correct
-    bool result = 
+    bool result =
         m_actionspace.publish_action(4, m_action_publisher, object_state);
     ASSERT_TRUE(result);
     WaitForMessage();
@@ -174,7 +186,6 @@ TEST_F(OOActionSpaceFixture, PublishActionTest) {
     EXPECT_EQ(2.5, action->speed);
     EXPECT_EQ(1, action->duration);
     msg_recieved = false;
-    
     result = m_actionspace.publish_action(-1, m_action_publisher, object_state);
     ASSERT_FALSE(result);
 }
@@ -182,7 +193,8 @@ TEST_F(OOActionSpaceFixture, PublishActionTest) {
 TEST_F(OOActionSpaceFixture, ActionVectorTest) {
     // Tests action vector generation
     libcozmo::actionspace::ObjectOrientedActionSpace::GenericAction* action =
-        static_cast<libcozmo::actionspace::ObjectOrientedActionSpace::GenericAction*>(
+        static_cast<
+            libcozmo::actionspace::ObjectOrientedActionSpace::GenericAction*>(
             m_actionspace.get_action(4));
     Eigen::VectorXd action_vector(4);
     EXPECT_TRUE(m_actionspace.to_action_vector(*action, &action_vector));

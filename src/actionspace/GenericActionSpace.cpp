@@ -67,9 +67,9 @@ bool GenericActionSpace::action_similarity(
     const Action* action2 = m_actions[action_id2];
     std::vector<double> action2_vector{
         action2->m_speed, action2->m_duration, action2->m_heading};
-    
+
     *similarity = utils::euclidean_distance(action1_vector, action2_vector);
-    
+
     return true;
 }
 
@@ -111,7 +111,7 @@ bool GenericActionSpace::to_action_vector(
         (*action_vector) <<
             generic_action.m_speed,
             generic_action.m_duration,
-            generic_action.m_heading;    
+            generic_action.m_heading;
         return true;
     }
 
