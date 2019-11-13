@@ -35,6 +35,15 @@
 namespace libcozmo {
 namespace statespace {
 
+
+SE2::State::State(const int& x, const int& y, const int& theta) : \
+    x(x), y(y), theta(theta) {}
+
+SE2::State::State(const Eigen::Vector3d& input) : \
+    x(input[0]),
+    y(input[1]),
+    theta(input[2]) {}
+
 SE2::~SE2() {
     for (int i = 0; i < m_state_map.size(); ++i) {
         delete(m_state_map[i]);

@@ -164,6 +164,9 @@ class StateSpace::State {
     ///
     /// \return Output state vector
     virtual Eigen::VectorXd vector() const = 0;
+
+    /// Equality operator
+    virtual bool operator== (const State& state) const = 0;
 };
 
 }  // namespace statespace
