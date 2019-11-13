@@ -177,21 +177,20 @@ TEST_F(SE2StatespaceTest, AddFail) {
     EXPECT_FALSE(sum);
 }
 
-TEST_F(SE2StatespaceTest, State2StateVector) {
-    Eigen::VectorXd a(3);
+TEST_F(SE2StatespaceTest, State2Vector) {
     SE2::State dest;
     statespace.copy_state(SE2::State(1, 2, 3), &dest);
-    EXPECT_TRUE(statespace.get_state_vector(dest, &a));
+    Eigen::VectorXd a = dest.vector();    
+
     EXPECT_EQ(1, a[0]);
     EXPECT_EQ(2, a[1]);
     EXPECT_EQ(3, a[2]); 
 }
 
-TEST_F(SE2StatespaceTest, StateVector2State) {
+TEST_F(SE2StatespaceTest, Vector2State) {
     Eigen::VectorXd a(3);
-    SE2::State dest;
-    statespace.copy_state(SE2::State(1, 2, 3), &dest);
-    EXPECT_TRUE(statespace.from_state_vector(&dest, a));
+    a << 1, 2, 3;
+    SE2::State dest(a);    
     EXPECT_EQ(1, dest.getX());
     EXPECT_EQ(2, dest.getY());
     EXPECT_EQ(3, dest.getTheta()); 

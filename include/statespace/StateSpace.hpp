@@ -148,25 +148,6 @@ class StateSpace {
         return true;
     }
 
-    /// Given input state, convert it to dynamic vector representing state.
-    /// Length, values of state depend on the derived class
-    ///
-    /// \param state Input state
-    /// \param[out] state_vector State vector
-    /// \return True if conversion successful; false otherwise
-    virtual bool get_state_vector(
-        const State& state,
-        Eigen::VectorXd* state_vector) const = 0;
-
-    /// Converts state vector representation to state
-    ///
-    /// \param state State
-    /// \param state_vector State vector
-    /// \return True if conversion successful; false otherwise;
-    virtual bool from_state_vector(
-        StateSpace::State* state,
-        const Eigen::VectorXd& state_vector) const = 0;
-
  private:
     virtual State* create_state() = 0;
 };
@@ -178,6 +159,11 @@ class StateSpace::State {
     State() = default;
 
     ~State() = default;
+
+    /// Convert state to its vector representation
+    ///
+    /// \return Output state vector
+    virtual Eigen::VectorXd vector() const = 0;
 };
 
 }  // namespace statespace

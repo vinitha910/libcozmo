@@ -56,6 +56,12 @@ class SE2 : public virtual StateSpace {
         explicit State(const int& x, const int& y, const int& theta) : \
             x(x), y(y), theta(theta) {}
 
+        /// Constructs state with given vector representation
+        explicit State(const Eigen::Vector3d& state__vector) : \
+            x(state__vector[0]),
+            y(state__vector[1]),
+            theta(state__vector[2]) {}
+
         /// Equality operator
         bool operator== (const State& state) const {
             return x == state.x && y == state.y && theta == state.theta;
@@ -73,6 +79,13 @@ class SE2 : public virtual StateSpace {
         int getX() const { return x; }
         int getY() const { return y; }
         int getTheta() const { return theta; }
+
+        /// Documentation Inherited
+        Eigen::VectorXd vector() const override {
+            Eigen::VectorXd state_vector(3);
+            state_vector << x, y, theta;
+            return state_vector;
+        };
 
      private:
         int x;
@@ -146,18 +159,6 @@ class SE2 : public virtual StateSpace {
 
     /// Documentation inherited
     double get_resolution() const override;
-
-    /// Documentation inherited
-    ///
-    /// In SE2, state vector is formatted as [x(mm), y(mm), theta(radians)]
-    bool get_state_vector(
-        const StateSpace::State& state,
-        Eigen::VectorXd* state_vector) const override;
-
-    /// Documentation inherited
-    bool from_state_vector(
-        StateSpace::State* state,
-        const Eigen::VectorXd& state_vector) const override;
 
  private:
     /// Creates a new state and adds it to the statespace
