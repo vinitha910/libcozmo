@@ -53,9 +53,15 @@ Eigen::VectorXd SE2::State::vector() const {
     return state_vector;
 }
 
-int SE2::State::getX() const { return x; }
-int SE2::State::getY() const { return y; }
-int SE2::State::getTheta() const { return theta; }
+int SE2::State::X() const {
+    return x;
+}
+int SE2::State::Y() const {
+    return y;
+}
+int SE2::State::Theta() const {
+    return theta;
+}
 
 SE2::~SE2() {
     for (int i = 0; i < m_state_map.size(); ++i) {

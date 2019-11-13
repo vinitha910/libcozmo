@@ -89,9 +89,9 @@ TEST_F(SE2StatespaceTest, ContinuousToDiscreteStateConversion) {
     SE2::State out_state;
     statespace.continuous_state_to_discrete(in_state, &out_state);
 
-    EXPECT_DOUBLE_EQ(out_state.getX(), 1);
-    EXPECT_DOUBLE_EQ(out_state.getY(), 2);
-    EXPECT_DOUBLE_EQ(out_state.getTheta(), 1);
+    EXPECT_DOUBLE_EQ(out_state.X(), 1);
+    EXPECT_DOUBLE_EQ(out_state.Y(), 2);
+    EXPECT_DOUBLE_EQ(out_state.Theta(), 1);
 }
 
 TEST_F(SE2StatespaceTest, GetsStateID) {
@@ -107,14 +107,14 @@ TEST_F(SE2StatespaceTest, GetsStateID) {
 
 TEST_F(SE2StatespaceTest, GetsState) {
     const SE2::State* s1 = static_cast<SE2::State*>(statespace.get_state(0));
-    EXPECT_EQ(3, s1->getX());
-    EXPECT_EQ(2, s1->getY());
-    EXPECT_EQ(1, s1->getTheta());
+    EXPECT_EQ(3, s1->X());
+    EXPECT_EQ(2, s1->Y());
+    EXPECT_EQ(1, s1->Theta());
 
     const SE2::State* s2 = static_cast<SE2::State*>(statespace.get_state(1));
-    EXPECT_EQ(1, s2->getX());
-    EXPECT_EQ(3, s2->getY());
-    EXPECT_EQ(3, s2->getTheta());
+    EXPECT_EQ(1, s2->X());
+    EXPECT_EQ(3, s2->Y());
+    EXPECT_EQ(3, s2->Theta());
 
     EXPECT_EQ(nullptr, statespace.get_state(2));
 }
@@ -144,9 +144,9 @@ TEST_F(SE2StatespaceTest, CopyState) {
     SE2::State dest;
     statespace.copy_state(SE2::State(1, 1, 1), &dest);
 
-    EXPECT_EQ(1, dest.getX());
-    EXPECT_EQ(1, dest.getY());
-    EXPECT_EQ(1, dest.getTheta());    
+    EXPECT_EQ(1, dest.X());
+    EXPECT_EQ(1, dest.Y());
+    EXPECT_EQ(1, dest.Theta());    
 }
 
 TEST_F(SE2StatespaceTest, GetResolution) {
@@ -191,9 +191,9 @@ TEST_F(SE2StatespaceTest, Vector2State) {
     Eigen::VectorXd a(3);
     a << 1, 2, 3;
     SE2::State dest(a);    
-    EXPECT_EQ(1, dest.getX());
-    EXPECT_EQ(2, dest.getY());
-    EXPECT_EQ(3, dest.getTheta()); 
+    EXPECT_EQ(1, dest.X());
+    EXPECT_EQ(2, dest.Y());
+    EXPECT_EQ(3, dest.Theta()); 
 }
 
 }  // namespace test

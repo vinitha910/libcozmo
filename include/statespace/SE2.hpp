@@ -71,9 +71,9 @@ class SE2 : public virtual StateSpace {
             return seed;
         }
 
-        int getX() const;
-        int getY() const;
-        int getTheta() const;
+        int X() const;
+        int Y() const;
+        int Theta() const;
 
         /// Documentation Inherited
         Eigen::VectorXd vector() const override;
