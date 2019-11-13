@@ -84,7 +84,7 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
     /// This class handles generic attributes to the action that can be
     /// executed by cozmo, which are speed (mm / s), edge offset (mm),
     /// aspect ratio (mm), and heading offset (radian)
-    class GenericAction : public ActionSpace::Action {
+    class Action : public ActionSpace::Action {
      public:
         /// Constructs action with given attributes
         ///
@@ -98,15 +98,11 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
         /// \param heading_offset : The angular distance from front of
         ///     the object, indicating which side of the object the action
         ///     is being applied to (radians)
-        explicit GenericAction(
+        explicit Action(
             const double& speed,
             const double& edge_offset,
             const double& aspect_ratio,
-            const double& heading_offset) : \
-            m_speed(speed),
-            m_edge_offset(edge_offset),
-            m_aspect_ratio(aspect_ratio),
-            m_heading_offset(heading_offset) {}
+            const double& heading_offset);
 
         double speed() const { return m_speed; }
         double aspect_ratio() const { return m_aspect_ratio; }
@@ -138,7 +134,7 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
     /// This class contains the parameters for executing an objected oriented
     /// action. These parameters are calculated from the corresponding generic
     /// action parameters.
-    class ObjectOrientedAction : public ActionSpace::Action {
+    class CozmoAction : public ActionSpace::Action {
      public:
             /// Constructs object oriented action w.r.t the object position
             ///
@@ -146,11 +142,9 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
             ///     refers to backward movement
             /// \param start_pose : starting pose of cozmo's action,
             ///     its attributes are x(mm), y(mm), and theta(radians)
-        explicit ObjectOrientedAction(
+        explicit CozmoAction(
             const double& speed,
-            const Eigen::Vector3d& start_pose) : \
-            m_speed(speed),
-            m_start_pose(start_pose) {}
+            const Eigen::Vector3d& start_pose);
 
         double speed() const { return m_speed; }
         Eigen::Vector3d start_pose() const { return m_start_pose; }
@@ -178,29 +172,26 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
     /// \param speeds : all possible speeds (mm/s) for the actions
     ///     (duplicates persist)
     /// \param ratios : The ratios (mm) of the object.
-    ///     For example, if the size of the object is 100mm x 300mm then the
-    ///     ratio = {100, 300} = {width, length}
-    /// \param center_offsets : The distance (mm) from the center of the object
-    ///     and perpendicular to an edge.
-    ///     For example, {70, 160} = {width, length} for an object of size
-    ///     100mm x 300mm
-    ///     ----------------------
-    ///     |          __________|_ 160
-    ///     |         |          |
-    ///     ----------|-----------
-    ///               |
-    ///               70
+    ///     For example, if the size of the object is 300mm x 100mm then the
+    ///     ratio = {300, 100} = {width, length}
+    /// \param center_offsets : The distance (mm) along a vector, from the
+    ///     center of the object, that is perpendicular to an edge.
+    ///     For example, {v1, v2} = {width, length} for an object of size
+    ///     300mm x 100mm
+    ///                 BACK
+    ///        +1        0       -1
+    ///         -------------------
+    ///         |                 |
+    /// LEFT  0 |        |--------|--►  v1    0  RIGHT
+    ///         |        |        |
+    ///         ---------|---------
+    ///                  ▼ v2
+    ///                 
+    ///        -1        0        +1
+    ///                FRONT
+    ///
     /// \param max_edge_offsets : The max distances (mm), along the edge of
     ///     the object, from the center of that edge.
-    ///     For example, {55, 155} = {width, length} for an object of size
-    ///     100mm x 300mm
-    ///     ----------------------  55
-    ///     |                    |   |
-    ///     |                    |   |
-    ///     ----------|----------- -55
-    ///
-    ///  |-155        0           155|  (offset)
-    ///     |        300mm       |      (object dimension)
     /// \param num_edge_offsets : number of starting position offsets on each
     ///     side of the object; this value must always be odd
     ObjectOrientedActionSpace(
@@ -245,7 +236,7 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
     bool get_generic_to_object_oriented_action(
         const int& action_id,
         const aikido::statespace::StateSpace::State& _state,
-        ObjectOrientedAction* action) const;
+        CozmoAction* action) const;
 
     /// Documentation inherited
     bool publish_action(
@@ -261,7 +252,7 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
     const std::vector<double> m_ratios;
     const Eigen::Vector2d m_center_offsets;
     const Eigen::Vector2d m_max_edge_offsets;
-    std::vector<GenericAction*> m_actions;
+    std::vector<Action*> m_actions;
     ros::Publisher action_publisher;
 };
 

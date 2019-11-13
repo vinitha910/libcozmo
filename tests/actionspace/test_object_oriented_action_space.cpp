@@ -31,8 +31,6 @@
 #include "actionspace/ObjectOrientedActionSpace.hpp"
 #include "utils/utils.hpp"
 
-// using namespace libcozmo::actionspace;
-
 class OOActionSpaceFixture: public ::testing::Test {
  public:
     OOActionSpaceFixture() : \
@@ -119,12 +117,12 @@ TEST_F(OOActionSpaceFixture, UniqueActionTest) {
         const auto action1 =
             static_cast<
                 libcozmo::actionspace::
-                    ObjectOrientedActionSpace::GenericAction*>(
+                    ObjectOrientedActionSpace::Action*>(
                     m_actionspace.get_action(i));
         const auto action2 =
             static_cast<
                 libcozmo::actionspace::
-                    ObjectOrientedActionSpace::GenericAction*>(
+                    ObjectOrientedActionSpace::Action*>(
                     m_actionspace.get_action(i + m_actionspace.size()/2));
 
         EXPECT_EQ(action1->speed(), action2->speed());
@@ -136,9 +134,9 @@ TEST_F(OOActionSpaceFixture, UniqueActionTest) {
 
 TEST_F(OOActionSpaceFixture, ActionGenerationTest) {
     // Tests a valid action
-    libcozmo::actionspace::ObjectOrientedActionSpace::GenericAction* action =
+    libcozmo::actionspace::ObjectOrientedActionSpace::Action* action =
         static_cast<
-            libcozmo::actionspace::ObjectOrientedActionSpace::GenericAction*>(
+            libcozmo::actionspace::ObjectOrientedActionSpace::Action*>(
             m_actionspace.get_action(4));
     EXPECT_EQ(2.5, action->speed());
     EXPECT_NEAR(0, action->heading_offset(), 0.001);
@@ -147,13 +145,13 @@ TEST_F(OOActionSpaceFixture, ActionGenerationTest) {
 
     // Tests nullptr action
     action = static_cast<
-        libcozmo::actionspace::ObjectOrientedActionSpace::GenericAction*>(
+        libcozmo::actionspace::ObjectOrientedActionSpace::Action*>(
         m_actionspace.get_action(-1));
     EXPECT_TRUE(action == nullptr);
 }
 
 TEST_F(OOActionSpaceFixture, GetObjectOrientedActionTest) {
-    libcozmo::actionspace::ObjectOrientedActionSpace::ObjectOrientedAction
+    libcozmo::actionspace::ObjectOrientedActionSpace::CozmoAction
         action(0.0, Eigen::Vector3d(0, 0, 0));
     m_actionspace.get_generic_to_object_oriented_action(
         4,
@@ -192,9 +190,9 @@ TEST_F(OOActionSpaceFixture, PublishActionTest) {
 
 TEST_F(OOActionSpaceFixture, ActionVectorTest) {
     // Tests action vector generation for Generic Action
-    libcozmo::actionspace::ObjectOrientedActionSpace::GenericAction* action =
+    libcozmo::actionspace::ObjectOrientedActionSpace::Action* action =
         static_cast<
-            libcozmo::actionspace::ObjectOrientedActionSpace::GenericAction*>(
+            libcozmo::actionspace::ObjectOrientedActionSpace::Action*>(
             m_actionspace.get_action(4));
     Eigen::VectorXd action_vector = action->vector();
     EXPECT_NEAR(2.5, action_vector[0], 0.00001);
@@ -203,10 +201,10 @@ TEST_F(OOActionSpaceFixture, ActionVectorTest) {
     EXPECT_NEAR(0, action_vector[3], 0.00001);
 }
 
-TEST_F(OOActionSpaceFixture, ActionVectorTest2) {
+TEST_F(OOActionSpaceFixture, CozmoActionVectorTest) {
     // Tests action vector generation for OOAction
     libcozmo::actionspace::ObjectOrientedActionSpace::
-        ObjectOrientedAction action(3.0, Eigen::Vector3d{1, 2, 3});
+        CozmoAction action(3.0, Eigen::Vector3d{1, 2, 3});
     Eigen::VectorXd action_vector = action.vector();
     EXPECT_NEAR(3.0, action_vector[0], 0.00001);
     EXPECT_NEAR(1, action_vector[1], 0.00001);

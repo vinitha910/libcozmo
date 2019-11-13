@@ -84,7 +84,8 @@ class ActionSpace {
 class ActionSpace::Action {
  public:
     /// Converts Action object into dynamic 1-D vector representing
-    /// action. Note that length of action vector depends on class.
+    /// action. Note that length of action vector depends on the action
+    /// representation.
     ///
     /// \return Action vector representation
     virtual Eigen::VectorXd vector() const = 0;

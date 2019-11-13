@@ -72,7 +72,7 @@ class GenericActionSpace : public virtual ActionSpace {
         /// [speed, duration, heading]
         Eigen::VectorXd vector() const override {
             Eigen::VectorXd action_vector(3);
-            action_vector <<m_speed, m_duration, m_heading;
+            action_vector << m_speed, m_duration, m_heading;
             return action_vector;
         }
         const double m_speed;

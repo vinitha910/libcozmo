@@ -34,6 +34,23 @@
 namespace libcozmo {
 namespace actionspace {
 
+ObjectOrientedActionSpace::Action::Action(
+    const double& speed,
+    const double& edge_offset,
+    const double& aspect_ratio,
+    const double& heading_offset) : \
+    m_speed(speed),
+    m_edge_offset(edge_offset),
+    m_aspect_ratio(aspect_ratio),
+    m_heading_offset(heading_offset) {}
+
+ObjectOrientedActionSpace::CozmoAction::CozmoAction(
+    const double& speed,
+    const Eigen::Vector3d& start_pose) : \
+    m_speed(speed),
+    m_start_pose(start_pose) {}
+
+
 ObjectOrientedActionSpace::ObjectOrientedActionSpace(
     const std::vector<double>& speeds,
     const std::vector<double>& ratios,
@@ -79,7 +96,7 @@ ObjectOrientedActionSpace::ObjectOrientedActionSpace(
 
         for (const auto& edge_offset : edge_offsets) {
             for (const auto& speed : speeds) {
-                m_actions.push_back(new GenericAction(
+                m_actions.push_back(new Action(
                     speed,
                     offset_sign * edge_offset / max_edge_offset,
                     ratio,
@@ -98,11 +115,11 @@ bool ObjectOrientedActionSpace::action_similarity(
         return false;
     }
 
-    GenericAction* action1 = m_actions[action_id1];
+    Action* action1 = m_actions[action_id1];
     std::vector<double> action1_vector{
         action1->speed(), action1->edge_offset(), action1->aspect_ratio()};
 
-    GenericAction* action2 = m_actions[action_id2];
+    Action* action2 = m_actions[action_id2];
     std::vector<double> action2_vector{
         action2->speed(), action2->edge_offset(), action2->aspect_ratio()};
 
@@ -123,10 +140,10 @@ bool ObjectOrientedActionSpace::is_valid_action_id(const int& action_id) const {
 bool ObjectOrientedActionSpace::get_generic_to_object_oriented_action(
     const int& action_id,
     const aikido::statespace::StateSpace::State& _state,
-    ObjectOrientedAction* action) const {
+    CozmoAction* action) const {
 
     const auto generic_action =
-        static_cast<GenericAction*>(get_action(action_id));
+        static_cast<Action*>(get_action(action_id));
     if (generic_action == nullptr) {
         return false;
     }
@@ -149,7 +166,7 @@ bool ObjectOrientedActionSpace::get_generic_to_object_oriented_action(
     const double offset_sign =
             (heading_offset == FRONT || heading_offset == LEFT) ? 1 : -1;
 
-    *action = ObjectOrientedAction(
+    *action = CozmoAction(
         generic_action->speed(),
         Eigen::Vector3d(
             position.x() - center_offset * cos(orientation) +
@@ -168,7 +185,7 @@ bool ObjectOrientedActionSpace::publish_action(
     const ros::Publisher& publisher,
     const aikido::statespace::StateSpace::State& _state) const {
     libcozmo::ObjectOrientedAction msg;
-    ObjectOrientedAction OO_action(0.0, Eigen::Vector3d(0, 0, 0));
+    CozmoAction OO_action(0.0, Eigen::Vector3d(0, 0, 0));
     if (!get_generic_to_object_oriented_action(action_id, _state, &OO_action)) {
         return false;
     }
