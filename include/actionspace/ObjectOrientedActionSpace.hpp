@@ -69,15 +69,17 @@ namespace actionspace {
 /// applying the action with the same parameters on opposite corners results in
 /// the same movement of the object.
 ///
-///                  BACK
-///       +1          0         -1
-///         --------------------
-///         |                  |
-/// LEFT  0 |                  | 0  RIGHT
-///         |                  |
-///         --------------------
-///       -1          0         +1
-///                 FRONT
+///                 BACK
+///        +1        0       -1
+///         -------------------
+///         |                 |
+/// LEFT  0 |        |--------|--►  v1    0  RIGHT
+///         |        |        |
+///         ---------|---------
+///                  ▼ v2
+///
+///        -1        0        +1
+///                FRONT
 ///
 class ObjectOrientedActionSpace : public virtual ActionSpace {
  public:
@@ -110,7 +112,7 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
         double heading_offset() const { return m_heading_offset; }
 
         /// Documentation inherited
-        /// In this class the action vector is in format
+        /// The action vector is in the following format:
         /// [speed, aspect_ratio, edge_offset, heading_offset]
         Eigen::VectorXd vector() const override {
             Eigen::VectorXd action_vector(4);
@@ -150,7 +152,7 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
         Eigen::Vector3d start_pose() const { return m_start_pose; }
 
         /// Documentation inherited
-        /// In this class the action vector is in format
+        /// The action vector is in the following format:
         /// [speed, start_pose_x, start_pose_y, start_pose_theta]
         Eigen::VectorXd vector() const override {
             Eigen::VectorXd action_vector(4);
@@ -176,20 +178,8 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
     ///     ratio = {300, 100} = {width, length}
     /// \param center_offsets : The distance (mm) along a vector, from the
     ///     center of the object, that is perpendicular to an edge.
-    ///     For example, {v1, v2} = {width, length} for an object of size
-    ///     300mm x 100mm
-    ///                 BACK
-    ///        +1        0       -1
-    ///         -------------------
-    ///         |                 |
-    /// LEFT  0 |        |--------|--►  v1    0  RIGHT
-    ///         |        |        |
-    ///         ---------|---------
-    ///                  ▼ v2
-    ///
-    ///        -1        0        +1
-    ///                FRONT
-    ///
+    ///     For example, |v1| and |v2| are the x and y offsets from the
+    ///     center respectively
     /// \param max_edge_offsets : The max distances (mm), along the edge of
     ///     the object, from the center of that edge.
     /// \param num_edge_offsets : number of starting position offsets on each

@@ -68,7 +68,7 @@ class GenericActionSpace : public virtual ActionSpace {
             m_heading(heading) {}
 
         /// Documentation inherited
-        /// In this class it is assumed that the action vector is in format
+        /// The action vector is in the following format:
         /// [speed, duration, heading]
         Eigen::VectorXd vector() const override {
             Eigen::VectorXd action_vector(3);
