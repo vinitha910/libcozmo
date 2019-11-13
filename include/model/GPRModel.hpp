@@ -41,10 +41,6 @@
 namespace libcozmo {
 namespace model {
 
-/// This model assumes it using SE2-based state vector as its state input and
-/// object oriented-based action vector as its model input.
-/// Addtionally, path to model.pkl passed in as construction argument
-/// needs to be the absolute path.
 class GPRModel : public virtual Model {
  public:
     /// Constructs this class given the framework where the GPR was trained in
@@ -55,11 +51,10 @@ class GPRModel : public virtual Model {
     ~GPRModel() = default;
 
     /// Documentation inherited
-    /// Model input format in [speed, aspect_ratio, edge_offset, heading_offset]
     bool predict_state(
-        const Eigen::VectorXd& model_input,
-        const Eigen::VectorXd& state_input,
-        Eigen::VectorXd* state_output) const override;
+        const actionspace::Actionspace::Action& input_action,
+        const statespace::StateSpace::State& input_state,
+        statespace::StateSpace::State* output_state) const override;
 
  private:
     const std::shared_ptr<ModelFramework> m_framework;

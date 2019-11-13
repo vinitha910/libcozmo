@@ -37,13 +37,14 @@ namespace libcozmo {
 namespace model {
 
 bool GPRModel::predict_state(
-    const Eigen::VectorXd& model_input,
-    const Eigen::VectorXd& state_input,
-    Eigen::VectorXd* state_output) const {
+    const actionspace::Actionspace::Action& input_action,
+    const statespace::StateSpace::State& input_state,
+    statespace::StateSpace::State* output_state) const {
 
-    if (model_input.size() != 4 ||
-        state_input.size() != 3 ||
-        state_output->size() != 3) {
+    Eigen::VectorXd model_input = input_action.vector();
+    Eigen::VectorXd state_input = input_state.vector();
+
+    if (model_input.size() != 4 || state_input.size() != 3) {
         return false;
     }
 
@@ -65,9 +66,10 @@ bool GPRModel::predict_state(
 
     double distance = PyFloat_AsDouble(PyList_GetItem(p_result, 0));
     double dtheta = PyFloat_AsDouble(PyList_GetItem(p_result, 1));
-    (*state_output)[0] = state_input[0] + distance * cos(dtheta);
-    (*state_output)[1] = state_input[1] + distance * sin(dtheta);
-    (*state_output)[2] = state_input[2] + dtheta;
+    double x = state_input[0] + distance * cos(dtheta);
+    double y = state_input[1] + distance * sin(dtheta);
+    double theta = state_input[2] + dtheta;
+    *output_state = statespace::StateSpace::State(Eigen::Vector3d ());
     return true;
 }
 

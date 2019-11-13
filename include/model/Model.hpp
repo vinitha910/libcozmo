@@ -40,22 +40,16 @@ namespace model {
 /// Py_Finalize();
 class Model {
  public:
-    // /// Get the model's predicted output given then input
-    // ///
-    // /// \param input The model input, dependent on model type
-    // /// \param[out] output The ouput after running inference
-    // virtual void inference(const ModelInput& input, ModelOutput* output) = 0;
-
-    /// Get the output state given the input and the current state
+    /// Get the output state given the action input and the current state
     ///
-    /// \param model_input Input to model
-    /// \param state_input Input state
-    /// \param[out] state_output The predicted output state
+    /// \param input_action Model input
+    /// \param input_state Given state
+    /// \param[out] output_state
     /// \return True if prediction successfully calculated; false otherwise;
     virtual bool predict_state(
-        const Eigen::VectorXd& model_input,
-        const Eigen::VectorXd& state_input,
-        Eigen::VectorXd* state_output) const = 0;
+        const actionspace::Actionspace::Action& input_action,
+        const statespace::StateSpace::State& input_state,
+        statespace::StateSpace::State* output_state) const = 0;
 };
 
 }  // namespace model
