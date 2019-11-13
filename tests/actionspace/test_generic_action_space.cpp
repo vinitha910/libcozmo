@@ -158,8 +158,7 @@ TEST_F(GenericActionFixture, ActionVectorTest) {
     libcozmo::actionspace::GenericActionSpace::Action* action =
         static_cast<libcozmo::actionspace::GenericActionSpace::Action*>(
             m_actionspace.get_action(15));
-    Eigen::VectorXd action_vector(3);
-    EXPECT_TRUE(m_actionspace.to_action_vector(*action, &action_vector));
+    Eigen::VectorXd action_vector = action->vector();
     EXPECT_NEAR(1, action_vector[0], 0.00001);
     EXPECT_NEAR(1, action_vector[1], 0.00001);
     EXPECT_NEAR(M_PI * 3.0 / 2.0, action_vector[2], 0.00001);

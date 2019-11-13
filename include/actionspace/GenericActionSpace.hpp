@@ -67,6 +67,14 @@ class GenericActionSpace : public virtual ActionSpace {
             m_duration(duration),
             m_heading(heading) {}
 
+        /// Documentation inherited
+        /// In this class it is assumed that the action vector is in format
+        /// [speed, duration, heading]
+        Eigen::VectorXd vector() const override {
+            Eigen::VectorXd action_vector(3);
+            action_vector <<m_speed, m_duration, m_heading;
+            return action_vector;
+        }
         const double m_speed;
         const double m_duration;
         const double m_heading;
@@ -115,13 +123,6 @@ class GenericActionSpace : public virtual ActionSpace {
 
     /// Documentation inherited
     int size() const override;
-
-    /// Documentation inherited
-    /// In this class it is assumed that the action vector is in format
-    /// [speed, duration, heading]
-    bool to_action_vector(
-        const ActionSpace::Action& action,
-        Eigen::VectorXd* action_vector) const override;
 
  private:
     /// Vector of actions

@@ -101,19 +101,5 @@ bool GenericActionSpace::publish_action(
     return true;
 }
 
-bool GenericActionSpace::to_action_vector(
-    const ActionSpace::Action& action,
-    Eigen::VectorXd* action_vector) const {
-        const Action& generic_action = static_cast<const Action&>(action);
-        if ((*action_vector).size() != 3) {
-            return false;
-        }
-        (*action_vector) <<
-            generic_action.m_speed,
-            generic_action.m_duration,
-            generic_action.m_heading;
-        return true;
-    }
-
 }  // namespace actionspace
 }  // namespace libcozmo

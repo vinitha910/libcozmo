@@ -191,17 +191,27 @@ TEST_F(OOActionSpaceFixture, PublishActionTest) {
 }
 
 TEST_F(OOActionSpaceFixture, ActionVectorTest) {
-    // Tests action vector generation
+    // Tests action vector generation for Generic Action
     libcozmo::actionspace::ObjectOrientedActionSpace::GenericAction* action =
         static_cast<
             libcozmo::actionspace::ObjectOrientedActionSpace::GenericAction*>(
             m_actionspace.get_action(4));
-    Eigen::VectorXd action_vector(4);
-    EXPECT_TRUE(m_actionspace.to_action_vector(*action, &action_vector));
+    Eigen::VectorXd action_vector = action->vector();
     EXPECT_NEAR(2.5, action_vector[0], 0.00001);
     EXPECT_NEAR(1.1, action_vector[1], 0.00001);
     EXPECT_NEAR(-0.5, action_vector[2], 0.00001);
     EXPECT_NEAR(0, action_vector[3], 0.00001);
+}
+
+TEST_F(OOActionSpaceFixture, ActionVectorTest2) {
+    // Tests action vector generation for OOAction
+    libcozmo::actionspace::ObjectOrientedActionSpace::
+        ObjectOrientedAction action(3.0, Eigen::Vector3d{1, 2, 3});
+    Eigen::VectorXd action_vector = action.vector();
+    EXPECT_NEAR(3.0, action_vector[0], 0.00001);
+    EXPECT_NEAR(1, action_vector[1], 0.00001);
+    EXPECT_NEAR(2, action_vector[2], 0.00001);
+    EXPECT_NEAR(3, action_vector[3], 0.00001);
 }
 
 int main(int argc, char **argv) {

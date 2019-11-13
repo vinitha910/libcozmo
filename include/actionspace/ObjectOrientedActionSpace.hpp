@@ -113,6 +113,19 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
         double edge_offset() const { return m_edge_offset; }
         double heading_offset() const { return m_heading_offset; }
 
+        /// Documentation inherited
+        /// In this class the action vector is in format
+        /// [speed, aspect_ratio, edge_offset, heading_offset]
+        Eigen::VectorXd vector() const override {
+            Eigen::VectorXd action_vector(4);
+            action_vector <<
+                m_speed,
+                m_aspect_ratio,
+                m_edge_offset,
+                m_heading_offset;
+            return action_vector;
+        }
+
      private:
         double m_speed;
         double m_aspect_ratio;
@@ -142,6 +155,19 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
         double speed() const { return m_speed; }
         Eigen::Vector3d start_pose() const { return m_start_pose; }
 
+        /// Documentation inherited
+        /// In this class the action vector is in format
+        /// [speed, start_pose_x, start_pose_y, start_pose_theta]
+        Eigen::VectorXd vector() const override {
+            Eigen::VectorXd action_vector(4);
+            action_vector <<
+                m_speed,
+                m_start_pose[0],
+                m_start_pose[1],
+                m_start_pose[2];
+            return action_vector;
+        }
+
      private:
             double m_speed;
             Eigen::Vector3d m_start_pose;
@@ -149,17 +175,34 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
             friend class ObjectOrientedActionSpace;
     };
 
-
-    /// TODO UPDATE COMMENTS
     /// \param speeds : all possible speeds (mm/s) for the actions
     ///     (duplicates persist)
-    /// \param aspect_ratio : The aspect ratio (mm) of the object.
+    /// \param ratios : The ratios (mm) of the object.
     ///     For example, if the size of the object is 100mm x 300mm then the
-    ///     aspect ratio = {100, 300} = {width, length}
-    /// \param edge_offset : The max distance, along the edge of
-    ///     the object, from the center of that edge (mm)
-    /// \param num_offset : number of starting position offsets on each side
-    ///     of the object; this value must always be odd
+    ///     ratio = {100, 300} = {width, length}
+    /// \param center_offsets : The distance (mm) from the center of the object
+    ///     and perpendicular to an edge.
+    ///     For example, {70, 160} = {width, length} for an object of size
+    ///     100mm x 300mm
+    ///     ----------------------
+    ///     |          __________|_ 160
+    ///     |         |          |
+    ///     ----------|-----------
+    ///               |
+    ///               70
+    /// \param max_edge_offsets : The max distances (mm), along the edge of
+    ///     the object, from the center of that edge.
+    ///     For example, {55, 155} = {width, length} for an object of size
+    ///     100mm x 300mm
+    ///     ----------------------  55
+    ///     |                    |   |
+    ///     |                    |   |
+    ///     ----------|----------- -55
+    ///
+    ///  |-155        0           155|  (offset)
+    ///     |        300mm       |      (object dimension)
+    /// \param num_edge_offsets : number of starting position offsets on each
+    ///     side of the object; this value must always be odd
     ObjectOrientedActionSpace(
         const std::vector<double>& speeds,
         const std::vector<double>& ratios,
@@ -212,13 +255,6 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
 
     /// Documentation inherited
     int size() const;
-
-    /// Documentation inherited
-    /// In this class it is assumed that the action vector is in format
-    /// [speed, aspect_ratio, edge_offset, heading_offset]
-    bool to_action_vector(
-        const ActionSpace::Action& action,
-        Eigen::VectorXd* action_vector) const override;
 
  private:
     const std::vector<double> m_speeds;
