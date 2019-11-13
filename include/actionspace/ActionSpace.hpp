@@ -27,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef LIBCOZMO_ACTIONSPACE_ACTIONSPACE_HPP_
-#define LIBCOZMO_ACTIONSPACE_ACTIONSPACE_HPP_
+#ifndef INCLUDE_ACTIONSPACE_ACTIONSPACE_HPP_
+#define INCLUDE_ACTIONSPACE_ACTIONSPACE_HPP_
 
 #include "aikido/distance/SE2.hpp"
 
@@ -82,6 +82,14 @@ class ActionSpace {
 };
 
 class ActionSpace::Action {
+ public:
+    /// Converts Action object into dynamic 1-D vector representing
+    /// action. Note that length of action vector depends on the action
+    /// representation.
+    ///
+    /// \return Action vector representation
+    virtual Eigen::VectorXd vector() const = 0;
+
  protected:
     // This is a base class that should only be used in derived classes.
     Action() = default;
@@ -92,4 +100,4 @@ class ActionSpace::Action {
 }  // namespace actionspace
 }  // namespace libcozmo
 
-#endif
+#endif  // INCLUDE_ACTIONSPACE_ACTIONSPACE_HPP_

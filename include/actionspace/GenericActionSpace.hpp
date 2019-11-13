@@ -27,13 +27,14 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef LIBCOZMO_ACTIONSPACE_GENERICACTIONSPACE_HPP
-#define LIBCOZMO_ACTIONSPACE_GENERICACTIONSPACE_HPP
+#ifndef INCLUDE_ACTIONSPACE_GENERICACTIONSPACE_HPP_
+#define INCLUDE_ACTIONSPACE_GENERICACTIONSPACE_HPP_
 
-#include <ros/ros.h>
-#include "libcozmo/ActionMsg.h"
 #include <Eigen/Dense>
+#include <ros/ros.h>
+#include <vector>
 #include <cmath>
+#include "libcozmo/ActionMsg.h"
 #include "utils/utils.hpp"
 #include "ActionSpace.hpp"
 
@@ -66,6 +67,14 @@ class GenericActionSpace : public virtual ActionSpace {
             m_duration(duration),
             m_heading(heading) {}
 
+        /// Documentation inherited
+        /// The action vector is in the following format:
+        /// [speed, duration, heading]
+        Eigen::VectorXd vector() const override {
+            Eigen::VectorXd action_vector(3);
+            action_vector << m_speed, m_duration, m_heading;
+            return action_vector;
+        }
         const double m_speed;
         const double m_duration;
         const double m_heading;
@@ -122,4 +131,4 @@ class GenericActionSpace : public virtual ActionSpace {
 }  /// namespace actionspace
 }  /// namespace libcozmo
 
-#endif
+#endif  // INCLUDE_ACTIONSPACE_GENERICACTIONSPACE_HPP_

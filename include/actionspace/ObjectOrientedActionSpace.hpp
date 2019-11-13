@@ -27,13 +27,13 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef OBJECT_ORIENTED_ACTION_SPACE
-#define OBJECT_ORIENTED_ACTION_SPACE
+#ifndef INCLUDE_ACTIONSPACE_OBJECTORIENTEDACTIONSPACE_HPP_
+#define INCLUDE_ACTIONSPACE_OBJECTORIENTEDACTIONSPACE_HPP_
 
-#include "libcozmo/ObjectOrientedAction.h"
 #include <Eigen/Dense>
 #include <ros/ros.h>
 #include <vector>
+#include "libcozmo/ObjectOrientedAction.h"
 #include "ActionSpace.hpp"
 
 namespace libcozmo {
@@ -50,7 +50,7 @@ namespace actionspace {
 /// Cozmo at a location relative to a rectangular object. We store the actions
 /// as generic actions (i.e. the action is not generated with respect to an
 /// object's pose). These generic actions can then be converted to object
-/// oriented actions as needed. 
+/// oriented actions as needed.
 ///
 /// Each object oriented action contains a starting pose for Cozmo along one of
 /// the sides of the object, from which the action will be executed. The are 4
@@ -65,26 +65,30 @@ namespace actionspace {
 /// calculated when Cozmo is executing a plan.
 ///
 /// Below is an example object with its respective edge offset values and
-/// labelled sides. Note, opposite corners have the same edge offsets since 
-/// applying the action with the same parameters on opposite corners results in 
-/// the same movement of the object. 
+/// labelled sides. Note, opposite corners have the same edge offsets since
+/// applying the action with the same parameters on opposite corners results in
+/// the same movement of the object.
 ///
-///                  BACK        
-///       +1          0         -1
-///         --------------------
-///         |                  |
-/// LEFT  0 |                  | 0  RIGHT
-///         |                  |
-///         --------------------
-///       -1          0         +1
-///                 FRONT        
+///                 BACK
+///        +1        0       -1
+///         -------------------
+///         |                 |
+/// LEFT  0 |        |--------|--►  v1    0  RIGHT
+///         |        |        |
+///         ---------|---------
+///                  ▼ v2
 ///
+///        -1        0        +1
+///                FRONT
+///
+/// Note the vectors |v1| and |v2|, which refer to the x and y offsets from the
+/// center of the object respectively.
 class ObjectOrientedActionSpace : public virtual ActionSpace {
  public:
     /// This class handles generic attributes to the action that can be
     /// executed by cozmo, which are speed (mm / s), edge offset (mm),
     /// aspect ratio (mm), and heading offset (radian)
-    class GenericAction : public ActionSpace::Action {
+    class Action : public ActionSpace::Action {
      public:
         /// Constructs action with given attributes
         ///
@@ -98,20 +102,21 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
         /// \param heading_offset : The angular distance from front of
         ///     the object, indicating which side of the object the action
         ///     is being applied to (radians)
-        explicit GenericAction(
+        explicit Action(
             const double& speed,
             const double& edge_offset,
             const double& aspect_ratio,
-            const double& heading_offset) : \
-            m_speed(speed),
-            m_edge_offset(edge_offset),
-            m_aspect_ratio(aspect_ratio),
-            m_heading_offset(heading_offset) {}
+            const double& heading_offset);
 
-        double speed() const { return m_speed; }
-        double aspect_ratio() const { return m_aspect_ratio; }
-        double edge_offset() const { return m_edge_offset; }
-        double heading_offset() const { return m_heading_offset; }
+        double speed() const;
+        double aspect_ratio() const;
+        double edge_offset() const;
+        double heading_offset() const;
+
+        /// Documentation inherited
+        /// The action vector is in the following format:
+        /// [speed, aspect_ratio, edge_offset, heading_offset]
+        Eigen::VectorXd vector() const override;
 
      private:
         double m_speed;
@@ -125,7 +130,7 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
     /// This class contains the parameters for executing an objected oriented
     /// action. These parameters are calculated from the corresponding generic
     /// action parameters.
-    class ObjectOrientedAction : public ActionSpace::Action {
+    class CozmoAction : public ActionSpace::Action {
      public:
             /// Constructs object oriented action w.r.t the object position
             ///
@@ -133,14 +138,17 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
             ///     refers to backward movement
             /// \param start_pose : starting pose of cozmo's action,
             ///     its attributes are x(mm), y(mm), and theta(radians)
-        explicit ObjectOrientedAction(
+        explicit CozmoAction(
             const double& speed,
-            const Eigen::Vector3d& start_pose) : \
-            m_speed(speed),
-            m_start_pose(start_pose) {}
+            const Eigen::Vector3d& start_pose);
 
-        double speed() const { return m_speed; }
-        Eigen::Vector3d start_pose() const { return m_start_pose; }
+        double speed() const;
+        Eigen::Vector3d start_pose() const;
+
+        /// Documentation inherited
+        /// The action vector is in the following format:
+        /// [speed, start_pose_x, start_pose_y, start_pose_theta]
+        Eigen::VectorXd vector() const override;
 
      private:
             double m_speed;
@@ -149,17 +157,19 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
             friend class ObjectOrientedActionSpace;
     };
 
-
-    /// TODO UPDATE COMMENTS
     /// \param speeds : all possible speeds (mm/s) for the actions
     ///     (duplicates persist)
-    /// \param aspect_ratio : The aspect ratio (mm) of the object.
-    ///     For example, if the size of the object is 100mm x 300mm then the
-    ///     aspect ratio = {100, 300} = {width, length}
-    /// \param edge_offset : The max distance, along the edge of
-    ///     the object, from the center of that edge (mm)
-    /// \param num_offset : number of starting position offsets on each side
-    ///     of the object; this value must always be odd
+    /// \param ratios : The ratios (mm) of the object.
+    ///     For example, if the size of the object is 300mm x 100mm then the
+    ///     ratio = {300, 100} = {width, length}
+    /// \param center_offsets : The distance (mm) along a vector, from the
+    ///     center of the object, that is perpendicular to an edge.
+    ///     For example, |v1| and |v2| are the x and y offsets from the
+    ///     center respectively
+    /// \param max_edge_offsets : The max distances (mm), along the edge of
+    ///     the object, from the center of that edge.
+    /// \param num_edge_offsets : number of starting position offsets on each
+    ///     side of the object; this value must always be odd
     ObjectOrientedActionSpace(
         const std::vector<double>& speeds,
         const std::vector<double>& ratios,
@@ -202,7 +212,7 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
     bool get_generic_to_object_oriented_action(
         const int& action_id,
         const aikido::statespace::StateSpace::State& _state,
-        ObjectOrientedAction* action) const;
+        CozmoAction* action) const;
 
     /// Documentation inherited
     bool publish_action(
@@ -218,11 +228,11 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
     const std::vector<double> m_ratios;
     const Eigen::Vector2d m_center_offsets;
     const Eigen::Vector2d m_max_edge_offsets;
-    std::vector<GenericAction*> m_actions;
+    std::vector<Action*> m_actions;
     ros::Publisher action_publisher;
 };
 
 }  // namespace actionspace
 }  // namespace libcozmo
 
-#endif
+#endif  // INCLUDE_ACTIONSPACE_OBJECTORIENTEDACTIONSPACE_HPP_
