@@ -18,16 +18,10 @@ env:
     - ROS_CI_DESKTOP="`lsb_release -cs`"  # e.g. [precise|trusty|...]
     - CI_SOURCE_PATH=$(pwd)
     - ROSINSTALL_FILE=$CI_SOURCE_PATH/dependencies.rosinstall
-    - CATKIN_OPTIONS=$CI_SOURCE_PATH/catkin.options
     - ROS_PARALLEL_JOBS='-j8 -l6'
     # Set the python path manually to include /usr/-/python2.7/dist-packages
     # as this is where apt-get installs python packages.
-    - PYTHONPATH=$PYTHONPATH:/usr/lib/python2.7/dist-packages:/usr/local/lib/python2.7/dist-packages
-################################################################################
-
-env:
-  global:
-    - ROS_CI_DESKTOP="`lsb_release -cs`"  # e.g. [precise|trusty|...]
+    - PYTHONPATH=$PYTHONPATH:/usr/lib/python3.5/dist-packages:/usr/local/lib/python3.5/dist-packages
     - toolset_branch: master
     - server_type: travis
     - ros_release_name: kinetic
@@ -57,26 +51,45 @@ install:
   - catkin build
   - source devel/setup.bash
   - cd ~/catkin_ws/src
+  - ln -s $CI_SOURCE_PATH .
 
 # Install all dependencies, using wstool first and rosdep second.
 # wstool looks for a ROSINSTALL_FILE defined in the environment variables.
 before_script:
   # Install Other dependencies
-  - sudo add-apt-repository -y ppa:dartsim/ppa
   - sudo add-apt-repository -y ppa:personalrobotics/ppa
   - sudo rm -vf /etc/apt/sources.list.d/*riak*
   - sudo apt-get update
-  - sudo apt-get install cmake build-essential libboost-filesystem-dev libdart6-optimizer-nlopt-dev libdart6-utils-dev libdart6-utils-urdf-dev libmicrohttpd-dev libompl-dev libtinyxml2-dev libyaml-cpp-dev
+  - sudo apt-get install -y --allow-unauthenticated cmake build-essential libboost-filesystem-dev libmicrohttpd-dev libompl-dev libtinyxml2-dev libyaml-cpp-dev
+  - sudo apt-get install -y --allow-unauthenticated libopenscenegraph-dev
+  - sudo apt-get install -y --allow-unauthenticated libnlopt-dev coinor-libipopt-dev libbullet-dev libode-dev
+  - sudo apt-get install -y --allow-unauthenticated libassimp-dev libccd-dev libfcl-dev libboost-regex-dev libboost-system-dev doxygen
   - sudo apt-get purge -y ros-kinetic-dartsim
-  - sudo pip install pybind11
+  - sudo apt-get install -y --allow-unauthenticated ros-kinetic-rospy ros-kinetic-pybind11-catkin ros-kinetic-octomap-ros libeigen3-dev python-catkin-tools python-catkin-pkg
+  - sudo apt-get install -y --allow-unauthenticated python3-yaml python3-pip
+  - sudo apt-get install -y --allow-unauthenticated libboost-all-dev python3-dev libpython3-dev python3-setuptools python-empy
+  - sudo pip3 install rospkg catkin_pkg empy
+  # Install DART
+  - cd ~/
+  - git clone git://github.com/dartsim/dart.git
+  - cd ~/dart
+  - git checkout tags/v6.8.2
+  - mkdir build
+  - cd build
+  - cmake ..
+  - make -j4
+  - sudo make install
   # source dependencies: install using wstool.
   - cd ~/catkin_ws/src
   - wstool init
   - if [[ -f $ROSINSTALL_FILE ]] ; then wstool merge $ROSINSTALL_FILE ; fi
   - wstool up
-  
+  - cd ~/catkin_ws
+
 script:
   - source /opt/ros/$ROS_DISTRO/setup.bash
   - cd ~/catkin_ws
+  - ls src/
+  - export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:/usr/include/python3.5m/"
   - catkin build
   - source devel/setup.bash
