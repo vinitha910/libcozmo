@@ -44,12 +44,50 @@ ObjectOrientedActionSpace::Action::Action(
     m_aspect_ratio(aspect_ratio),
     m_heading_offset(heading_offset) {}
 
+double ObjectOrientedActionSpace::Action::speed() const {
+    return m_speed;
+}
+double ObjectOrientedActionSpace::Action::aspect_ratio() const {
+    return m_aspect_ratio;
+}
+double ObjectOrientedActionSpace::Action::edge_offset() const {
+    return m_edge_offset;
+}
+double ObjectOrientedActionSpace::Action::heading_offset() const {
+    return m_heading_offset;
+}
+
+Eigen::VectorXd ObjectOrientedActionSpace::Action::vector() const {
+    Eigen::VectorXd action_vector(4);
+    action_vector <<
+        m_speed,
+        m_aspect_ratio,
+        m_edge_offset,
+        m_heading_offset;
+    return action_vector;
+}
+
 ObjectOrientedActionSpace::CozmoAction::CozmoAction(
     const double& speed,
     const Eigen::Vector3d& start_pose) : \
     m_speed(speed),
     m_start_pose(start_pose) {}
 
+double ObjectOrientedActionSpace::CozmoAction::speed() const {
+    return m_speed;
+}
+Eigen::Vector3d ObjectOrientedActionSpace::CozmoAction::start_pose() const {
+    return m_start_pose;
+}
+Eigen::VectorXd ObjectOrientedActionSpace::CozmoAction::vector() const {
+    Eigen::VectorXd action_vector(4);
+    action_vector <<
+        m_speed,
+        m_start_pose[0],
+        m_start_pose[1],
+        m_start_pose[2];
+    return action_vector;
+}
 
 ObjectOrientedActionSpace::ObjectOrientedActionSpace(
     const std::vector<double>& speeds,

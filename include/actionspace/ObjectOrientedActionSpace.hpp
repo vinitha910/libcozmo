@@ -81,6 +81,8 @@ namespace actionspace {
 ///        -1        0        +1
 ///                FRONT
 ///
+/// Note the vectors |v1| and |v2|, which refer to the x and y offsets from the
+/// center of the object respectively.
 class ObjectOrientedActionSpace : public virtual ActionSpace {
  public:
     /// This class handles generic attributes to the action that can be
@@ -106,23 +108,15 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
             const double& aspect_ratio,
             const double& heading_offset);
 
-        double speed() const { return m_speed; }
-        double aspect_ratio() const { return m_aspect_ratio; }
-        double edge_offset() const { return m_edge_offset; }
-        double heading_offset() const { return m_heading_offset; }
+        double speed() const;
+        double aspect_ratio() const;
+        double edge_offset() const;
+        double heading_offset() const;
 
         /// Documentation inherited
         /// The action vector is in the following format:
         /// [speed, aspect_ratio, edge_offset, heading_offset]
-        Eigen::VectorXd vector() const override {
-            Eigen::VectorXd action_vector(4);
-            action_vector <<
-                m_speed,
-                m_aspect_ratio,
-                m_edge_offset,
-                m_heading_offset;
-            return action_vector;
-        }
+        Eigen::VectorXd vector() const override;
 
      private:
         double m_speed;
@@ -148,21 +142,13 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
             const double& speed,
             const Eigen::Vector3d& start_pose);
 
-        double speed() const { return m_speed; }
-        Eigen::Vector3d start_pose() const { return m_start_pose; }
+        double speed() const;
+        Eigen::Vector3d start_pose() const;
 
         /// Documentation inherited
         /// The action vector is in the following format:
         /// [speed, start_pose_x, start_pose_y, start_pose_theta]
-        Eigen::VectorXd vector() const override {
-            Eigen::VectorXd action_vector(4);
-            action_vector <<
-                m_speed,
-                m_start_pose[0],
-                m_start_pose[1],
-                m_start_pose[2];
-            return action_vector;
-        }
+        Eigen::VectorXd vector() const override;
 
      private:
             double m_speed;
