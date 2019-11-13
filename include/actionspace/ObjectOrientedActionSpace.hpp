@@ -186,7 +186,7 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
     ///         |        |        |
     ///         ---------|---------
     ///                  ▼ v2
-    ///                 
+    ///
     ///        -1        0        +1
     ///                FRONT
     ///
