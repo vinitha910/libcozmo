@@ -53,13 +53,14 @@ class SE2 : public virtual StateSpace {
         ~State() = default;
 
         /// Constructs state with given parameters
-        explicit State(const int& x, const int& y, const int& theta) : \
-            x(x), y(y), theta(theta) {}
+        explicit State(const int& x, const int& y, const int& theta);
 
-        /// Equality operator
-        bool operator== (const State& state) const {
-            return x == state.x && y == state.y && theta == state.theta;
-        }
+        /// Constructs state with given vector representation
+        /// Vector in format [x, y, theta]
+        explicit State(const Eigen::Vector3d& input);
+
+        /// Documentation Inherited
+        bool operator== (const StateSpace::State& state) const override;
 
         /// Custom state hash
         friend std::size_t hash_value(const State& state) {
@@ -70,9 +71,12 @@ class SE2 : public virtual StateSpace {
             return seed;
         }
 
-        int getX() const { return x; }
-        int getY() const { return y; }
-        int getTheta() const { return theta; }
+        int X() const;
+        int Y() const;
+        int Theta() const;
+
+        /// Documentation Inherited
+        Eigen::VectorXd vector() const override;
 
      private:
         int x;

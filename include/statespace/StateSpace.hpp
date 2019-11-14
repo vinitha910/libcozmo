@@ -159,6 +159,14 @@ class StateSpace::State {
     State() = default;
 
     ~State() = default;
+
+    /// Convert state to its vector representation
+    ///
+    /// \return Output state vector
+    virtual Eigen::VectorXd vector() const = 0;
+
+    /// Equality operator
+    virtual bool operator== (const State& state) const = 0;
 };
 
 }  // namespace statespace
