@@ -30,10 +30,7 @@
 #ifndef INCLUDE_MODEL_MODEL_HPP_
 #define INCLUDE_MODEL_MODEL_HPP_
 
-#include <ros/ros.h>
-#include "statespace/StateSpace.hpp"
-#include "actionspace/ActionSpace.hpp"
-#include "aikido/statespace/StateSpace.hpp"
+#include <Eigen/Dense>
 
 namespace libcozmo {
 namespace model {
