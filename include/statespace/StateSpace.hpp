@@ -154,12 +154,7 @@ class StateSpace {
 
 
 class StateSpace::State {
- protected:
-    // This is a base class that should only only be used in derived classes.
-    State() = default;
-
-    ~State() = default;
-
+ public:
     /// Convert state to its vector representation
     ///
     /// \return Output state vector
@@ -167,6 +162,11 @@ class StateSpace::State {
 
     /// Equality operator
     virtual bool operator== (const State& state) const = 0;
+ protected:
+    // This is a base class that should only only be used in derived classes.
+    State() = default;
+
+    ~State() = default;
 };
 
 }  // namespace statespace
