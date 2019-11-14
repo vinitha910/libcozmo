@@ -37,22 +37,18 @@ namespace libcozmo {
 namespace model {
 
 bool GPRModel::predict_state(
-    const actionspace::ActionSpace::Action& input_action,
-    const statespace::StateSpace::State& input_state,
-    statespace::StateSpace::State* output_state) const {
-
-    Eigen::VectorXd model_input = input_action.vector();
-    Eigen::VectorXd state_input = input_state.vector();
-
-    if (model_input.size() != 4 || state_input.size() != 3) {
+        const Eigen::VectorXd& input_action,
+        const Eigen::VectorXd& input_state,
+        Eigen::VectorXd* output_state) const {
+    if (input_action.size() != 4 || input_state.size() != 3) {
         return false;
     }
 
     // Get speed, edge_offset, aspect_ratio into Python list
     PyObject* p_list = PyList_New(3);
-    PyList_SetItem(p_list, 0, Py_BuildValue("f", model_input[0]));
-    PyList_SetItem(p_list, 1, Py_BuildValue("f", model_input[2]));
-    PyList_SetItem(p_list, 2, Py_BuildValue("f", model_input[1]));
+    PyList_SetItem(p_list, 0, Py_BuildValue("f", input_action[0]));
+    PyList_SetItem(p_list, 1, Py_BuildValue("f", input_action[2]));
+    PyList_SetItem(p_list, 2, Py_BuildValue("f", input_action[1]));
 
     PyObject* p_input = PyList_New(1);
     PyList_SetItem(p_input, 0, p_list);
@@ -66,10 +62,12 @@ bool GPRModel::predict_state(
 
     double distance = PyFloat_AsDouble(PyList_GetItem(p_result, 0));
     double dtheta = PyFloat_AsDouble(PyList_GetItem(p_result, 1));
-    double x = state_input[0] + distance * cos(dtheta);
-    double y = state_input[1] + distance * sin(dtheta);
-    double theta = state_input[2] + dtheta;
-    *output_state = statespace::StateSpace::State(Eigen::Vector3d{x, y, theta});
+    double x = input_state[0] + distance * cos(dtheta);
+    double y = input_state[1] + distance * sin(dtheta);
+    double theta = input_state[2] + dtheta;
+
+    Eigen::Vector3d state(x, y, theta);
+    *output_state = state;
     return true;
 }
 

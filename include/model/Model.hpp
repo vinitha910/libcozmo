@@ -45,14 +45,14 @@ class Model {
  public:
     /// Get the output state given the action input and the current state
     ///
-    /// \param input_action Model input
-    /// \param input_state Given state
-    /// \param[out] output_state
+    /// \param input_action Given action vector
+    /// \param input_state Given state vector
+    /// \param[out] output_state vector
     /// \return True if prediction successfully calculated; false otherwise;
     virtual bool predict_state(
-        const actionspace::ActionSpace::Action& input_action,
-        const statespace::StateSpace::State& input_state,
-        statespace::StateSpace::State* output_state) const = 0;
+        const Eigen::VectorXd& input_action,
+        const Eigen::VectorXd& input_state,
+        Eigen::VectorXd* output_state) const = 0;
 };
 
 }  // namespace model

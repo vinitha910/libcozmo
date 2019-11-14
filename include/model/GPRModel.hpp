@@ -53,10 +53,12 @@ class GPRModel : public virtual Model {
     ~GPRModel() = default;
 
     /// Documentation inherited
+    /// Action in format [speed, aspect_ratio, edge_offset, heading_offset]
+    /// State in format [x, y, theta]
     bool predict_state(
-        const actionspace::ActionSpace::Action& input_action,
-        const statespace::StateSpace::State& input_state,
-        statespace::StateSpace::State* output_state) const override;
+        const Eigen::VectorXd& input_action,
+        const Eigen::VectorXd& input_state,
+        Eigen::VectorXd* output_state) const override;
 
  private:
     const std::shared_ptr<ModelFramework> m_framework;
