@@ -36,7 +36,7 @@
 #include "model/Model.hpp"
 #include "model/ModelFramework.hpp"
 #include "model/ScikitLearnFramework.hpp"
-// #include "statespace/StateSpace.hpp"
+#include "statespace/StateSpace.hpp"
 
 namespace libcozmo {
 namespace model {

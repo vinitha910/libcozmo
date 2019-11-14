@@ -31,6 +31,7 @@
 #define INCLUDE_ACTIONSPACE_ACTIONSPACE_HPP_
 
 #include "aikido/distance/SE2.hpp"
+#include <ros/ros.h>
 
 namespace libcozmo {
 namespace actionspace {

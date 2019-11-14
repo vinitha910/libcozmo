@@ -31,6 +31,8 @@
 #define INCLUDE_MODEL_MODEL_HPP_
 
 // #include "aikido/statespace/StateSpace.hpp"
+#include "statespace/StateSpace.hpp"
+#include "actionspace/ActionSpace.hpp"
 
 namespace libcozmo {
 namespace model {
