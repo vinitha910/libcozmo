@@ -30,7 +30,7 @@
 #include "model/GPRModel.hpp"
 #include <sstream>
 #include <iostream>
-#include "aikido/statespace/SE2.hpp"
+// #include "aikido/statespace/SE2.hpp"
 #include "utils/utils.hpp"
 
 namespace libcozmo {
@@ -69,7 +69,7 @@ bool GPRModel::predict_state(
     double x = state_input[0] + distance * cos(dtheta);
     double y = state_input[1] + distance * sin(dtheta);
     double theta = state_input[2] + dtheta;
-    *output_state = statespace::StateSpace::State(Eigen::Vector3d ());
+    *output_state = statespace::StateSpace::State(Eigen::Vector3d{x, y, theta});
     return true;
 }
 
