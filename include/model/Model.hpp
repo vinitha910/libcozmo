@@ -30,6 +30,9 @@
 #ifndef INCLUDE_MODEL_MODEL_HPP_
 #define INCLUDE_MODEL_MODEL_HPP_
 
+#include <ros/ros.h>
+#include "statespace/StateSpace.hpp"
+#include "actionspace/ActionSpace.hpp"
 #include "aikido/statespace/StateSpace.hpp"
 
 namespace libcozmo {
@@ -40,44 +43,16 @@ namespace model {
 /// Py_Finalize();
 class Model {
  public:
-    /// Base class for model input
-    class ModelInput;
-
-    /// Base class for model output
-    class ModelOutput;
-
-    /// Get the model's predicted output given then input
+    /// Get the output state given the action input and the current state
     ///
-    /// \param input The model input, dependent on model type
-    /// \param[out] output The ouput after running inference
-    virtual void inference(const ModelInput& input, ModelOutput* output) = 0;
-
-    /// Get the output state given the input and the current state
-    ///
-    /// \param in The in/current state
-    /// \param[out] The predicted output state given the model input
-    virtual void predict_state(
-        const ModelInput& input,
-        const aikido::statespace::StateSpace::State& in_,
-        aikido::statespace::StateSpace::State* out_) = 0;
-};
-
-/// Class for handling input of the model; varies based on model
-class Model::ModelInput {
- protected:
-    /// This is a base class that should only be used in derived classes
-    ModelInput() = default;
-
-    ~ModelInput() = default;
-};
-
-/// Class for handling output of the model; varies based on model type
-class Model::ModelOutput {
- protected:
-    /// This is a base class that should only be used in derived classes
-    ModelOutput() = default;
-
-    ~ModelOutput() = default;
+    /// \param input_action Model input
+    /// \param input_state Given state
+    /// \param[out] output_state
+    /// \return True if prediction successfully calculated; false otherwise;
+    virtual bool predict_state(
+        const actionspace::ActionSpace::Action& input_action,
+        const statespace::StateSpace::State& input_state,
+        statespace::StateSpace::State* output_state) const = 0;
 };
 
 }  // namespace model
