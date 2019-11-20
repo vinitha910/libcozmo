@@ -40,6 +40,7 @@
 namespace libcozmo {
 namespace model {
 
+/// Model learns function f: a--> delta s
 class GPRModel : public virtual Model {
  public:
     /// Constructs this class given the framework where the GPR was trained and
