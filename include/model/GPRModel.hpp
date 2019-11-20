@@ -41,11 +41,11 @@ namespace libcozmo {
 namespace model {
 
 /// This class implements a Gaussian Process Regressor(GPR), a type of
-/// multi-dimensional linear regression model, from Scikit-Learn.
+/// multi-dimensional linear regression model.
 ///
-/// Given input vector action (a) : [speed, aspect ratio, edge offset], it
-/// predicts outcome delta state (Δs) : [delta distance, delta theta].
-/// such that the function can be defined as f: a--> Δs
+/// This model learns the effect of an action a (i.e. the change in state). More
+/// specifically, it learns f: a -> Δs where a is
+/// [speed, aspect ratio, edge offset] and Δs is [delta distance, delta theta].
 class GPRModel : public virtual Model {
  public:
     /// Constructs this class given the framework where the GPR was trained and
@@ -57,10 +57,8 @@ class GPRModel : public virtual Model {
     ~GPRModel() = default;
 
     /// Documentation inherited
-    /// Action takes in vector from ObjectOrientedActionSpace in
-    /// format [speed, aspect_ratio, edge_offset, heading_offset],
-    /// but only the first three elemnts are used by the model.
-    /// State in SE2 format: [x, y, theta]
+    /// Given an action vector from ObjectOrientedActionSpace and an SE2 state
+    /// vector, this function predicts end output SE2 state vector.
     bool predict_state(
         const Eigen::VectorXd& input_action,
         const Eigen::VectorXd& input_state,

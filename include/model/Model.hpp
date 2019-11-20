@@ -41,7 +41,7 @@ namespace model {
 class Model {
  public:
     /// Get the output state given the action input and the current state
-    /// Size/parameters of input action/state vector depends on class
+    /// Input vectors vary based on derived class
     ///
     /// \param input_action Given action vector
     /// \param input_state Given state vector
