@@ -44,8 +44,9 @@ namespace model {
 /// multi-dimensional linear regression model.
 ///
 /// This model learns the effect of an action a (i.e. the change in state). More
-/// specifically, it learns f: a -> Δs where a is
-/// [speed, aspect ratio, edge offset] and Δs is [delta distance, delta theta].
+/// specifically, it learns f: a -> Δs where a is an object oriented action
+/// and Δs is the change in the SE2 state which is represented by the distance
+/// the object moved along the action vector and the change in its orientation.
 class GPRModel : public virtual Model {
  public:
     /// Constructs this class given the framework where the GPR was trained and
@@ -58,7 +59,7 @@ class GPRModel : public virtual Model {
 
     /// Documentation inherited
     /// Given an action vector from ObjectOrientedActionSpace and an SE2 state
-    /// vector, this function predicts end output SE2 state vector.
+    /// vector, this function predicts end SE2 state vector.
     bool predict_state(
         const Eigen::VectorXd& input_action,
         const Eigen::VectorXd& input_state,

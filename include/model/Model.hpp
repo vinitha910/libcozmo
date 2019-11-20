@@ -40,7 +40,7 @@ namespace model {
 /// Py_Finalize();
 class Model {
  public:
-    /// Get the output state given the action input and the current state
+    /// Gets the end state after applying the given action on the input state
     /// Input vectors vary based on derived class
     ///
     /// \param input_action Given action vector
