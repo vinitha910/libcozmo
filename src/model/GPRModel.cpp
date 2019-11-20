@@ -65,9 +65,7 @@ bool GPRModel::predict_state(
     double x = input_state[0] + distance * cos(dtheta);
     double y = input_state[1] + distance * sin(dtheta);
     double theta = input_state[2] + dtheta;
-
-    Eigen::Vector3d state(x, y, theta);
-    *output_state = state;
+    *output_state = Eigen::Vector3d(x, y, theta);
     return true;
 }
 
