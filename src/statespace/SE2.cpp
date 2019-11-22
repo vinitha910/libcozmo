@@ -39,9 +39,6 @@ namespace statespace {
 SE2::State::State(const int& x, const int& y, const int& theta) : \
     x(x), y(y), theta(theta) {}
 
-SE2::State::State(const Eigen::Vector3d& input) : \
-    x(input[0]), y(input[1]), theta(input[2]) {}
-
 bool SE2::State::operator== (const StateSpace::State& state) const {
     auto state_ = static_cast<const State&>(state);
     return x == state_.x && y == state_.y && theta == state_.theta;
@@ -51,6 +48,18 @@ Eigen::VectorXd SE2::State::vector() const {
     Eigen::VectorXd state_vector(3);
     state_vector << x, y, theta;
     return state_vector;
+}
+
+bool SE2::State::from_vector(const Eigen::VectorXd& vector) {
+    if (vector.size() != 3) {
+        return false;
+    }
+
+    x = vector[0];
+    y = vector[1];
+    theta = vector[2];
+
+    return true;
 }
 
 int SE2::State::X() const {
@@ -69,8 +78,6 @@ SE2::~SE2() {
     }
     m_state_map.clear();
 }
-
-
 
 int SE2::get_or_create_state(const StateSpace::State& _state) {
     const State state = static_cast<const State&>(_state);

@@ -160,6 +160,12 @@ class StateSpace::State {
     /// \return Output state vector
     virtual Eigen::VectorXd vector() const = 0;
 
+    /// Changes state value given vector representation
+    ///
+    /// \param vector State vector
+    /// \return True if modification successful, false otherwise
+    virtual bool from_vector(const Eigen::VectorXd& vector) = 0;
+
     /// Equality operator
     virtual bool operator== (const State& state) const = 0;
  protected:
