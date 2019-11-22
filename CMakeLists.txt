@@ -60,6 +60,7 @@ add_library(cozmo SHARED
   src/distance/orientation.cpp
   src/model/GPRModel.cpp
   src/model/ScikitLearnFramework.cpp
+  src/planner/Dijkstra.cpp
 )
 
 target_include_directories(cozmo PUBLIC
@@ -117,6 +118,9 @@ target_link_libraries(test_model ${TEST_LIBS})
 
 catkin_add_gtest(test_framework tests/model/test_ScikitLearnFramework.cpp)
 target_link_libraries(test_framework ${TEST_LIBS})
+
+catkin_add_gtest(test_dijkstra tests/planner/test_Dijkstra.cpp)
+target_link_libraries(test_dijkstra ${TEST_LIBS})
 
 ################################################################################
 # EXECUTABLES       
