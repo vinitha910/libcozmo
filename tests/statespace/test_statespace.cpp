@@ -160,21 +160,19 @@ TEST_F(SE2StatespaceTest, Add) {
     Eigen::VectorXd b(3);
     b << 2.4, 1.4, -7.0;
     Eigen::VectorXd c(3);
-    bool sum = statespace.add(a, b, &c);
+    statespace.add(a, b, &c);
     EXPECT_NEAR(3.4, c[0], 0.0001);
     EXPECT_NEAR(-1.1, c[1], 0.0001);
     EXPECT_NEAR(-3.6, c[2], 0.0001);
-    EXPECT_TRUE(sum);
 }
 
-TEST_F(SE2StatespaceTest, AddFail) {
+TEST_F(SE2StatespaceTest, AddException) {
     Eigen::VectorXd a(3);
     a << 1.0, -2.5, 3.4;
     Eigen::VectorXd b(2);
     b << 2.4, 1.4;
     Eigen::VectorXd c(3);
-    bool sum = statespace.add(a, b, &c);
-    EXPECT_FALSE(sum);
+    EXPECT_THROW(statespace.add(a, b, &c), std::runtime_error);
 }
 
 TEST_F(SE2StatespaceTest, State2Vector) {
@@ -195,6 +193,13 @@ TEST_F(SE2StatespaceTest, Vector2State) {
     EXPECT_EQ(1, dest.X());
     EXPECT_EQ(2, dest.Y());
     EXPECT_EQ(3, dest.Theta());
+}
+
+TEST_F(SE2StatespaceTest, Vector2StateException) {
+    Eigen::VectorXd a(4);
+    a << 1, 2, 3, 0;
+    SE2::State dest;
+    EXPECT_THROW(dest.from_vector(a), std::runtime_error);
 }
 
 }  // namespace test
