@@ -191,7 +191,7 @@ TEST_F(SE2StatespaceTest, Vector2State) {
     Eigen::VectorXd a(3);
     a << 1, 2, 3;
     SE2::State dest;
-    EXPECT_TRUE(dest.from_vector(a));
+    dest.from_vector(a);
     EXPECT_EQ(1, dest.X());
     EXPECT_EQ(2, dest.Y());
     EXPECT_EQ(3, dest.Theta());

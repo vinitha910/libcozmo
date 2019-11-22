@@ -57,7 +57,7 @@ class SE2 : public virtual StateSpace {
 
         /// Documentation Inherited
         /// Vector in format [x, y, theta]
-        bool from_vector(const Eigen::VectorXd& vector);
+        void from_vector(const Eigen::VectorXd& state);
 
         /// Documentation Inherited
         bool operator== (const StateSpace::State& state) const override;

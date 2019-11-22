@@ -50,16 +50,17 @@ Eigen::VectorXd SE2::State::vector() const {
     return state_vector;
 }
 
-bool SE2::State::from_vector(const Eigen::VectorXd& vector) {
-    if (vector.size() != 3) {
-        return false;
+void SE2::State::from_vector(const Eigen::VectorXd& state) {
+    if (state.rows() != 3) {
+        std::stringstream msg;
+        msg << "state has incorrect size: expected 3"
+            << ", got " << state.size() << ".\n";
+        throw std::runtime_error(msg.str());
     }
 
-    x = vector[0];
-    y = vector[1];
-    theta = vector[2];
-
-    return true;
+    x = state[0];
+    y = state[1];
+    theta = state[2];
 }
 
 int SE2::State::X() const {
