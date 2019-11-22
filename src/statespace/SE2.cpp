@@ -51,7 +51,7 @@ Eigen::VectorXd SE2::State::vector() const {
 }
 
 void SE2::State::from_vector(const Eigen::VectorXd& state) {
-    if (state.rows() != 3) {
+    if (state.size() != 3) {
         std::stringstream msg;
         msg << "state has incorrect size: expected 3"
             << ", got " << state.size() << ".\n";

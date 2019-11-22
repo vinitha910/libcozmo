@@ -161,7 +161,8 @@ class StateSpace::State {
     virtual Eigen::VectorXd vector() const = 0;
 
     /// Converts state value given vector representation
-    /// Throws and exception if state vector is of wrong format
+    /// Throws an exception if the state vector size is incorrect; allowed
+    /// vector size depends on derived class
     ///
     /// \param state State vector
     virtual void from_vector(const Eigen::VectorXd& state) = 0;
