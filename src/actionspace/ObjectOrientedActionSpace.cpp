@@ -30,6 +30,7 @@
 #include "actionspace/ObjectOrientedActionSpace.hpp"
 #include "statespace/SE2.hpp"
 #include "utils/utils.hpp"
+#include <iostream>
 
 namespace libcozmo {
 namespace actionspace {
@@ -140,6 +141,12 @@ ObjectOrientedActionSpace::ObjectOrientedActionSpace(
                     ratio,
                     heading_offset));
                 action_id++;
+                if (action_id == 4 || action_id == 40) {
+                    std::cout<<"ACTION: " << "speed: " << speed << "\n"
+                    << "edge offset: " << offset_sign * edge_offset / max_edge_offset << "\n"
+                    << "aspect ratio: " << ratio << "\n"
+                    << "heading offset: " << heading_offset << "\n";
+                }
             }
         }
     }
@@ -215,25 +222,6 @@ bool ObjectOrientedActionSpace::get_generic_to_object_oriented_action(
                     max_edge_offset * cos(orientation),
             utils::angle_normalization(orientation + heading_offset)));
 
-    return true;
-}
-
-bool ObjectOrientedActionSpace::publish_action(
-    const int& action_id,
-    const ros::Publisher& publisher,
-    const aikido::statespace::StateSpace::State& _state) const {
-    libcozmo::ObjectOrientedAction msg;
-    CozmoAction OO_action(0.0, Eigen::Vector3d(0, 0, 0));
-    if (!get_generic_to_object_oriented_action(action_id, _state, &OO_action)) {
-        return false;
-    }
-    msg.speed = OO_action.speed();
-    msg.duration = 1;
-    Eigen::Vector3d start_pose = OO_action.start_pose();
-    msg.x = start_pose[0];
-    msg.y = start_pose[1];
-    msg.theta = start_pose[2];
-    publisher.publish(msg);
     return true;
 }
 

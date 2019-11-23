@@ -86,20 +86,5 @@ bool GenericActionSpace::is_valid_action_id(const int& action_id) const {
     return ((action_id < m_actions.size() && action_id >= 0));
 }
 
-bool GenericActionSpace::publish_action(
-    const int& action_id, const ros::Publisher& publisher,
-    const aikido::statespace::StateSpace::State& _state) const {
-    libcozmo::ActionMsg msg;
-    Action* action = static_cast<Action*>(get_action(action_id));
-    if (action == nullptr) {
-        return false;
-    }
-    msg.speed = action->m_speed;
-    msg.heading = action->m_heading;
-    msg.duration = action->m_duration;
-    publisher.publish(msg);
-    return true;
-}
-
 }  // namespace actionspace
 }  // namespace libcozmo
