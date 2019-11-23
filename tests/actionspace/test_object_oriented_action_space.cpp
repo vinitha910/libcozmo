@@ -39,7 +39,9 @@ class OOActionSpaceFixture: public ::testing::Test {
             std::vector<double>{4.0, 1.1},
             Eigen::Vector2d(6.0, 3.1),
             Eigen::Vector2d(5.0, 2.1),
-            5) {}
+            5) {
+            object_state = create_object_state();
+            }
 
     aikido::statespace::SE2::State create_object_state() {
         Eigen::Isometry2d transform(Eigen::Isometry2d::Identity());
