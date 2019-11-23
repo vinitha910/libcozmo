@@ -124,9 +124,9 @@ TEST_F(OOActionSpaceFixture, GetObjectOrientedActionTest) {
         4,
         object_state,
         &action);
-    EXPECT_NEAR(action.start_pose().x(), -6, 0.001);
-    EXPECT_NEAR(action.start_pose().y(), -2.5, 0.001);
-    EXPECT_NEAR(action.start_pose().z(), 0, 0.001);
+    EXPECT_NEAR(action.start_pose().x(), 8.989592, 0.001);
+    EXPECT_NEAR(action.start_pose().y(), 8.989592, 0.001);
+    EXPECT_NEAR(action.start_pose().z(), M_PI/4, 0.001);
 
     m_actionspace.get_generic_to_object_oriented_action(
         40,
@@ -134,7 +134,7 @@ TEST_F(OOActionSpaceFixture, GetObjectOrientedActionTest) {
         &action);
     EXPECT_NEAR(action.start_pose().x(), 12.52512, 0.001);
     EXPECT_NEAR(action.start_pose().y(), 12.52512, 0.001);
-    EXPECT_NEAR(action.start_pose().z(), M_PI, 0.001);
+    EXPECT_NEAR(action.start_pose().z(), M_PI + M_PI/4, 0.001);
 }
 
 TEST_F(OOActionSpaceFixture, ActionVectorTest) {

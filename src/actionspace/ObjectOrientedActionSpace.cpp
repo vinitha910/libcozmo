@@ -30,7 +30,6 @@
 #include "actionspace/ObjectOrientedActionSpace.hpp"
 #include "statespace/SE2.hpp"
 #include "utils/utils.hpp"
-#include <iostream>
 
 namespace libcozmo {
 namespace actionspace {
@@ -141,12 +140,6 @@ ObjectOrientedActionSpace::ObjectOrientedActionSpace(
                     ratio,
                     heading_offset));
                 action_id++;
-                if (action_id == 4 || action_id == 40) {
-                    std::cout<<"ACTION: " << "speed: " << speed << "\n"
-                    << "edge offset: " << offset_sign * edge_offset / max_edge_offset << "\n"
-                    << "aspect ratio: " << ratio << "\n"
-                    << "heading offset: " << heading_offset << "\n";
-                }
             }
         }
     }
