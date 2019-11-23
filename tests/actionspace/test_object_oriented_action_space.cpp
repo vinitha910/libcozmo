@@ -54,7 +54,6 @@ class OOActionSpaceFixture: public ::testing::Test {
 
     libcozmo::actionspace::ObjectOrientedActionSpace m_actionspace;
     aikido::statespace::SE2::State object_state;
-
 };
 
 /// Check that correct amount of actions were generated
