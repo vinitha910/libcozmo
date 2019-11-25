@@ -85,7 +85,7 @@ TEST_F(SE2StatespaceTest, ContinuousToDiscreteStateConversion) {
     aikido::statespace::SE2::State in_state;
     continuous_statespace.expMap(
         Eigen::Vector3d(0.17, 0.257, M_PI/5), &in_state);
-    
+
     SE2::State out_state;
     statespace.continuous_state_to_discrete(in_state, &out_state);
 
@@ -100,9 +100,9 @@ TEST_F(SE2StatespaceTest, GetsStateID) {
     EXPECT_EQ(state_id, 0);
 
     EXPECT_TRUE(statespace.get_state_id(SE2::State(1, 3, 3), &state_id));
-    EXPECT_EQ(state_id, 1);   
+    EXPECT_EQ(state_id, 1);
 
-    EXPECT_FALSE(statespace.get_state_id(SE2::State(1, 0, 3), &state_id));       
+    EXPECT_FALSE(statespace.get_state_id(SE2::State(1, 0, 3), &state_id));
 }
 
 TEST_F(SE2StatespaceTest, GetsState) {
@@ -131,11 +131,11 @@ TEST_F(SE2StatespaceTest, StateSpaceSize) {
 
 TEST_F(SE2StatespaceTest, GetsDistanceBetweenDiscreteStates) {
     EXPECT_DOUBLE_EQ(
-        sqrt(0.02), 
+        sqrt(0.02),
         statespace.get_distance(SE2::State(1, 1, 1), SE2::State(2, 2, 1)));
 
     EXPECT_NEAR(
-        0.798, 
+        0.798,
         statespace.get_distance(SE2::State(1, 1, 0), SE2::State(2, 2, 1)),
         0.0001);
 }
@@ -146,7 +146,7 @@ TEST_F(SE2StatespaceTest, CopyState) {
 
     EXPECT_EQ(1, dest.X());
     EXPECT_EQ(1, dest.Y());
-    EXPECT_EQ(1, dest.Theta());    
+    EXPECT_EQ(1, dest.Theta());
 }
 
 TEST_F(SE2StatespaceTest, GetResolution) {
@@ -160,44 +160,50 @@ TEST_F(SE2StatespaceTest, Add) {
     Eigen::VectorXd b(3);
     b << 2.4, 1.4, -7.0;
     Eigen::VectorXd c(3);
-    bool sum = statespace.add(a, b, &c); 
+    statespace.add(a, b, &c);
     EXPECT_NEAR(3.4, c[0], 0.0001);
     EXPECT_NEAR(-1.1, c[1], 0.0001);
     EXPECT_NEAR(-3.6, c[2], 0.0001);
-    EXPECT_TRUE(sum);
 }
 
-TEST_F(SE2StatespaceTest, AddFail) {
+TEST_F(SE2StatespaceTest, AddException) {
     Eigen::VectorXd a(3);
     a << 1.0, -2.5, 3.4;
     Eigen::VectorXd b(2);
     b << 2.4, 1.4;
     Eigen::VectorXd c(3);
-    bool sum = statespace.add(a, b, &c); 
-    EXPECT_FALSE(sum);
+    EXPECT_THROW(statespace.add(a, b, &c), std::runtime_error);
 }
 
 TEST_F(SE2StatespaceTest, State2Vector) {
     SE2::State dest;
     statespace.copy_state(SE2::State(1, 2, 3), &dest);
-    Eigen::VectorXd a = dest.vector();    
+    Eigen::VectorXd a = dest.vector();
 
     EXPECT_EQ(1, a[0]);
     EXPECT_EQ(2, a[1]);
-    EXPECT_EQ(3, a[2]); 
+    EXPECT_EQ(3, a[2]);
 }
 
 TEST_F(SE2StatespaceTest, Vector2State) {
     Eigen::VectorXd a(3);
     a << 1, 2, 3;
-    SE2::State dest(a);    
+    SE2::State dest;
+    dest.from_vector(a);
     EXPECT_EQ(1, dest.X());
     EXPECT_EQ(2, dest.Y());
-    EXPECT_EQ(3, dest.Theta()); 
+    EXPECT_EQ(3, dest.Theta());
+}
+
+TEST_F(SE2StatespaceTest, Vector2StateException) {
+    Eigen::VectorXd a(4);
+    a << 1, 2, 3, 0;
+    SE2::State dest;
+    EXPECT_THROW(dest.from_vector(a), std::runtime_error);
 }
 
 }  // namespace test
-}  // namspace statespace
+}  // namespace statespace
 }  // namespace libcozmo
 
 int main(int argc, char **argv) {
