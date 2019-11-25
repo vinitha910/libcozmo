@@ -40,25 +40,8 @@ class OOActionSpaceFixture: public ::testing::Test {
             Eigen::Vector2d(6.0, 3.1),
             Eigen::Vector2d(5.0, 2.1),
             5) {
-            m_action_publisher =
-                m_handle.advertise<
-                    libcozmo::ObjectOrientedAction>("Action", 10);
-            m_action_subscriber =
-                m_handle.subscribe(
-                    "Action", 10, &OOActionSpaceFixture::Callback, this);
-            msg_recieved = false;
             object_state = create_object_state();
-         }
-
-    libcozmo::ObjectOrientedAction* get_action_msg() {
-        return &msg;
-    }
-
-    void WaitForMessage() const {
-        while (!msg_recieved) {
-            ros::spinOnce();
-        }
-    }
+            }
 
     aikido::statespace::SE2::State create_object_state() {
         Eigen::Isometry2d transform(Eigen::Isometry2d::Identity());
@@ -70,22 +53,7 @@ class OOActionSpaceFixture: public ::testing::Test {
     }
 
     libcozmo::actionspace::ObjectOrientedActionSpace m_actionspace;
-    ros::NodeHandle m_handle;
-    ros::Publisher m_action_publisher;
-    ros::Subscriber m_action_subscriber;
-    libcozmo::ObjectOrientedAction msg;
-    bool msg_recieved;
     aikido::statespace::SE2::State object_state;
-
- private:
-    void Callback(const libcozmo::ObjectOrientedAction& event) {
-        msg.speed = event.speed;
-        msg.duration = event.duration;
-        msg.x = event.x;
-        msg.y = event.y;
-        msg.theta = event.theta;
-        msg_recieved = true;
-    }
 };
 
 /// Check that correct amount of actions were generated
@@ -170,24 +138,6 @@ TEST_F(OOActionSpaceFixture, GetObjectOrientedActionTest) {
     EXPECT_NEAR(action.start_pose().z(), M_PI + M_PI/4, 0.001);
 }
 
-TEST_F(OOActionSpaceFixture, PublishActionTest) {
-    /// Check that action published with updated cube pose is correct
-    bool result =
-        m_actionspace.publish_action(4, m_action_publisher, object_state);
-    ASSERT_TRUE(result);
-    WaitForMessage();
-
-    libcozmo::ObjectOrientedAction* action = get_action_msg();
-    EXPECT_NEAR(8.989592, action->x, 0.001);
-    EXPECT_NEAR(8.989592, action->y, 0.001);
-    EXPECT_NEAR(M_PI/4, action->theta, 0.001);
-    EXPECT_EQ(2.5, action->speed);
-    EXPECT_EQ(1, action->duration);
-    msg_recieved = false;
-    result = m_actionspace.publish_action(-1, m_action_publisher, object_state);
-    ASSERT_FALSE(result);
-}
-
 TEST_F(OOActionSpaceFixture, ActionVectorTest) {
     // Tests action vector generation for Generic Action
     libcozmo::actionspace::ObjectOrientedActionSpace::Action* action =
@@ -213,11 +163,7 @@ TEST_F(OOActionSpaceFixture, CozmoActionVectorTest) {
 }
 
 int main(int argc, char **argv) {
-    ros::init(argc, argv, "tester");
     testing::InitGoogleTest(&argc, argv);
-    ros::AsyncSpinner spinner(2);
-    spinner.start();
     int ret = RUN_ALL_TESTS();
-    spinner.stop();
     return ret;
 }

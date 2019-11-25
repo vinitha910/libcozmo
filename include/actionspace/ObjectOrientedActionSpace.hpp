@@ -31,9 +31,7 @@
 #define INCLUDE_ACTIONSPACE_OBJECTORIENTEDACTIONSPACE_HPP_
 
 #include <Eigen/Dense>
-#include <ros/ros.h>
 #include <vector>
-#include "libcozmo/ObjectOrientedAction.h"
 #include "ActionSpace.hpp"
 
 namespace libcozmo {
@@ -215,12 +213,6 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
         CozmoAction* action) const;
 
     /// Documentation inherited
-    bool publish_action(
-        const int& action_id,
-        const ros::Publisher& publisher,
-        const aikido::statespace::StateSpace::State& _state) const;
-
-    /// Documentation inherited
     int size() const;
 
  private:
@@ -229,7 +221,6 @@ class ObjectOrientedActionSpace : public virtual ActionSpace {
     const Eigen::Vector2d m_center_offsets;
     const Eigen::Vector2d m_max_edge_offsets;
     std::vector<Action*> m_actions;
-    ros::Publisher action_publisher;
 };
 
 }  // namespace actionspace

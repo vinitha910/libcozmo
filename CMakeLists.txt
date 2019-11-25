@@ -25,8 +25,6 @@ add_message_files(
   DIRECTORY msg
   FILES
   ForkLift.msg
-  ObjectOrientedAction.msg
-  ActionMsg.msg
 )
 
 generate_messages(

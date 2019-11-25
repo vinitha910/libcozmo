@@ -31,10 +31,8 @@
 #define INCLUDE_ACTIONSPACE_GENERICACTIONSPACE_HPP_
 
 #include <Eigen/Dense>
-#include <ros/ros.h>
 #include <vector>
 #include <cmath>
-#include "libcozmo/ActionMsg.h"
 #include "utils/utils.hpp"
 #include "ActionSpace.hpp"
 
@@ -111,12 +109,6 @@ class GenericActionSpace : public virtual ActionSpace {
 
     /// Documentation inherited
     ActionSpace::Action* get_action(const int& action_id) const override;
-
-    /// Documentation inherited
-    bool publish_action(
-        const int& action_id,
-        const ros::Publisher& publisher,
-        const aikido::statespace::StateSpace::State& _state) const override;
 
     /// Documentation inherited
     bool is_valid_action_id(const int& action_id) const override;

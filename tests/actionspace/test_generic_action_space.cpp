@@ -33,62 +33,12 @@
 class GenericActionFixture: public ::testing::Test {
  public:
     GenericActionFixture() : \
-        m_handle(),
-        m_msg_received(false),
         m_actionspace(std::vector<double>{0, 1}, std::vector<double>{0, 1}, 4),
-        m_action(1.5, 4.0, M_PI),
-        m_action_publisher(m_handle.advertise<libcozmo::ActionMsg>(
-            "Action", 10)),
-        m_action_subscriber(m_handle.subscribe(
-            "Action", 10, &GenericActionFixture::Callback, this)) {}
-
-    /// Necessary step because it takes a while for the subscriber
-    /// and publisher to start up.
-    void SetUp() {
-        while (!IsReady()) {
-            ros::spinOnce();
-        }
-    }
-
-    bool IsReady() {
-        return (m_action_publisher.getNumSubscribers() > 0) &&
-               (m_action_subscriber.getNumPublishers() > 0);
-    }
-
-    void Callback(const libcozmo::ActionMsg& event) {
-        m_msg.speed = event.speed;
-        m_msg.duration = event.duration;
-        m_msg.heading = event.heading;
-        m_msg_received = true;
-    }
-
-    bool Publish(const int id) {
-        aikido::statespace::SE2::State _state;
-        return m_actionspace.publish_action(
-            id,
-            m_action_publisher,
-            _state);
-    }
-
-    void WaitForMessage() {
-        while (m_msg_received == false) {
-            ros::spinOnce();
-        }
-        m_msg_received = false;
-    }
-
-    libcozmo::ActionMsg* GetActionMsg() {
-        return &m_msg;
-    }
+        m_action(1.5, 4.0, M_PI) {}
 
     ~GenericActionFixture()  {}
     libcozmo::actionspace::GenericActionSpace::Action m_action;
     libcozmo::actionspace::GenericActionSpace m_actionspace;
-    ros::NodeHandle m_handle;
-    ros::Publisher m_action_publisher;
-    ros::Subscriber m_action_subscriber;
-    libcozmo::ActionMsg m_msg;
-    bool m_msg_received;
 };
 
 /// Tests action similarity
@@ -133,26 +83,6 @@ TEST_F(GenericActionFixture, GetSize) {
     EXPECT_EQ(m_actionspace.size(), 16);
 }
 
-/// Action publisher
-/// Test first and last action generated
-TEST_F(GenericActionFixture, PublishActionTest) {
-    Publish(0);
-    WaitForMessage();
-    libcozmo::ActionMsg* msg = GetActionMsg();
-    EXPECT_NEAR(0, msg->speed, 0.00001);
-    EXPECT_NEAR(0, msg->duration, 0.00001);
-    EXPECT_NEAR(0, msg->heading, 0.00001);
-
-    Publish(15);
-    WaitForMessage();
-    msg = GetActionMsg();
-    EXPECT_NEAR(1, msg->speed, 0.00001);
-    EXPECT_NEAR(1, msg->duration, 0.00001);
-    EXPECT_NEAR(M_PI * 3.0 / 2.0, msg->heading, 0.00001);
-
-    EXPECT_TRUE(false == Publish(16));
-}
-
 /// Check generated action vector
 TEST_F(GenericActionFixture, ActionVectorTest) {
     libcozmo::actionspace::GenericActionSpace::Action* action =
@@ -165,11 +95,7 @@ TEST_F(GenericActionFixture, ActionVectorTest) {
 }
 
 int main(int argc, char **argv) {
-    ros::init(argc, argv, "talker");
     testing::InitGoogleTest(&argc, argv);
-    ros::AsyncSpinner spinner(2);
-    spinner.start();
     int ret =  RUN_ALL_TESTS();
-    spinner.stop();
     return ret;
 }
