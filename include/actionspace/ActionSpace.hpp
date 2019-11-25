@@ -58,17 +58,6 @@ class ActionSpace {
     /// \return Pointer to action
     virtual Action* get_action(const int& action_id) const = 0;
 
-    /// Publishes action msg for given action ID
-    ///
-    /// \param action_id Action ID
-    /// \param publisher ROS publisher
-    /// \param _state The aikido state of the cube
-    /// \return True if publish successful; false otherwise;
-    virtual bool publish_action(
-        const int& action_id,
-        const ros::Publisher& publisher,
-        const aikido::statespace::StateSpace::State& _state) const = 0;
-
     /// Checks whether given action ID is valid
     ///
     /// \param action_id Action ID
