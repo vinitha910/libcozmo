@@ -62,11 +62,9 @@ class DijkstraTest: public ::testing::Test {
 
         // Get shared pointer of model, actionspace, and distance metric for
         // construction
-        auto type_ =
-            libcozmo::model::DeterministicModel::DeterministicModelType();
-        const std::shared_ptr<model::DeterministicModel> model_ptr =
-            std::make_shared<model::DeterministicModel>();
-        model_ptr->load_model(&type_);
+
+        const std::shared_ptr<model::GPRModel> model_ptr =
+            std::make_shared<model::GPRModel>(std::make_shared<ScikitLearnFramework>("/home/joonh/cozmo_ws/src/libcozmo/tests/model/SampleGPRModel.pkl"));
         const std::shared_ptr<distance::SE2> distance_ptr =
             std::make_shared<distance::SE2>(SE2_ptr);
 

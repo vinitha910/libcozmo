@@ -33,7 +33,7 @@
 #include <memory>
 #include "actionspace/GenericActionSpace.hpp"
 #include "statespace/SE2.hpp"
-#include "model/DeterministicModel.hpp"
+#include "model/Model.hpp"
 #include "planner/Planner.hpp"
 #include "distance/distance.hpp"
 
@@ -91,7 +91,7 @@ class Dijkstra : public virtual Planner {
     /// \param[out] successors 
     void get_successors(
         const statespace::StateSpace::State& state_,
-        std::vector<statespace::StateSpace::State>* succesors);
+        std::vector<statespace::StateSpace::State*>* succesors);
 
     /// Check whether the solver has reached the goal (i.e. is within the
     /// specified goal tolerance)
