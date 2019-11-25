@@ -133,19 +133,21 @@ class StateSpace {
     /// \param _vector_1 The first vector to add
     /// \param _vector_2 The second vector to add
     /// \param[out] _vector_out Output vector
-    /// \return True if calculation successful, false otherwise
-    /// (i.e. input vectors must be the same size)
-    virtual bool add(
+    /// Throws an exception if the vector sizes are not equal
+    virtual void add(
         const Eigen::VectorXd& _vector_1,
         const Eigen::VectorXd& _vector_2,
         Eigen::VectorXd* _vector_out) const {
         if (_vector_1.size() != _vector_2.size()) {
-            return false;
+            std::stringstream msg;
+            msg << "states do not have equal size: "
+                << ", got " << _vector_1.size() <<
+                    " and " << _vector_2.size() << ".\n";
+            throw std::runtime_error(msg.str());
         }
         for (int i = 0; i < _vector_1.size(); i++) {
             (*_vector_out)[i] = _vector_1[i] + _vector_2[i];
         }
-        return true;
     }
 
  private:
@@ -159,6 +161,13 @@ class StateSpace::State {
     ///
     /// \return Output state vector
     virtual Eigen::VectorXd vector() const = 0;
+
+    /// Converts state value given vector representation
+    /// Throws an exception if the state vector size is incorrect; allowed
+    /// vector size depends on derived class
+    ///
+    /// \param state State vector
+    virtual void from_vector(const Eigen::VectorXd& state) = 0;
 
     /// Equality operator
     virtual bool operator== (const State& state) const = 0;

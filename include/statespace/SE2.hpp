@@ -55,9 +55,9 @@ class SE2 : public virtual StateSpace {
         /// Constructs state with given parameters
         explicit State(const int& x, const int& y, const int& theta);
 
-        /// Constructs state with given vector representation
+        /// Documentation Inherited
         /// Vector in format [x, y, theta]
-        explicit State(const Eigen::Vector3d& input);
+        void from_vector(const Eigen::VectorXd& state);
 
         /// Documentation Inherited
         bool operator== (const StateSpace::State& state) const override;
