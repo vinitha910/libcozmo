@@ -142,7 +142,7 @@ class StateSpace {
             std::stringstream msg;
             msg << "states do not have equal size: "
                 << ", got " << _vector_1.size() <<
-                    " and " << _vector_1.size() << ".\n";
+                    " and " << _vector_2.size() << ".\n";
             throw std::runtime_error(msg.str());
         }
         for (int i = 0; i < _vector_1.size(); i++) {
