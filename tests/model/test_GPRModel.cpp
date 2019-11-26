@@ -33,6 +33,7 @@
 #include <Python.h>
 #include "model/GPRModel.hpp"
 #include "model/ScikitLearnFramework.hpp"
+#include "ros/package.h"
 
 namespace libcozmo {
 namespace model {
@@ -46,8 +47,11 @@ class GPRModelTest: public ::testing::Test {
     ~GPRModelTest() {}
 
     GPRModel create_model() {
+        std::string path = 
+            ros::package::getPath("libcozmo") + "/tests/model/SampleGPRModel.pkl";
+        // std::cout << path << std::endl;
         auto framework =
-            std::make_shared<ScikitLearnFramework>("SampleGPRModel.pkl");
+            std::make_shared<ScikitLearnFramework>(path);
         return GPRModel(framework);
     }
 

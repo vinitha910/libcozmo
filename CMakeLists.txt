@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs 
   message_generation 
   geometry_msgs 
+  roslib
 )
 
 find_package(Eigen3 REQUIRED)
@@ -39,6 +40,7 @@ catkin_package(
       pybind11_catkin 
       message_runtime  
       geometry_msgs 
+      roslib
 )
 
 include_directories(
