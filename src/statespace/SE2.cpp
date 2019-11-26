@@ -100,6 +100,18 @@ int SE2::get_or_create_state(
     return get_or_create_state(discrete_state);
 }
 
+int SE2::get_or_create_state(
+    const Eigen::VectorXd& _state) {
+    if (_state.size() != 3) {
+        std::stringstream msg;
+        msg << "vector has incorrect size: expected 3"
+            << ", got " << _state.size() << ".\n";
+        throw std::runtime_error(msg.str());
+    }
+    State discrete_state(_state[0], _state[1], _state[2]);
+    return get_or_create_state(discrete_state);
+}
+
 void SE2::discrete_state_to_continuous(
     const StateSpace::State& _state,
     aikido::statespace::StateSpace::State* _continuous_state) const {

@@ -70,6 +70,22 @@ TEST_F(SE2StatespaceTest, GetsOrCreatesContinuousState) {
     EXPECT_EQ(2, statespace.get_or_create_state(state));
 }
 
+TEST_F(SE2StatespaceTest, GetsOrCreatesVectorState) {
+    // Checking that new state is created and appropiate ID is returned
+    Eigen::VectorXd state_vector(3);
+    state_vector << 1, 1, 1;
+    EXPECT_EQ(2, statespace.get_or_create_state(state_vector));
+}
+
+TEST_F(SE2StatespaceTest, GetsOrCreatesContinuousStateException) {
+    // Checking for exception when creating state via vector
+    Eigen::VectorXd state_vector(4);
+    state_vector << 1, 1, 1, 1;
+    EXPECT_THROW(
+        statespace.get_or_create_state(state_vector),
+        std::runtime_error);
+}
+
 TEST_F(SE2StatespaceTest, DiscreteToContinuousStateConversion) {
     aikido::statespace::SE2::State out_state;
     statespace.discrete_state_to_continuous(SE2::State(1, 2, 1), &out_state);

@@ -55,6 +55,16 @@ class StateSpace {
     virtual int get_or_create_state(
         const aikido::statespace::StateSpace::State& _state) = 0;
 
+    /// Checks if given state via vector representation exists in the
+    /// statespace; if not, creates and adds the state to the statespace
+    /// Throws an exception if vector size does not match the exected size,
+    /// which depends on derived class
+    ///
+    /// \param _state Vector representation
+    /// \return State ID
+    virtual int get_or_create_state(
+        const Eigen::VectorXd& _state) = 0;
+
     /// Converts the given discrete state into a continuous state
     ///
     /// \param _state Input discrete state (assumption: state is valid)

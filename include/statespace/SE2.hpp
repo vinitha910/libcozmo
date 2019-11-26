@@ -109,6 +109,10 @@ class SE2 : public virtual StateSpace {
         const aikido::statespace::StateSpace::State& _state) override;
 
     /// Documentation inherited
+    /// Input vector in format [x, y, theta]
+    int get_or_create_state(const Eigen::VectorXd& _state) override;
+
+    /// Documentation inherited
     void discrete_state_to_continuous(
         const StateSpace::State& _state,
         aikido::statespace::StateSpace::State*
