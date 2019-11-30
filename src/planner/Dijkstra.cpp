@@ -91,32 +91,28 @@ namespace planner {
             std::vector<int> succesor_states;
             get_successors(*curr_state, &succesor_states);
             for (int i = 0; i < succesor_states.size(); i++) {
-                // auto successor_state = stasspace.get_state(id);
-                auto succesor_state = succesor_states[i];
-                if (m_state_space->is_valid_state(*succesor_state)) {
-                    const int succesor_id =
-                        m_state_space->get_or_create_state(*succesor_state);
-                    const double new_cost = costmap[curr_state_id] +
-                        m_state_space->get_distance(
-                            *curr_state,
-                            *succesor_state);
+                const int successor_id = succesor_states[i];
+                const auto succesor_state = m_state_space->get_state(successor_id);
+                const double new_cost = costmap[curr_state_id] +
+                    m_state_space->get_distance(
+                        *curr_state,
+                        *succesor_state);
 
-                    // Update the cost map if a successor state has not been
-                    // explored before, or if it has lower cost than previously
-                    // explored path
-                    if (costmap.find(succesor_id) == costmap.end() ||
-                        costmap[succesor_id] > new_cost) {
+                // Update the cost map if a successor state has not been
+                // explored before, or if it has lower cost than previously
+                // explored path
+                if (costmap.find(successor_id) == costmap.end() ||
+                    costmap[successor_id] > new_cost) {
 
-                        // Add (parent ID, action ID) pair to child to parent
-                        // map if the explored succsor is being added
-                        m_child_to_parent_map[succesor_id] =
-                            std::make_pair(curr_state_id, i);
-                        costmap[succesor_id] = new_cost;
-                        assert(priority_queue.find(curr_state_id) ==
-                            priority_queue.end());
-                        priority_queue.erase(succesor_id);
-                        priority_queue.insert(succesor_id);
-                    }
+                    // Add (parent ID, action ID) pair to child to parent
+                    // map if the explored succsor is being added
+                    m_child_to_parent_map[successor_id] =
+                        std::make_pair(curr_state_id, i);
+                    costmap[successor_id] = new_cost;
+                    assert(priority_queue.find(curr_state_id) ==
+                        priority_queue.end());
+                    priority_queue.erase(successor_id);
+                    priority_queue.insert(successor_id);
                 }
             }
         }
@@ -140,18 +136,10 @@ namespace planner {
             Eigen::VectorXd state_vector = state_.vector();
             Eigen::VectorXd output(state_vector.size());
             m_model->predict_state(state_.vector(), action->vector(), &output);
-            
-            /*
-            int successor_id = get_or create .. (output);
-            if (id valid) {push back to vector}
-            
-            */
-
-
-            // Append discretized successor state to vector of valid successors
-            statespace::StateSpace::State& succesor_state_ = state_;
-            succesor_state_.from_vector(output);
-            succesors->push_back(&succesor_state_);
+            int successor_id = m_state_space->get_or_create_state(output);
+            if (m_state_space->is_valid_state(*(m_state_space->get_state(successor_id)))) {
+                succesors->push_back(successor_id);
+            }
         }
         // Reverse the vector order as successors are appened in backwards order
         std::reverse(succesors->begin(), succesors->end());

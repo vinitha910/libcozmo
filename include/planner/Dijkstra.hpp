@@ -55,10 +55,10 @@ class Dijkstra : public virtual Planner {
     ///     two states
     /// \param goal_tolerance The threshold for being considered at the goal
     Dijkstra(
-        std::shared_ptr<actionspace::ActionSpace> actionspace,
-        std::shared_ptr<statespace::StateSpace> statespace,
-        std::shared_ptr<model::Model> model,
-        std::shared_ptr<distance::Distance> distance_metric,
+        const std::shared_ptr<actionspace::ActionSpace> actionspace,
+        const std::shared_ptr<statespace::StateSpace> statespace,
+        const std::shared_ptr<model::Model> model,
+        const std::shared_ptr<distance::Distance> distance_metric,
         const double& goal_tolerance) : \
         m_action_space(actionspace),
         m_state_space(statespace),
@@ -91,7 +91,7 @@ class Dijkstra : public virtual Planner {
     /// \param[out] successors 
     void get_successors(
         const statespace::StateSpace::State& state_,
-        std::vector<statespace::StateSpace::State*>* succesors);
+        std::vector<int>* succesors);
 
     /// Check whether the solver has reached the goal (i.e. is within the
     /// specified goal tolerance)
