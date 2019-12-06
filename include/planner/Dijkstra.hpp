@@ -31,11 +31,10 @@
 #define LIBCOZMO_PLANNER_DIJKSTRA_HPP_
 
 #include <memory>
-#include "actionspace/GenericActionSpace.hpp"
 #include "statespace/SE2.hpp"
-#include "model/Model.hpp"
 #include "planner/Planner.hpp"
 #include "distance/distance.hpp"
+#include "actionspace/GenericActionSpace.hpp"
 
 namespace libcozmo {
 namespace planner {
@@ -48,22 +47,16 @@ class Dijkstra : public virtual Planner {
     ///
     /// Constructs distance metric and goal tolerance
     ///
-    /// \param actionspace Defines the set of all possible actions
     /// \param statespace Defines the set of all possible states
-    /// \param model A model that has learnt f : (state, action) -> state'
     /// \param distance_metric The metric used to calculate the distance between
     ///     two states
     /// \param goal_tolerance The threshold for being considered at the goal
     Dijkstra(
         const std::shared_ptr<actionspace::ActionSpace> actionspace,
         const std::shared_ptr<statespace::StateSpace> statespace,
-        const std::shared_ptr<model::Model> model,
-        const std::shared_ptr<distance::Distance> distance_metric,
         const double& goal_tolerance) : \
         m_action_space(actionspace),
         m_state_space(statespace),
-        m_model(model),
-        m_distance_metric(distance_metric),
         m_goal_tolerance(goal_tolerance)  {
         m_start_id = -1;
         m_goal_id = -1;
@@ -77,13 +70,13 @@ class Dijkstra : public virtual Planner {
     bool set_goal(const int& goal_id) override;
 
     /// Documentation inherited
-    bool solve(std::vector<int>* actions) override;
+    bool solve(std::vector<int>* path) override;
 
  private:
     /// Extracts sequence of actions from start to goal
     ///
     /// \param[out] actions Vector of action IDs
-    void extract_action_sequence(std::vector<int> *actions);
+    void extract_path(std::vector<int> *path_state_ids);
 
     /// Finds all successor states given input state
     ///
@@ -104,8 +97,6 @@ class Dijkstra : public virtual Planner {
     std::shared_ptr<statespace::StateSpace> m_state_space;
     int m_start_id;
     int m_goal_id;
-    std::shared_ptr<model::Model> m_model;
-    std::shared_ptr<distance::Distance> m_distance_metric;
     const double m_goal_tolerance;
     ChildToParentMap m_child_to_parent_map;
 };

@@ -4,7 +4,7 @@
 #include <aikido/rviz/InteractiveMarkerViewer.hpp>
 
 static const std::string topicName("dart_markers");
-static const std::string baseFrameName("map");
+static const std::string baseFrameName("base_link");
 
 int main(int argc, char* argv[])
 {

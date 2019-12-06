@@ -57,7 +57,7 @@ class SE2 : public virtual StateSpace {
 
         /// Documentation Inherited
         /// Vector in format [x, y, theta]
-        void from_vector(const Eigen::VectorXd& state);
+        void from_vector(const Eigen::Vector3d& state);
 
         /// Documentation Inherited
         bool operator== (const StateSpace::State& state) const override;
@@ -76,7 +76,7 @@ class SE2 : public virtual StateSpace {
         int Theta() const;
 
         /// Documentation Inherited
-        Eigen::VectorXd vector() const override;
+        Eigen::Vector3d vector() const override;
 
      private:
         int x;
@@ -88,13 +88,13 @@ class SE2 : public virtual StateSpace {
 
     /// Constructs a discretized SE2 state space
     ///
-    /// \param resolution_m Resolution of the environment (mm)
+    /// \param resolution_mm Resolution of the environment (mm)
     /// \param num_theta_vals Number of discretized theta values; Must be a
     /// power of 2
     SE2(
-        const double& resolution_m,
+        const double& resolution_mm,
         const int& num_theta_vals) : \
-        m_resolution(resolution_m),
+        m_resolution(resolution_mm),
         m_num_theta_vals(num_theta_vals),
         m_statespace(std::make_shared<aikido::statespace::SE2>()),
         m_distance_metric(aikido::distance::SE2(m_statespace)) {}
@@ -110,7 +110,7 @@ class SE2 : public virtual StateSpace {
 
     /// Documentation inherited
     /// Input vector in format [x, y, theta]
-    int get_or_create_state(const Eigen::VectorXd& _state) override;
+    int get_or_create_state(const Eigen::Vector3i& _state) override;
 
     /// Documentation inherited
     void discrete_state_to_continuous(
@@ -155,6 +155,26 @@ class SE2 : public virtual StateSpace {
     /// Documentation inherited
     double get_resolution() const override;
 
+    /// Converts discrete angle to continuous (radians)
+    ///
+    /// \param theta Discrete angle in [0, num_theta_vals]
+    /// \return Continuous angle in [0, 2pi]
+    double discrete_angle_to_continuous(const int& theta) const override;
+
+    /// Converts discrete angle to continuous (radians)
+    ///
+    /// \param theta Continuous angle (radians)
+    /// \return Discrete angle in [0, num_theta_vals]
+    int continuous_angle_to_discrete(const double& theta) const override;
+
+    void discrete_state_to_continuous(
+        const StateSpace::State& _state,
+        Eigen::Vector3d* out_state) const override;
+
+    void continuous_state_to_discrete(
+        const Eigen::Vector3d& _state,
+        Eigen::Vector3i* out_state) const override;
+
  private:
     /// Creates a new state and adds it to the statespace
     ///
@@ -166,18 +186,6 @@ class SE2 : public virtual StateSpace {
     /// \param theta_rad Angle (radians)
     /// \return normalized angle
     double normalize_angle_rad(const double& theta_rad) const;
-
-    /// Converts discrete angle to continuous (radians)
-    ///
-    /// \param theta Discrete angle in [0, num_theta_vals]
-    /// \return Continuous angle in [0, 2pi]
-    double discrete_angle_to_continuous(const int& theta) const;
-
-    /// Converts discrete angle to continuous (radians)
-    ///
-    /// \param theta Continuous angle (radians)
-    /// \return Discrete angle in [0, num_theta_vals]
-    int continuous_angle_to_discrete(const double& theta) const;
 
     /// Converts discrete position to continuous (x_mm, y_mm)
     ///

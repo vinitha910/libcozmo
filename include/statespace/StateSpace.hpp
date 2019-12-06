@@ -63,7 +63,7 @@ class StateSpace {
     /// \param _state Vector representation
     /// \return State ID
     virtual int get_or_create_state(
-        const Eigen::VectorXd& _state) = 0;
+        const Eigen::Vector3i& _state) = 0;
 
     /// Converts the given discrete state into a continuous state
     ///
@@ -145,9 +145,9 @@ class StateSpace {
     /// \param[out] _vector_out Output vector
     /// Throws an exception if the vector sizes are not equal
     virtual void add(
-        const Eigen::VectorXd& _vector_1,
-        const Eigen::VectorXd& _vector_2,
-        Eigen::VectorXd* _vector_out) const {
+        const Eigen::Vector3d& _vector_1,
+        const Eigen::Vector3d& _vector_2,
+        Eigen::Vector3d* _vector_out) const {
         if (_vector_1.size() != _vector_2.size()) {
             std::stringstream msg;
             msg << "states do not have equal size: "
@@ -160,6 +160,26 @@ class StateSpace {
         }
     }
 
+    /// Converts discrete angle to continuous (radians)
+    ///
+    /// \param theta Discrete angle in [0, num_theta_vals]
+    /// \return Continuous angle in [0, 2pi]
+    virtual double discrete_angle_to_continuous(const int& theta) const = 0;
+
+    /// Converts discrete angle to continuous (radians)
+    ///
+    /// \param theta Continuous angle (radians)
+    /// \return Discrete angle in [0, num_theta_vals]
+    virtual int continuous_angle_to_discrete(const double& theta) const = 0;
+
+    virtual void discrete_state_to_continuous(
+        const StateSpace::State& _state,
+        Eigen::Vector3d* out_state) const = 0;
+
+    virtual void continuous_state_to_discrete(
+        const Eigen::Vector3d& _state,
+        Eigen::Vector3i* out_state) const = 0;
+
  private:
     virtual State* create_state() = 0;
 };
@@ -170,14 +190,14 @@ class StateSpace::State {
     /// Convert state to its vector representation
     ///
     /// \return Output state vector
-    virtual Eigen::VectorXd vector() const = 0;
+    virtual Eigen::Vector3d vector() const = 0;
 
     /// Converts state value given vector representation
     /// Throws an exception if the state vector size is incorrect; allowed
     /// vector size depends on derived class
     ///
     /// \param state State vector
-    virtual void from_vector(const Eigen::VectorXd& state) = 0;
+    virtual void from_vector(const Eigen::Vector3d& state) = 0;
 
     /// Equality operator
     virtual bool operator== (const State& state) const = 0;

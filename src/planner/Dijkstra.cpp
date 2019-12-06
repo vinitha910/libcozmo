@@ -29,6 +29,7 @@
 
 #include "planner/Dijkstra.hpp"
 #include <iostream>
+#include <math.h>
 
 namespace libcozmo {
 namespace planner {
@@ -58,7 +59,7 @@ namespace planner {
         return false;
     }
 
-    bool Dijkstra::solve(std::vector<int>* actions) {
+    bool Dijkstra::solve(std::vector<int>* path) {
         // Check that goal and start ID have been set
         if (m_goal_id == -1 || m_start_id == -1) {
             return false;
@@ -81,12 +82,15 @@ namespace planner {
 
             // Check if the goal condition has been met
             if (is_goal(curr_state_id)) {
-                extract_action_sequence(actions);
+                m_goal_id = curr_state_id;
+                extract_path(path);
                 return true;
             }
             const statespace::StateSpace::State* curr_state =
                 m_state_space->get_state(curr_state_id);
             
+            // const auto s = static_cast<const statespace::SE2::State*>(curr_state);
+            // std::cout << s->X() << " " << s->Y() << std::endl;
             // Find successor states to the current state
             std::vector<int> succesor_states;
             get_successors(*curr_state, &succesor_states);
@@ -106,8 +110,7 @@ namespace planner {
 
                     // Add (parent ID, action ID) pair to child to parent
                     // map if the explored succsor is being added
-                    m_child_to_parent_map[successor_id] =
-                        std::make_pair(curr_state_id, i);
+                    m_child_to_parent_map[successor_id] = curr_state_id;
                     costmap[successor_id] = new_cost;
                     assert(priority_queue.find(curr_state_id) ==
                         priority_queue.end());
@@ -121,40 +124,67 @@ namespace planner {
     }
 
     bool Dijkstra::is_goal(const int& curr_state_id) const {
-        return curr_state_id  == m_goal_id || m_distance_metric->get_distance(
+        const double dist = m_state_space->get_distance(
             *m_state_space->get_state(curr_state_id),
-            *m_state_space->get_state(m_goal_id)) <= m_goal_tolerance;
+            *m_state_space->get_state(m_goal_id));
+        // std::cout << dist << std::endl;
+        return curr_state_id  == m_goal_id || dist <= m_goal_tolerance;
     }
 
     void Dijkstra::get_successors(
         const statespace::StateSpace::State& state_,
         std::vector<int>* succesors) {
         for (int i = 0; i < m_action_space->size(); i++) {
-            const actionspace::ActionSpace::Action* action =
+            const actionspace::ActionSpace::Action* action_ =
                 m_action_space->get_action(i);
-            // Given model input, get successor state in continuous space
-            Eigen::VectorXd state_vector = state_.vector();
-            Eigen::VectorXd output(state_vector.size());
-            m_model->predict_state(state_.vector(), action->vector(), &output);
-            int successor_id = m_state_space->get_or_create_state(output);
-            if (m_state_space->is_valid_state(*(m_state_space->get_state(successor_id)))) {
-                succesors->push_back(successor_id);
+            const auto action = 
+                static_cast<const actionspace::GenericActionSpace::Action*>(action_);
+            
+            Eigen::Vector3d state;
+            m_state_space->discrete_state_to_continuous(state_, &state);
+             
+            // If the speed == 0 and action and current headings are different
+            // then rotate in place
+            if (action->m_speed == 0.0 && state[2] != action->m_heading) {
+                 state[2] = action->m_heading;   
             }
+
+            // If the action's heading and the current heading are not equal,
+            // the action cannot be applied
+            else if (action->m_speed != 0.0 && state[2] != action->m_heading) {
+                continue;
+            }
+ 
+            // The headings match and there is a speed > 0
+            else {
+                const double distance = action->m_speed * action->m_duration;
+                const double dx = distance * cos(action->m_heading);
+                const double dy = distance * sin(action->m_heading);
+                state[0] = state[0] + dx;
+                state[1] = state[1] + dy;
+            }
+
+            Eigen::Vector3i discrete_state;
+            m_state_space->continuous_state_to_discrete(state, &discrete_state);
+            succesors->push_back(m_state_space->get_or_create_state(discrete_state));
         }
-        // Reverse the vector order as successors are appened in backwards order
-        std::reverse(succesors->begin(), succesors->end());
     }
 
-    void Dijkstra::extract_action_sequence(std::vector<int>* actions) {
+    void Dijkstra::extract_path(std::vector<int>* path_state_ids) {
         if (m_goal_id == m_start_id) {
             return;
         }
-        auto parent = m_child_to_parent_map.find(m_goal_id);
-        while (parent != m_child_to_parent_map.end()) {
-            actions->push_back(parent->second.second);
-            parent = m_child_to_parent_map.find(parent->second.first);
+        path_state_ids->push_back(m_goal_id);
+        int current_state_id = m_goal_id;
+        while (current_state_id != m_start_id) {
+            const auto parent = m_child_to_parent_map.find(current_state_id);
+            if (parent == m_child_to_parent_map.end()) {
+                break;
+            }
+            current_state_id = parent->second;
+            path_state_ids->push_back(current_state_id);
         }
-        std::reverse(actions->begin(), actions->end());
+        std::reverse(path_state_ids->begin(), path_state_ids->end());
     }
 
 }  // namespace planner

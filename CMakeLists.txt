@@ -152,6 +152,15 @@ target_link_libraries(execute_traj
   ${aikido_LIBRARIES}
 )
 
+add_executable(planner src/examples/planner_example.cpp)
+target_include_directories(planner PRIVATE
+  ${aikido_INCLUDE_DIRS}
+)
+target_link_libraries(planner
+  cozmo
+  ${aikido_LIBRARIES}
+)
+
 ################################################################################
 # PYBIND 
 ################################################################################

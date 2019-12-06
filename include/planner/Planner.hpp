@@ -39,10 +39,8 @@ namespace planner {
 /// Maps state ID to it's appropiate cost
 typedef std::unordered_map<int, double> CostMap;
 
-/// Maps the child/successor state ID to its respective (parent ID, action ID)
-/// pair
-typedef std::unordered_map<int, std::pair<
-    int, int>> ChildToParentMap;
+/// Maps the child/successor state ID to its respective parent ID
+typedef std::unordered_map<int, int> ChildToParentMap;
 
 /// Comparator orders state IDs based on their costs-to-come from the start state
 class CostMapComparator {
@@ -87,7 +85,7 @@ class Planner {
     ///
     /// \param[out] path Vector of action IDs
     /// \return true if solution is found; false otherwise
-    virtual bool solve(std::vector<int>* actions) = 0;
+    virtual bool solve(std::vector<int>* path) = 0;
 };
 
 }  // namespace planner

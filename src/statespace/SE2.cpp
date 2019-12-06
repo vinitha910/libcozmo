@@ -44,13 +44,13 @@ bool SE2::State::operator== (const StateSpace::State& state) const {
     return x == state_.x && y == state_.y && theta == state_.theta;
 }
 
-Eigen::VectorXd SE2::State::vector() const {
-    Eigen::VectorXd state_vector(3);
+Eigen::Vector3d SE2::State::vector() const {
+    Eigen::Vector3d state_vector;
     state_vector << x, y, theta;
     return state_vector;
 }
 
-void SE2::State::from_vector(const Eigen::VectorXd& state) {
+void SE2::State::from_vector(const Eigen::Vector3d& state) {
     if (state.size() != 3) {
         std::stringstream msg;
         msg << "state has incorrect size: expected 3"
@@ -101,7 +101,7 @@ int SE2::get_or_create_state(
 }
 
 int SE2::get_or_create_state(
-    const Eigen::VectorXd& _state) {
+    const Eigen::Vector3i& _state) {
     if (_state.size() != 3) {
         std::stringstream msg;
         msg << "vector has incorrect size: expected 3"
@@ -123,6 +123,25 @@ void SE2::discrete_state_to_continuous(
     state_log[2] =
         discrete_angle_to_continuous(state.theta);
     m_statespace->expMap(state_log, _continuous_state);
+}
+
+void SE2::discrete_state_to_continuous(
+    const StateSpace::State& _state,
+    Eigen::Vector3d* out_state) const {
+    const State state = static_cast<const State&>(_state);
+    out_state->head<2>() =
+        discrete_position_to_continuous(Eigen::Vector2i(state.x, state.y));
+    (*out_state)[2] =
+        discrete_angle_to_continuous(state.theta);
+}
+
+void SE2::continuous_state_to_discrete(
+    const Eigen::Vector3d& _state,
+    Eigen::Vector3i* out_state) const {
+    out_state->head<2>() = 
+        continuous_position_to_discrete(Eigen::Vector2d(_state[0], _state[1]));
+    (*out_state)[2] =
+        continuous_angle_to_discrete(_state[2]);
 }
 
 void SE2::continuous_state_to_discrete(
@@ -171,11 +190,14 @@ int SE2::size() const {
 double SE2::get_distance(
     const StateSpace::State& _state_1,
     const StateSpace::State& _state_2) const {
-    aikido::statespace::SE2::State continuous_state_1;
-    discrete_state_to_continuous(_state_1, &continuous_state_1);
-    aikido::statespace::SE2::State continuous_state_2;
-    discrete_state_to_continuous(_state_2, &continuous_state_2);
-    return m_distance_metric.distance(&continuous_state_1, &continuous_state_2);
+    Eigen::Vector3d s1;
+    discrete_state_to_continuous(_state_1, &s1);
+    Eigen::Vector3d s2;
+    discrete_state_to_continuous(_state_2, &s2);
+    const double dx = (s1[0] - s2[0]) * (s1[0] - s2[0]);
+    const double dy = (s1[1] - s2[1]) * (s1[1] - s2[1]);
+    const double dth = (s1[2] - s2[2]) * (s1[2] - s2[2]);
+    return std::sqrt(dx + dy + dth);
 }
 
 double SE2::get_distance(
