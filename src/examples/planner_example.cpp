@@ -21,22 +21,23 @@ int main(int argc, char* argv[])
       return 0;
     }
 
-    const std::string mesh_dir = argv[1];
-    libcozmo::Cozmo cozmo(mesh_dir);
-
     // Start the RViz viewer.
     std::cout << "Starting ROS node." << std::endl;
     ros::init(argc, argv, "load_cozmo");
     ros::NodeHandle nh("~");
 
-    dart::dynamics::SkeletonPtr skeleton;
-    skeleton = cozmo.getCozmoSkeleton();
-
     std::cout << "Starting viewer. Please subscribe to the '" << topicName
         << "' InteractiveMarker topic in RViz." << std::endl;
 
     aikido::rviz::InteractiveMarkerViewer viewer(topicName, baseFrameName);
-    viewer.addSkeletonMarker(skeleton);
+
+    const std::string mesh_dir = argv[1];
+    const int num_robots = 2;
+    std::vector<libcozmo::Cozmo*> robots(num_robots);
+    for (int i = 0; i < num_robots; ++i) {
+        robots[i] = new libcozmo::Cozmo(mesh_dir);
+        viewer.addSkeletonMarker(robots[i]->getCozmoSkeleton());
+    } 
     viewer.setAutoUpdate(true);
 
     auto GAS =
@@ -72,10 +73,14 @@ int main(int argc, char* argv[])
     }
 
     std::shared_ptr<Interpolated> traj;
-    traj = cozmo.createInterpolatedTraj(waypoints);
+    traj = robots[0]->createInterpolatedTraj(waypoints);
 
     std::chrono::milliseconds period(10);
-    cozmo.executeTrajectory(period, traj);
+    robots[0]->executeTrajectory(period, traj);
+
+    for (int i = 0; i < num_robots; ++i) {
+        delete robots[i];
+    }
 
     return 0;
 }
