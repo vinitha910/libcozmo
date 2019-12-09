@@ -3,6 +3,7 @@
 #include <chrono>
 #include <cstdlib>
 #include <math.h>
+#include <stdlib.h>  
 #include "aikido/trajectory/Interpolated.hpp"
 #include <aikido/rviz/InteractiveMarkerViewer.hpp>
 #include "aikido/rviz/FrameMarker.hpp"
@@ -13,6 +14,31 @@ using Interpolated = aikido::trajectory::Interpolated;
 
 static const std::string topicName("dart_markers");
 static const std::string baseFrameName("base_link");
+const Eigen::Vector4d sphere_1(0.03249, -0.001, 0.03391, 0.08);
+const Eigen::Vector4d sphere_2(-0.00861, -0.001, 0.03391, 0.08);
+const Eigen::Vector4d collision_thresh(0.01144, 0.0, 0.04252, 0.119);
+
+Eigen::Vector2d transform_spheres(
+    Eigen::Vector3d& robot_pose, Eigen::Vector4d& sphere_pose)
+{
+    const Eigen::Vector2d sphere =
+            Eigen::Translation2d(robot_pose.x(), robot_pose.y()) * \
+            Eigen::Rotation2Dd(robot_pose.w()) * \
+            Eigen::Vector2d(sphere_pose.x(), sphere.y());
+    return sphere;
+}
+
+bool in_collision(
+    Eigen::Vector3d& robot1_pose, 
+    Eigen::Vector3d& robot2_pose,
+    Eigen::Vector4d& sphere)
+{
+    Eigen::Vector2d s1 = transform_spheres(robot1_pose, sphere);
+    Eigen::Vector2d s2 = transform_spheres(robot2_pose, sphere);
+    const double dx = (s1.x() - s2.x()) * (s1.x() - s2.x());
+    const double dy = (s1.y() - s2.y()) * (s1.y() - s2.y());
+    return std::sqrt(dx + dy) < sphere[3] ? true : false;
+}
 
 int main(int argc, char* argv[])
 {
@@ -24,7 +50,7 @@ int main(int argc, char* argv[])
     // Start the RViz viewer.
     std::cout << "Starting ROS node." << std::endl;
     ros::init(argc, argv, "load_cozmo");
-    ros::NodeHandle nh("~");
+    ros::NodeHandle nh;
 
     std::cout << "Starting viewer. Please subscribe to the '" << topicName
         << "' InteractiveMarker topic in RViz." << std::endl;
@@ -32,12 +58,8 @@ int main(int argc, char* argv[])
     aikido::rviz::InteractiveMarkerViewer viewer(topicName, baseFrameName);
 
     const std::string mesh_dir = argv[1];
-    const int num_robots = 2;
-    std::vector<libcozmo::Cozmo*> robots(num_robots);
-    for (int i = 0; i < num_robots; ++i) {
-        robots[i] = new libcozmo::Cozmo(mesh_dir);
-        viewer.addSkeletonMarker(robots[i]->getCozmoSkeleton());
-    } 
+    libcozmo::Cozmo cozmo = libcozmo::Cozmo(mesh_dir);
+    viewer.addSkeletonMarker(cozmo.getCozmoSkeleton());
     viewer.setAutoUpdate(true);
 
     auto GAS =
@@ -48,18 +70,24 @@ int main(int argc, char* argv[])
 
     auto SE2 = std::make_shared<libcozmo::statespace::SE2>(10, 8);
     libcozmo::planner::Dijkstra planner(GAS, SE2, 20);
+
+    std::map<std::string, double> start;
+    nh.getParam("start_pose", start);
     const int start_id = SE2->get_or_create_state(
-        libcozmo::statespace::SE2::State(0, 0, 3));
-    const int goal_id = SE2->get_or_create_state(
-        libcozmo::statespace::SE2::State(10, 10, 0));
+        Eigen::Vector3d(start["x_mm"], start["y_mm"], start["theta_rad"]));
     planner.set_start(start_id);
+
+    std::map<std::string, double> goal;
+    nh.getParam("goal_pose", goal);
+    const int goal_id = SE2->get_or_create_state(
+        Eigen::Vector3d(goal["x_mm"], goal["y_mm"], goal["theta_rad"]));
     planner.set_goal(goal_id);
 
     std::vector<int> path;
     bool success = planner.solve(&path);
 
-    std::vector<libcozmo::Waypoint> waypoints;
     double t = 0;
+    std::vector<libcozmo::Waypoint> waypoints;
     for (const int& state_id : path) {
         const libcozmo::statespace::StateSpace::State* state = SE2->get_state(state_id);
         Eigen::Vector3d cont_state;
@@ -73,14 +101,10 @@ int main(int argc, char* argv[])
     }
 
     std::shared_ptr<Interpolated> traj;
-    traj = robots[0]->createInterpolatedTraj(waypoints);
+    traj = cozmo.createInterpolatedTraj(waypoints);
 
     std::chrono::milliseconds period(10);
-    robots[0]->executeTrajectory(period, traj);
-
-    for (int i = 0; i < num_robots; ++i) {
-        delete robots[i];
-    }
+    cozmo.executeTrajectory(period, traj);
 
     return 0;
 }

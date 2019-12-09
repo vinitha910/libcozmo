@@ -10,17 +10,13 @@
 #include "aikido/statespace/SE2.hpp"
 
 namespace libcozmo{
-using BoxShape = dart::dynamics::BoxShape;
 using MeshShape = dart::dynamics::MeshShape;
 using FreeJoint = dart::dynamics::FreeJoint;
 using RevoluteJoint = dart::dynamics::RevoluteJoint;
 using VisualAspect = dart::dynamics::VisualAspect;
 using Skeleton = dart::dynamics::Skeleton; 
-using WeldJointConstraint = dart::constraint::WeldJointConstraint;
-using InverseKinematicsPtr = dart::dynamics::InverseKinematicsPtr;
 using Interpolator = aikido::statespace::Interpolator;
 using GeodesicInterpolator = aikido::statespace::GeodesicInterpolator;
-using Interpolated = aikido::trajectory::Interpolated;
 using aikido::statespace::SE2;
 
 Cozmo::Cozmo(const std::string& mesh_dir){
@@ -267,5 +263,14 @@ std::shared_ptr<Interpolated> Cozmo::createInterpolatedTraj(
 
     return traj;
 }
+
+// void Cozmo::createCollisionSphere(const SphereShape::Spheres& collision_spheres)
+// {
+//     std::shared_ptr<SphereShape> spheres(new SphereShape(collision_spheres));
+//     bn->addVisualizationShape(shape);
+//     bn->addCollisionShape(shape);
+//     // auto shapeNode = bn->createShapeNodeWith<VisualAspect>(spheres);
+//     // shapeNode->getVisualAspect()->setColor(dart::Color::Blue());
+// }
 
 }  // namespace libcozmo

@@ -112,6 +112,19 @@ int SE2::get_or_create_state(
     return get_or_create_state(discrete_state);
 }
 
+int SE2::get_or_create_state(const Eigen::Vector3d& _state) {
+    if (_state.size() != 3) {
+        std::stringstream msg;
+        msg << "vector has incorrect size: expected 3"
+            << ", got " << _state.size() << ".\n";
+        throw std::runtime_error(msg.str());
+    }
+
+    Eigen::Vector3i state;
+    continuous_state_to_discrete(_state, &state);
+    return get_or_create_state(state);
+}
+
 void SE2::discrete_state_to_continuous(
     const StateSpace::State& _state,
     aikido::statespace::StateSpace::State* _continuous_state) const {
@@ -262,4 +275,3 @@ Eigen::Vector2i SE2::continuous_position_to_discrete(
 
 }  // namespace statespace
 }  // namespace libcozmo
-

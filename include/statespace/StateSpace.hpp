@@ -65,6 +65,8 @@ class StateSpace {
     virtual int get_or_create_state(
         const Eigen::Vector3i& _state) = 0;
 
+    virtual int get_or_create_state(const Eigen::Vector3d& _state) = 0;
+
     /// Converts the given discrete state into a continuous state
     ///
     /// \param _state Input discrete state (assumption: state is valid)

@@ -1,0 +1,9 @@
+start_pose:
+    x_mm:  100.0
+    y_mm:  100.0
+    theta_rad: 0.0
+
+goal_pose:
+    x_mm:  0.0
+    y_mm:  0.0
+    theta_rad: 1.57

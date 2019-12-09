@@ -14,6 +14,7 @@ using SkeletonPtr = dart::dynamics::SkeletonPtr;
 using InverseKinematicsPtr = dart::dynamics::InverseKinematicsPtr;
 using TrajectoryPtr = aikido::trajectory::TrajectoryPtr;
 using Interpolated = aikido::trajectory::Interpolated;
+using SphereShape = dart::dynamics::MultiSphereConvexHullShape;
 using aikido::statespace::SE2;
   
 class Waypoint 
@@ -65,6 +66,8 @@ public:
     /// \param waypoints A vector of waypoints
     std::shared_ptr<Interpolated> createInterpolatedTraj(std::vector<Waypoint> waypoints);
  
+    // void createCollisionSphere(const SphereShape::Spheres& spheres);
+
 private:
     /// SkeletonPtr to Cozmo
     SkeletonPtr cozmo;

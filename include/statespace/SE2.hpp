@@ -112,6 +112,8 @@ class SE2 : public virtual StateSpace {
     /// Input vector in format [x, y, theta]
     int get_or_create_state(const Eigen::Vector3i& _state) override;
 
+    int get_or_create_state(const Eigen::Vector3d& _state) override;
+
     /// Documentation inherited
     void discrete_state_to_continuous(
         const StateSpace::State& _state,
@@ -222,4 +224,3 @@ class SE2 : public virtual StateSpace {
 }  // namespace libcozmo
 
 #endif  // INCLUDE_STATESPACE_SE2_HPP_
-
