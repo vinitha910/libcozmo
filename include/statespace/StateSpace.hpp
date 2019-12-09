@@ -62,10 +62,7 @@ class StateSpace {
     ///
     /// \param _state Vector representation
     /// \return State ID
-    virtual int get_or_create_state(
-        const Eigen::Vector3i& _state) = 0;
-
-    virtual int get_or_create_state(const Eigen::Vector3d& _state) = 0;
+    virtual int get_or_create_state(const Eigen::Vector4d& _state, const bool cont) = 0;
 
     /// Converts the given discrete state into a continuous state
     ///
@@ -176,11 +173,11 @@ class StateSpace {
 
     virtual void discrete_state_to_continuous(
         const StateSpace::State& _state,
-        Eigen::Vector3d* out_state) const = 0;
+        Eigen::Vector4d* out_state) const = 0;
 
     virtual void continuous_state_to_discrete(
-        const Eigen::Vector3d& _state,
-        Eigen::Vector3i* out_state) const = 0;
+        const Eigen::Vector4d& _state,
+        Eigen::Vector4d* out_state) const = 0;
 
  private:
     virtual State* create_state() = 0;
@@ -192,14 +189,14 @@ class StateSpace::State {
     /// Convert state to its vector representation
     ///
     /// \return Output state vector
-    virtual Eigen::Vector3d vector() const = 0;
+    virtual Eigen::Vector4d vector() const = 0;
 
     /// Converts state value given vector representation
     /// Throws an exception if the state vector size is incorrect; allowed
     /// vector size depends on derived class
     ///
     /// \param state State vector
-    virtual void from_vector(const Eigen::Vector3d& state) = 0;
+    virtual void from_vector(const Eigen::Vector4d& state) = 0;
 
     /// Equality operator
     virtual bool operator== (const State& state) const = 0;

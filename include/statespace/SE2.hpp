@@ -48,16 +48,16 @@ class SE2 : public virtual StateSpace {
     class State : public StateSpace::State {
      public:
         /// Constructs identity state
-        State() : x(0), y(0), theta(0) {}
+        State() : x(0), y(0), theta(0), time(0) {}
 
         ~State() = default;
 
         /// Constructs state with given parameters
-        explicit State(const int& x, const int& y, const int& theta);
+        explicit State(const int& x, const int& y, const int& theta, const double& time);
 
         /// Documentation Inherited
-        /// Vector in format [x, y, theta]
-        void from_vector(const Eigen::Vector3d& state);
+        /// Vector in format [x, y, theta, time]
+        void from_vector(const Eigen::Vector4d& state);
 
         /// Documentation Inherited
         bool operator== (const StateSpace::State& state) const override;
@@ -68,20 +68,23 @@ class SE2 : public virtual StateSpace {
             boost::hash_combine(seed, boost::hash_value(state.x));
             boost::hash_combine(seed, boost::hash_value(state.y));
             boost::hash_combine(seed, boost::hash_value(state.theta));
+            boost::hash_combine(seed, boost::hash_value(state.time));
             return seed;
         }
 
         int X() const;
         int Y() const;
         int Theta() const;
+        double Time() const; 
 
         /// Documentation Inherited
-        Eigen::Vector3d vector() const override;
+        Eigen::Vector4d vector() const override;
 
      private:
         int x;
         int y;
         int theta;
+        double time;
 
         friend class SE2;
     };
@@ -109,16 +112,14 @@ class SE2 : public virtual StateSpace {
         const aikido::statespace::StateSpace::State& _state) override;
 
     /// Documentation inherited
-    /// Input vector in format [x, y, theta]
-    int get_or_create_state(const Eigen::Vector3i& _state) override;
-
-    int get_or_create_state(const Eigen::Vector3d& _state) override;
+    /// Input vector in format [x, y, theta, time]
+    int get_or_create_state(const Eigen::Vector4d& _state, const bool cont) override;
 
     /// Documentation inherited
     void discrete_state_to_continuous(
         const StateSpace::State& _state,
         aikido::statespace::StateSpace::State*
-            _continuous_state) const override;
+        _continuous_state) const override;
 
     /// Documentation inherited
     void continuous_state_to_discrete(
@@ -171,11 +172,11 @@ class SE2 : public virtual StateSpace {
 
     void discrete_state_to_continuous(
         const StateSpace::State& _state,
-        Eigen::Vector3d* out_state) const override;
+        Eigen::Vector4d* out_state) const override;
 
     void continuous_state_to_discrete(
-        const Eigen::Vector3d& _state,
-        Eigen::Vector3i* out_state) const override;
+        const Eigen::Vector4d& _state,
+        Eigen::Vector4d* out_state) const override;
 
  private:
     /// Creates a new state and adds it to the statespace
@@ -200,7 +201,7 @@ class SE2 : public virtual StateSpace {
     ///
     /// \param position Continuous coordinates in millimeters
     /// \return Discrete coordinates
-    Eigen::Vector2i continuous_position_to_discrete(
+    Eigen::Vector2d continuous_position_to_discrete(
         const Eigen::Vector2d& position) const;
 
     /// Maps discrete state (libcozmo::statespace::SE2::State) to state ID
@@ -224,3 +225,4 @@ class SE2 : public virtual StateSpace {
 }  // namespace libcozmo
 
 #endif  // INCLUDE_STATESPACE_SE2_HPP_
+

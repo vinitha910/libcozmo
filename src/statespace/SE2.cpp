@@ -36,24 +36,24 @@ namespace libcozmo {
 namespace statespace {
 
 
-SE2::State::State(const int& x, const int& y, const int& theta) : \
-    x(x), y(y), theta(theta) {}
+SE2::State::State(const int& x, const int& y, const int& theta, const double& time) : \
+    x(x), y(y), theta(theta), time(time) {}
 
 bool SE2::State::operator== (const StateSpace::State& state) const {
     auto state_ = static_cast<const State&>(state);
-    return x == state_.x && y == state_.y && theta == state_.theta;
+    return x == state_.x && y == state_.y && theta == state_.theta && time == state_.time;
 }
 
-Eigen::Vector3d SE2::State::vector() const {
-    Eigen::Vector3d state_vector;
-    state_vector << x, y, theta;
+Eigen::Vector4d SE2::State::vector() const {
+    Eigen::Vector4d state_vector;
+    state_vector << x, y, theta, time;
     return state_vector;
 }
 
-void SE2::State::from_vector(const Eigen::Vector3d& state) {
-    if (state.size() != 3) {
+void SE2::State::from_vector(const Eigen::Vector4d& state) {
+    if (state.size() != 4) {
         std::stringstream msg;
-        msg << "state has incorrect size: expected 3"
+        msg << "state has incorrect size: expected 4"
             << ", got " << state.size() << ".\n";
         throw std::runtime_error(msg.str());
     }
@@ -61,6 +61,7 @@ void SE2::State::from_vector(const Eigen::Vector3d& state) {
     x = state[0];
     y = state[1];
     theta = state[2];
+    time = state[3];
 }
 
 int SE2::State::X() const {
@@ -71,6 +72,9 @@ int SE2::State::Y() const {
 }
 int SE2::State::Theta() const {
     return theta;
+}
+double SE2::State::Time() const {
+    return time;
 }
 
 SE2::~SE2() {
@@ -100,29 +104,24 @@ int SE2::get_or_create_state(
     return get_or_create_state(discrete_state);
 }
 
-int SE2::get_or_create_state(
-    const Eigen::Vector3i& _state) {
-    if (_state.size() != 3) {
+int SE2::get_or_create_state(const Eigen::Vector4d& _state, const bool cont) {
+    if (_state.size() != 4) {
         std::stringstream msg;
-        msg << "vector has incorrect size: expected 3"
+        msg << "vector has incorrect size: expected 4"
             << ", got " << _state.size() << ".\n";
         throw std::runtime_error(msg.str());
     }
-    State discrete_state(_state[0], _state[1], _state[2]);
+
+
+    State discrete_state(_state[0], _state[1], _state[2], _state[3]);
+    // If input state is continuous
+    if (cont) {
+        Eigen::Vector4d state;
+        continuous_state_to_discrete(_state, &state);
+        discrete_state = State(state[0], state[1], state[2], state[3]);
+    }
+
     return get_or_create_state(discrete_state);
-}
-
-int SE2::get_or_create_state(const Eigen::Vector3d& _state) {
-    if (_state.size() != 3) {
-        std::stringstream msg;
-        msg << "vector has incorrect size: expected 3"
-            << ", got " << _state.size() << ".\n";
-        throw std::runtime_error(msg.str());
-    }
-
-    Eigen::Vector3i state;
-    continuous_state_to_discrete(_state, &state);
-    return get_or_create_state(state);
 }
 
 void SE2::discrete_state_to_continuous(
@@ -140,21 +139,23 @@ void SE2::discrete_state_to_continuous(
 
 void SE2::discrete_state_to_continuous(
     const StateSpace::State& _state,
-    Eigen::Vector3d* out_state) const {
+    Eigen::Vector4d* out_state) const {
     const State state = static_cast<const State&>(_state);
     out_state->head<2>() =
         discrete_position_to_continuous(Eigen::Vector2i(state.x, state.y));
     (*out_state)[2] =
         discrete_angle_to_continuous(state.theta);
+    (*out_state)[3] = state.time;
 }
 
 void SE2::continuous_state_to_discrete(
-    const Eigen::Vector3d& _state,
-    Eigen::Vector3i* out_state) const {
+    const Eigen::Vector4d& _state,
+    Eigen::Vector4d* out_state) const {
     out_state->head<2>() = 
         continuous_position_to_discrete(Eigen::Vector2d(_state[0], _state[1]));
     (*out_state)[2] =
         continuous_angle_to_discrete(_state[2]);
+    (*out_state)[3] = _state[3];
 }
 
 void SE2::continuous_state_to_discrete(
@@ -163,12 +164,12 @@ void SE2::continuous_state_to_discrete(
     Eigen::VectorXd log_state;
     m_statespace->logMap(&_state, log_state);
 
-    const Eigen::Vector2i position =
+    const Eigen::Vector2d position =
         continuous_position_to_discrete(log_state.head<2>());
     const int theta = continuous_angle_to_discrete(log_state[2]);
 
     State* discrete_state = static_cast<State*>(_discrete_state);
-    *discrete_state = State(position.x(), position.y(), theta);
+    *discrete_state = State(position.x(), position.y(), theta, 0.0);
 }
 
 bool SE2::get_state_id(const StateSpace::State& _state, int* _state_id) const {
@@ -203,14 +204,23 @@ int SE2::size() const {
 double SE2::get_distance(
     const StateSpace::State& _state_1,
     const StateSpace::State& _state_2) const {
-    Eigen::Vector3d s1;
-    discrete_state_to_continuous(_state_1, &s1);
-    Eigen::Vector3d s2;
+    Eigen::Vector4d s1;            
+    discrete_state_to_continuous(_state_1, &s1);    
+    Eigen::Vector4d s2;
     discrete_state_to_continuous(_state_2, &s2);
+   
     const double dx = (s1[0] - s2[0]) * (s1[0] - s2[0]);
     const double dy = (s1[1] - s2[1]) * (s1[1] - s2[1]);
     const double dth = (s1[2] - s2[2]) * (s1[2] - s2[2]);
-    return std::sqrt(dx + dy + dth);
+    const double dist = std::sqrt(dx + dy + dth);
+
+    if (dist < 0) {
+        std::cout << s1[0] << " " << s1[1] << " " << s1[2] << " " << s1[3] << std::endl;
+        std::cout << s2[0] << " " << s2[1] << " " << s2[2] << " " << s2[3] << std::endl;
+        getchar();
+    }
+    
+    return dist;
 }
 
 double SE2::get_distance(
@@ -223,7 +233,7 @@ void SE2::copy_state(
     const StateSpace::State& _source, StateSpace::State* _destination) const {
     const State& source = static_cast<const State&>(_source);
     State* destination = static_cast<State*>(_destination);
-    *destination = State(source.x, source.y, source.theta);
+    *destination = State(source.x, source.y, source.theta, source.time);
 }
 
 double SE2::get_resolution() const { return m_resolution; }
@@ -266,12 +276,14 @@ Eigen::Vector2d SE2::discrete_position_to_continuous(
     return Eigen::Vector2d(x_mm, y_mm);
 }
 
-Eigen::Vector2i SE2::continuous_position_to_discrete(
+Eigen::Vector2d SE2::continuous_position_to_discrete(
     const Eigen::Vector2d& position) const {
     const int x = static_cast<int>(floor(position.x() / m_resolution));
     const int y = static_cast<int>(floor(position.y() / m_resolution));
-    return Eigen::Vector2i(x, y);
+    // std::cout << position.x() << "   " << position.y() << std::endl;
+    return Eigen::Vector2d(x, y);
 }
 
 }  // namespace statespace
 }  // namespace libcozmo
+

@@ -74,30 +74,29 @@ int main(int argc, char* argv[])
     std::map<std::string, double> start;
     nh.getParam("start_pose", start);
     const int start_id = SE2->get_or_create_state(
-        Eigen::Vector3d(start["x_mm"], start["y_mm"], start["theta_rad"]));
+        Eigen::Vector4d(start["x_mm"], start["y_mm"], start["theta_rad"], 0.0), true);
     planner.set_start(start_id);
 
     std::map<std::string, double> goal;
     nh.getParam("goal_pose", goal);
     const int goal_id = SE2->get_or_create_state(
-        Eigen::Vector3d(goal["x_mm"], goal["y_mm"], goal["theta_rad"]));
+        Eigen::Vector4d(goal["x_mm"], goal["y_mm"], goal["theta_rad"], 10.0), true);
     planner.set_goal(goal_id);
 
     std::vector<int> path;
     bool success = planner.solve(&path);
 
-    double t = 0;
     std::vector<libcozmo::Waypoint> waypoints;
     for (const int& state_id : path) {
         const libcozmo::statespace::StateSpace::State* state = SE2->get_state(state_id);
-        Eigen::Vector3d cont_state;
+        Eigen::Vector4d cont_state;
         SE2->discrete_state_to_continuous(*state, &cont_state);
         waypoints.push_back(
             {.x = cont_state[0]/100., 
              .y = cont_state[1]/100., 
              .th = cont_state[2],
-             .t = t});
-        t += 1;
+             .t = cont_state[3]});
+        std::cout << cont_state[0] << " " << cont_state[1] << " " << cont_state[2] << " " << cont_state[3] << std::endl;
     }
 
     std::shared_ptr<Interpolated> traj;

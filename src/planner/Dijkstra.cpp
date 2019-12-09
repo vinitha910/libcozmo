@@ -30,6 +30,7 @@
 #include "planner/Dijkstra.hpp"
 #include <iostream>
 #include <math.h>
+#include <ros/ros.h>
 
 namespace libcozmo {
 namespace planner {
@@ -89,8 +90,9 @@ namespace planner {
             const statespace::StateSpace::State* curr_state =
                 m_state_space->get_state(curr_state_id);
             
-            // const auto s = static_cast<const statespace::SE2::State*>(curr_state);
-            // std::cout << s->X() << " " << s->Y() << std::endl;
+            const auto s = static_cast<const statespace::SE2::State*>(curr_state);
+            // std::cout << "discrete" << std::endl;
+            // std::cout << s->X() << " " << s->Y() << " " << s->Theta() << " " << s->Time() << std::endl;
             // Find successor states to the current state
             std::vector<int> succesor_states;
             get_successors(*curr_state, &succesor_states);
@@ -127,7 +129,8 @@ namespace planner {
         const double dist = m_state_space->get_distance(
             *m_state_space->get_state(curr_state_id),
             *m_state_space->get_state(m_goal_id));
-        // std::cout << dist << std::endl;
+        // ROS_INFO("%d", dist);
+        // getchar();
         return curr_state_id  == m_goal_id || dist <= m_goal_tolerance;
     }
 
@@ -140,9 +143,9 @@ namespace planner {
             const auto action = 
                 static_cast<const actionspace::GenericActionSpace::Action*>(action_);
             
-            Eigen::Vector3d state;
+            Eigen::Vector4d state;
             m_state_space->discrete_state_to_continuous(state_, &state);
-             
+
             // If the speed == 0 and action and current headings are different
             // then rotate in place
             if (action->m_speed == 0.0 && state[2] != action->m_heading) {
@@ -164,9 +167,18 @@ namespace planner {
                 state[1] = state[1] + dy;
             }
 
-            Eigen::Vector3i discrete_state;
+            state[3] = state[3] + action->m_duration;
+
+            // std::cout << state[0] << " " << state[1] << " " << state[2] << " " << state[3] << std::endl;
+            // getchar();
+
+            Eigen::Vector4d discrete_state;
             m_state_space->continuous_state_to_discrete(state, &discrete_state);
-            succesors->push_back(m_state_space->get_or_create_state(discrete_state));
+            if (discrete_state.head<3>() == state_.vector().head<3>()) {
+                continue;
+            }
+            // std::cout << "not same" << std::endl;
+            succesors->push_back(m_state_space->get_or_create_state(state, true));
         }
     }
 

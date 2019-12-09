@@ -8,7 +8,7 @@
 
 	<group ns="group2">  
 		<rosparam command="load" file="$(find libcozmo)/scenarios/robot_2.yaml"/>
-		<node pkg="libcozmo" type="planner" name="planner" args="$(arg meshes)"/>
+		<node pkg="libcozmo" type="planner" name="planner" output="screen" args="$(arg meshes)"/>
 	</group>
 
 </launch>
