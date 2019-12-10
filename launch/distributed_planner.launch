@@ -11,4 +11,8 @@
 		<node pkg="libcozmo" type="planner" name="planner" output="screen" args="$(arg meshes)"/>
 	</group>
 
+	<group ns="group3">  
+		<rosparam command="load" file="$(find libcozmo)/scenarios/robot_3.yaml"/>
+		<node pkg="libcozmo" type="planner" name="planner" output="screen" args="$(arg meshes)"/>
+	</group>
 </launch>

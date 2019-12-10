@@ -1,0 +1,4 @@
+nav_msgs/Path path
+uint64 sender_priority
+---
+uint64 receiver_priority

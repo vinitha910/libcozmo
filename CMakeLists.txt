@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp 
   pybind11_catkin 
   std_msgs 
+  nav_msgs
   message_generation 
   geometry_msgs 
 )
@@ -27,9 +28,15 @@ add_message_files(
   ForkLift.msg
 )
 
+add_service_files(
+  FILES
+  GetTrajectory.srv
+)
+
 generate_messages(
   DEPENDENCIES
   std_msgs
+  nav_msgs
 )
 
 catkin_package(
