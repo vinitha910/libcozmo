@@ -31,6 +31,7 @@ add_message_files(
 add_service_files(
   FILES
   GetTrajectory.srv
+  Done.srv
 )
 
 generate_messages(

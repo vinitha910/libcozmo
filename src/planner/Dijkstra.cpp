@@ -129,7 +129,7 @@ namespace planner {
         const double dist = m_state_space->get_distance(
             *m_state_space->get_state(curr_state_id),
             *m_state_space->get_state(m_goal_id));
-        // ROS_INFO("%d", dist);
+        // std::cout << dist << std::endl;
         // getchar();
         return curr_state_id  == m_goal_id || dist <= m_goal_tolerance;
     }
@@ -178,7 +178,9 @@ namespace planner {
                 continue;
             }
             // std::cout << "not same" << std::endl;
-            succesors->push_back(m_state_space->get_or_create_state(state, true));
+            const int succ_id = m_state_space->get_or_create_state(state, true);
+            if (m_state_space->is_valid_state((*m_state_space->get_state(succ_id)))) 
+                succesors->push_back(succ_id);
         }
     }
 

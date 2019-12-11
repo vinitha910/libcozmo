@@ -31,6 +31,7 @@
 #include <assert.h>
 #include <cmath>
 #include <iostream>
+#include <ros/ros.h>
 
 namespace libcozmo {
 namespace statespace {
@@ -189,11 +190,42 @@ StateSpace::State* SE2::get_state(const int& _state_id) const {
     return m_state_map[_state_id];
 }
 
+void SE2::update_obstacle_map(
+    const std::unordered_map<double, std::vector<std::pair<int, int>>>& obs_map) {
+    m_obs_map = obs_map;
+    for (int i = 0; i < m_state_map.size(); ++i) {
+        delete(m_state_map[i]);
+    }
+    m_state_map.clear();
+    m_state_to_id_map.clear();
+}
+
 bool SE2::is_valid_state(const StateSpace::State& _state) const {
     const State& state = static_cast<const State&>(_state);
+
+    const auto obs_iter = m_obs_map.find(state.Time());
+    if (obs_iter != m_obs_map.end()) {
+        Eigen::Vector4d s;            
+        discrete_state_to_continuous(_state, &s);
+
+        for (const auto pt : obs_iter->second) {
+            const double x = pt.first;
+            const double dx = (s.x() - x) * (s.x() - x);
+            const double y = pt.second;
+            const double dy = (s.y() - y) * (s.y() - y);
+            // std::cout << std::sqrt(dx + dy) << std::endl;
+            if (std::sqrt(dx + dy) <= 12) {
+                // ROS_INFO("(%.2f, %.2f) in collision with (%.2f, %.2f)", s.x(), s.y(), x, y);
+                // getchar();
+                // std::cout << "collision " << s.x() << " " << s.y() << std::endl;
+                return false;
+            }
+        }
+    }
     if (!(state.theta >= 0 && state.theta < m_num_theta_vals)) {
         return false;
     }
+    
     return true;
 }
 

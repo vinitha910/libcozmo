@@ -94,6 +94,9 @@ class StateSpace {
     /// \return Pointer to the discrete state
     virtual State* get_state(const int& _state_id) const = 0;
 
+    virtual void update_obstacle_map(
+        const std::unordered_map<double, std::vector<std::pair<int, int>>>& obs_map) = 0;
+
     /// Checks if the given state is a valid state; validity of state varies
     /// based on state type
     ///

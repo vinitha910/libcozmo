@@ -133,6 +133,9 @@ class SE2 : public virtual StateSpace {
     /// Documentation inherited
     StateSpace::State* get_state(const int& _state_id) const override;
 
+    void update_obstacle_map(
+        const std::unordered_map<double, std::vector<std::pair<int, int>>>& obs_map) override;
+
     /// Documentation inherited
     /// State is valid if theta is in [0, num_theta_vals]
     bool is_valid_state(const StateSpace::State& _state) const override;
@@ -216,6 +219,8 @@ class SE2 : public virtual StateSpace {
 
     /// Resolution of environment (mm)
     const double m_resolution;
+
+    std::unordered_map<double, std::vector<std::pair<int, int>>> m_obs_map;
 
     std::shared_ptr<aikido::statespace::SE2> m_statespace;
     aikido::distance::SE2 m_distance_metric;

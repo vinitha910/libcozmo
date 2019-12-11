@@ -1,0 +1,10 @@
+priority: 5
+start_pose:
+    x_mm:  75.0
+    y_mm:  75.0
+    theta_rad: 1.57
+
+goal_pose:
+    x_mm:  25.0
+    y_mm:  25.0
+    theta_rad: 0.0

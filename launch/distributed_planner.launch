@@ -1,6 +1,8 @@
 <launch>
 	<arg name="meshes" default="$(find libcozmo)/src/cozmo_description/meshes"/>
-	
+	<arg unless="$(arg debug)" name="launch-prefix" value=""/>
+    <arg     if="$(arg debug)" name="launch-prefix" value="gdb -ex run --args"/>
+
 	<group ns="group1">  
 		<rosparam command="load" file="$(find libcozmo)/scenarios/robot_1.yaml"/>
 		<node pkg="libcozmo" type="planner" name="planner" output="screen" args="$(arg meshes)"/>
@@ -14,5 +16,15 @@
 	<group ns="group3">  
 		<rosparam command="load" file="$(find libcozmo)/scenarios/robot_3.yaml"/>
 		<node pkg="libcozmo" type="planner" name="planner" output="screen" args="$(arg meshes)"/>
+	</group>
+
+	<group ns="group4">  
+		<rosparam command="load" file="$(find libcozmo)/scenarios/robot_4.yaml"/>
+		<node pkg="libcozmo" type="planner" name="planner" output="screen" args="$(arg meshes)"/>
+	</group>
+
+	<group ns="group5">  
+		<rosparam command="load" file="$(find libcozmo)/scenarios/robot_5.yaml"/>
+		<node pkg="libcozmo" type="planner" name="planner" required="true" clear_params="true" launch-prefix="$(arg launch-prefix)" output="screen" args="$(arg meshes)"/>
 	</group>
 </launch>
