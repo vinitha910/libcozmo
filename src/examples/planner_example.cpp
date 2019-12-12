@@ -40,6 +40,9 @@ std::vector<int> dependency_list;
 std::vector<std::shared_ptr<Interpolated>> path_cache;
 int priority;
 
+int num_collisions = 0;
+int num_messages = 0;
+
 Eigen::Vector2d transform_spheres(
     Eigen::Vector3d& robot_pose, Eigen::Vector4d& sphere_pose)
 {
@@ -110,6 +113,7 @@ bool collision_check(const std::shared_ptr<Interpolated> path) {
             
             if (collision(s1, s2)) {
                 in_collision = true;
+                num_collisions += 1;
                 // std::cout << "Collision at " << s1.x()*100 << " " << s1.y()*100 << " " << s1[2] << " " << time << std::endl;
             }
         }    
@@ -234,13 +238,7 @@ bool send_traj(ros::ServiceClient client, const nav_msgs::Path& path)
     }
     ROS_INFO("Trajectory received by robot #%i", srv.response.receiver_priority);
 
-    // if (client.call(srv)) {
-    //     ROS_INFO("Trajectory received by robot #%i", srv.response.receiver_priority);
-    // } else { 
-    //     ROS_INFO("Robot #%i failed to send trajectory", priority);
-    //     return false;
-    // }
-
+    num_messages += 1;
     return true;
 }
 
@@ -254,13 +252,6 @@ bool send_complete(ros::ServiceClient client)
         sent = client.call(srv);
     }
     ROS_INFO("Robot #%i's complete message received by %i", priority, srv.response.receiver_priority);
-
-    // if (sent) {
-    //     ROS_INFO("Robot #%i's complete message received by %i", priority, srv.response.receiver_priority);
-    // } else { 
-    //     ROS_INFO("Robot #%i failed to send complete message", priority);
-    //     return false;
-    // }
 
     return true;
 }
@@ -333,7 +324,7 @@ int main(int argc, char* argv[])
     
     nh.getParam("priority", priority);
 
-    const int num_robots = 5;
+    const int num_robots = 15;
 
     for (int i = 1; i <= num_robots; ++i) {
         if (i == priority) continue;
@@ -359,15 +350,15 @@ int main(int argc, char* argv[])
         }
     }
 
-    std::cout << "Starting viewer. Please subscribe to the '" << topicName
-        << "' InteractiveMarker topic in RViz." << std::endl;
+    // std::cout << "Starting viewer. Please subscribe to the '" << topicName
+    //     << "' InteractiveMarker topic in RViz." << std::endl;
 
-    aikido::rviz::InteractiveMarkerViewer viewer(topicName, baseFrameName);
+    // aikido::rviz::InteractiveMarkerViewer viewer(topicName, baseFrameName);
 
     const std::string mesh_dir = argv[1];
     libcozmo::Cozmo cozmo = libcozmo::Cozmo(mesh_dir);
-    viewer.addSkeletonMarker(cozmo.getCozmoSkeleton());
-    viewer.setAutoUpdate(true);
+    // viewer.addSkeletonMarker(cozmo.getCozmoSkeleton());
+    // viewer.setAutoUpdate(true);
 
     auto GAS =
         std::make_shared<libcozmo::actionspace::GenericActionSpace>(
@@ -416,9 +407,11 @@ int main(int argc, char* argv[])
     }
 
     // traj = cozmo.createInterpolatedTraj(waypoints);
-    std::chrono::milliseconds period(2);
-    cozmo.executeTrajectory(period, traj);
+    // std::chrono::milliseconds period(2);
+    // cozmo.executeTrajectory(period, traj);
     
-    ros::spin();
+    // std::cout << "Collisions: " << num_collisions << std::endl;
+    // std::cout << "Num messages: " << num_messages << std::endl;
+    // ros::spin();
     return 0;
 }

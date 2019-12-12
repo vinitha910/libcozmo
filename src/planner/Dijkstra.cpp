@@ -96,13 +96,15 @@ namespace planner {
             // Find successor states to the current state
             std::vector<int> succesor_states;
             get_successors(*curr_state, &succesor_states);
+            const auto goal_state = m_state_space->get_state(m_goal_id);
             for (int i = 0; i < succesor_states.size(); i++) {
                 const int successor_id = succesor_states[i];
                 const auto succesor_state = m_state_space->get_state(successor_id);
                 const double new_cost = costmap[curr_state_id] +
                     m_state_space->get_distance(
-                        *curr_state,
-                        *succesor_state);
+                        *curr_state, *succesor_state) + 
+                    50.0*m_state_space->get_distance(
+                        *succesor_state, *goal_state);
 
                 // Update the cost map if a successor state has not been
                 // explored before, or if it has lower cost than previously
@@ -121,6 +123,7 @@ namespace planner {
                 }
             }
         }
+        ROS_INFO("No path found");
         // If all possible states are explored with no solution, return false
         return false;
     }

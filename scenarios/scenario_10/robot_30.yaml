@@ -1,0 +1,9 @@
+goal_pose:
+  theta_rad: 3.0031872639350867
+  x_mm: 271
+  y_mm: 285
+priority: 30
+start_pose:
+  theta_rad: 2.6802113091671886
+  x_mm: 386
+  y_mm: 269

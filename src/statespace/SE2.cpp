@@ -203,11 +203,19 @@ void SE2::update_obstacle_map(
 bool SE2::is_valid_state(const StateSpace::State& _state) const {
     const State& state = static_cast<const State&>(_state);
 
+    Eigen::Vector4d s;            
+    discrete_state_to_continuous(_state, &s);
+
+    int min_x = 0;
+    int max_x = 1000;
+    int min_y = 0;
+    int max_y = 1000;
+
+    if (s.x() < min_x || s.x() > max_x || s.y() < min_y || s.y() > max_y) 
+        return false;
+
     const auto obs_iter = m_obs_map.find(state.Time());
     if (obs_iter != m_obs_map.end()) {
-        Eigen::Vector4d s;            
-        discrete_state_to_continuous(_state, &s);
-
         for (const auto pt : obs_iter->second) {
             const double x = pt.first;
             const double dx = (s.x() - x) * (s.x() - x);

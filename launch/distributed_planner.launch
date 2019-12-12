@@ -1,30 +1,86 @@
 <launch>
 	<arg name="meshes" default="$(find libcozmo)/src/cozmo_description/meshes"/>
+	<arg name="scenario_num" default="1"/>
 	<arg unless="$(arg debug)" name="launch-prefix" value=""/>
     <arg     if="$(arg debug)" name="launch-prefix" value="gdb -ex run --args"/>
 
 	<group ns="group1">  
-		<rosparam command="load" file="$(find libcozmo)/scenarios/robot_1.yaml"/>
+		<rosparam command="load" file="$(find libcozmo)/scenarios/scenario_$(arg scenario_num)/robot_1.yaml"/>
 		<node pkg="libcozmo" type="planner" name="planner" output="screen" args="$(arg meshes)"/>
 	</group>
 
 	<group ns="group2">  
-		<rosparam command="load" file="$(find libcozmo)/scenarios/robot_2.yaml"/>
+		<rosparam command="load" file="$(find libcozmo)/scenarios/scenario_$(arg scenario_num)/robot_2.yaml"/>
 		<node pkg="libcozmo" type="planner" name="planner" output="screen" args="$(arg meshes)"/>
 	</group>
 
 	<group ns="group3">  
-		<rosparam command="load" file="$(find libcozmo)/scenarios/robot_3.yaml"/>
+		<rosparam command="load" file="$(find libcozmo)/scenarios/scenario_$(arg scenario_num)/robot_3.yaml"/>
 		<node pkg="libcozmo" type="planner" name="planner" output="screen" args="$(arg meshes)"/>
 	</group>
 
 	<group ns="group4">  
-		<rosparam command="load" file="$(find libcozmo)/scenarios/robot_4.yaml"/>
+		<rosparam command="load" file="$(find libcozmo)/scenarios/scenario_$(arg scenario_num)/robot_4.yaml"/>
 		<node pkg="libcozmo" type="planner" name="planner" output="screen" args="$(arg meshes)"/>
 	</group>
 
 	<group ns="group5">  
-		<rosparam command="load" file="$(find libcozmo)/scenarios/robot_5.yaml"/>
-		<node pkg="libcozmo" type="planner" name="planner" required="true" clear_params="true" launch-prefix="$(arg launch-prefix)" output="screen" args="$(arg meshes)"/>
+		<rosparam command="load" file="$(find libcozmo)/scenarios/scenario_$(arg scenario_num)/robot_5.yaml"/>
+		<node pkg="libcozmo" type="planner" name="planner" output="screen" args="$(arg meshes)"/>
 	</group>
+
+	<group ns="group6">  
+		<rosparam command="load" file="$(find libcozmo)/scenarios/scenario_$(arg scenario_num)/robot_6.yaml"/>
+		<node pkg="libcozmo" type="planner" name="planner" output="screen" args="$(arg meshes)"/>
+	</group>
+
+	<group ns="group7">  
+		<rosparam command="load" file="$(find libcozmo)/scenarios/scenario_$(arg scenario_num)/robot_7.yaml"/>
+		<node pkg="libcozmo" type="planner" name="planner" output="screen" args="$(arg meshes)"/>
+	</group>
+
+	<group ns="group8">  
+		<rosparam command="load" file="$(find libcozmo)/scenarios/scenario_$(arg scenario_num)/robot_8.yaml"/>
+		<node pkg="libcozmo" type="planner" name="planner" output="screen" args="$(arg meshes)"/>
+	</group>
+
+	<group ns="group9">  
+		<rosparam command="load" file="$(find libcozmo)/scenarios/scenario_$(arg scenario_num)/robot_9.yaml"/>
+		<node pkg="libcozmo" type="planner" name="planner" output="screen" args="$(arg meshes)"/>
+	</group>
+
+	<group ns="group10">  
+		<rosparam command="load" file="$(find libcozmo)/scenarios/scenario_$(arg scenario_num)/robot_10.yaml"/>
+		<node pkg="libcozmo" type="planner" name="planner" output="screen" args="$(arg meshes)"/>
+	</group>
+
+	<group ns="group11">  
+		<rosparam command="load" file="$(find libcozmo)/scenarios/scenario_$(arg scenario_num)/robot_11.yaml"/>
+		<node pkg="libcozmo" type="planner" name="planner" output="screen" args="$(arg meshes)"/>
+	</group>
+
+	<group ns="group12">  
+		<rosparam command="load" file="$(find libcozmo)/scenarios/scenario_$(arg scenario_num)/robot_12.yaml"/>
+		<node pkg="libcozmo" type="planner" name="planner" output="screen" args="$(arg meshes)"/>
+	</group>
+
+	<group ns="group13">  
+		<rosparam command="load" file="$(find libcozmo)/scenarios/scenario_$(arg scenario_num)/robot_13.yaml"/>
+		<node pkg="libcozmo" type="planner" name="planner" output="screen" args="$(arg meshes)"/>
+	</group>
+
+	<group ns="group14">  
+		<rosparam command="load" file="$(find libcozmo)/scenarios/scenario_$(arg scenario_num)/robot_14.yaml"/>
+		<node pkg="libcozmo" type="planner" name="planner" output="screen" args="$(arg meshes)"/>
+	</group>
+
+	<group ns="group15">  
+		<rosparam command="load" file="$(find libcozmo)/scenarios/scenario_$(arg scenario_num)/robot_15.yaml"/>
+		<node pkg="libcozmo" type="planner" name="planner" output="screen" args="$(arg meshes)"/>
+	</group>
+	
+	<!-- <group ns="group5">  
+		<rosparam command="load" file="$(find libcozmo)/scenarios/robot_5.yaml"/>
+		<node pkg="libcozmo" type="planner" name="planner" required="true" clear_params="true" launch-prefix="$(arg launch-prefix)" args="$(arg meshes)"/>
+	</group> -->
 </launch>
