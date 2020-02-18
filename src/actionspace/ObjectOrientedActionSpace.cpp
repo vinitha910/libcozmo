@@ -28,9 +28,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "actionspace/ObjectOrientedActionSpace.hpp"
+#include <iostream>
 #include "statespace/SE2.hpp"
 #include "utils/utils.hpp"
-#include <iostream>
 
 namespace libcozmo {
 namespace actionspace {
@@ -204,15 +204,18 @@ bool ObjectOrientedActionSpace::get_generic_to_object_oriented_action(
     // (Heading of Pi / 2) represents left of the object
     const double clockwise_headings =
         (heading_offset == FRONT || heading_offset == BACK) ? 1 : -1;
-    const double heading = utils::angle_normalization(orientation + heading_offset);
+    const double heading =
+        utils::angle_normalization(orientation + heading_offset);
 
     *action = CozmoAction(
         generic_action->speed(),
         Eigen::Vector3d(
             position.x() - center_offset * cos(heading) * clockwise_headings +
-                generic_action->edge_offset() * max_edge_offset * sin(heading) * clockwise_headings,
+                generic_action->edge_offset() * max_edge_offset * sin(heading) *
+                clockwise_headings,
             position.y() - center_offset * sin(heading) * clockwise_headings -
-                generic_action->edge_offset() * max_edge_offset * cos(heading) * clockwise_headings,
+                generic_action->edge_offset() * max_edge_offset * cos(heading) *
+                clockwise_headings,
             heading));
 
     return true;
