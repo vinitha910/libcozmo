@@ -22,6 +22,20 @@ class RectangularCuboid(object):
         self.width = side_length
         self.height = side_length
 
+        self.cube_marker = Marker()
+        self.cube_marker.header.frame_id = "base_link"
+        self.cube_marker.type = Marker.CUBE
+
+        color=(0, 0.5, 0.5, 1)
+        
+        self.cube_marker.scale.x = self.width / 1000
+        self.cube_marker.scale.y = self.length / 1000
+        self.cube_marker.scale.z = self.width / 1000
+        self.cube_marker.color.r = color[0]
+        self.cube_marker.color.g = color[1]
+        self.cube_marker.color.b = color[2]
+        self.cube_marker.color.a = color[3]
+
     def update_object(self, cubes):
         """
         Updates the object's pose given the cubes
@@ -53,29 +67,17 @@ class RectangularCuboid(object):
         color : tuple
             (r, g, b, a) to represent the color of the cube
         """
-        cube_marker = Marker()
-        cube_marker.header.frame_id = "base_link"
-        cube_marker.type = Marker.CUBE
-
-        cube_marker.pose.position.x = self.pose[0] / 1000
-        cube_marker.pose.position.y = self.pose[1] / 1000
-        cube_marker.pose.position.z = self.height / 1000
+        self.cube_marker.pose.position.x = self.pose[0] / 1000
+        self.cube_marker.pose.position.y = self.pose[1] / 1000
+        self.cube_marker.pose.position.z = self.height / 1000
 
         cube_orientation = angle_z_to_quaternion(radians(self.pose[2]))
-        cube_marker.pose.orientation.x = cube_orientation[1]
-        cube_marker.pose.orientation.y = cube_orientation[2]
-        cube_marker.pose.orientation.z = cube_orientation[3]
-        cube_marker.pose.orientation.w = cube_orientation[0]
+        self.cube_marker.pose.orientation.x = cube_orientation[1]
+        self.cube_marker.pose.orientation.y = cube_orientation[2]
+        self.cube_marker.pose.orientation.z = cube_orientation[3]
+        self.cube_marker.pose.orientation.w = cube_orientation[0]
 
-        cube_marker.scale.x = self.width / 1000
-        cube_marker.scale.y = self.length / 1000
-        cube_marker.scale.z = self.width / 1000
-        cube_marker.color.r = color[0]
-        cube_marker.color.g = color[1]
-        cube_marker.color.b = color[2]
-        cube_marker.color.a = color[3]
-
-        publisher.publish(cube_marker)
+        publisher.publish(self.cube_marker)
 
     def __str__(self):
         return "Pose: %s, Length: %s, Width: %s" % \
