@@ -28,7 +28,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "actionspace/ObjectOrientedActionSpace.hpp"
-#include <iostream>
 #include "statespace/SE2.hpp"
 #include "utils/utils.hpp"
 
