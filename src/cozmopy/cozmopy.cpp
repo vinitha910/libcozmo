@@ -105,11 +105,6 @@ PYBIND11_MODULE(cozmopy, m) {
                 action_id, _state, &action);
             return action;
         })
-        .def("publish_action",
-            &actionspace::ObjectOrientedActionSpace::publish_action,
-            py::arg("action_id"),
-            py::arg("publisher"),
-            py::arg("_state"))
         .def("size", &actionspace::ObjectOrientedActionSpace::size);
 
         py::class_<actionspace::ObjectOrientedActionSpace::Action>(m, "Action")
