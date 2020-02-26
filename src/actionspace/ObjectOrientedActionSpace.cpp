@@ -122,21 +122,19 @@ ObjectOrientedActionSpace::ObjectOrientedActionSpace(
     const std::vector<double> sides{FRONT, LEFT, BACK, RIGHT};
     for (const auto& heading_offset : sides) {
         const double ratio =
-            object_side_lambda(heading_offset) ? m_ratios[1] : m_ratios[0];
+            object_side_lambda(heading_offset) ? m_ratios[0] : m_ratios[1];
         const double max_edge_offset =
             object_side_lambda(heading_offset) ?
                 m_max_edge_offsets.x() : m_max_edge_offsets.y();
         const std::vector<double> edge_offsets =
             object_side_lambda(heading_offset) ?
                 x_edge_offsets : y_edge_offsets;
-        const double offset_sign =
-            (heading_offset == FRONT || heading_offset == LEFT) ? 1 : -1;
 
         for (const auto& edge_offset : edge_offsets) {
             for (const auto& speed : speeds) {
                 m_actions.push_back(new Action(
                     speed,
-                    offset_sign * edge_offset / max_edge_offset,
+                    edge_offset / max_edge_offset,
                     ratio,
                     heading_offset));
                 action_id++;
@@ -201,19 +199,23 @@ bool ObjectOrientedActionSpace::get_generic_to_object_oriented_action(
     const double center_offset =
         (heading_offset == FRONT || heading_offset == BACK) ?
             m_center_offsets.x() : m_center_offsets.y();
-    const double offset_sign =
-            (heading_offset == FRONT || heading_offset == LEFT) ? 1 : -1;
+    // Allows heading angles to represent sides of the object in clockwise order
+    // (Heading of Pi / 2) represents left of the object
+    const double clockwise_headings =
+        (heading_offset == FRONT || heading_offset == BACK) ? 1 : -1;
+    const double heading =
+        utils::angle_normalization(orientation + heading_offset);
 
     *action = CozmoAction(
         generic_action->speed(),
         Eigen::Vector3d(
-            position.x() - center_offset * cos(orientation) +
-                offset_sign * generic_action->edge_offset() *
-                    max_edge_offset * sin(orientation),
-            position.y() - center_offset * sin(orientation) +
-                offset_sign * generic_action->edge_offset() *
-                    max_edge_offset * cos(orientation),
-            utils::angle_normalization(orientation + heading_offset)));
+            position.x() - center_offset * cos(heading) * clockwise_headings +
+                generic_action->edge_offset() * max_edge_offset * sin(heading) *
+                clockwise_headings,
+            position.y() - center_offset * sin(heading) * clockwise_headings -
+                generic_action->edge_offset() * max_edge_offset * cos(heading) *
+                clockwise_headings,
+            heading));
 
     return true;
 }

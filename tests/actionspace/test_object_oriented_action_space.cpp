@@ -78,8 +78,8 @@ TEST_F(OOActionSpaceFixture, ActionSimilarityTest) {
     ASSERT_FALSE(result);
 }
 
-/// Check that actions on opposite sides of the object have the same speed and
-/// aspect ratio but opposite edge offsets and heading offsets that differ by pi
+/// Check that actions on opposite sides of the object have the same speed,
+/// aspect ratio, and edge offset but heading offsets that differ by pi
 TEST_F(OOActionSpaceFixture, UniqueActionTest) {
     for (int i = 0; i < m_actionspace.size()/2; ++i) {
         const auto action1 =
@@ -95,7 +95,7 @@ TEST_F(OOActionSpaceFixture, UniqueActionTest) {
 
         EXPECT_EQ(action1->speed(), action2->speed());
         EXPECT_EQ(action1->aspect_ratio(), action2->aspect_ratio());
-        EXPECT_EQ(action1->edge_offset(), -1*action2->edge_offset());
+        EXPECT_EQ(action1->edge_offset(), action2->edge_offset());
         EXPECT_EQ(action1->heading_offset(), action2->heading_offset() - M_PI);
     }
 }
@@ -109,7 +109,7 @@ TEST_F(OOActionSpaceFixture, ActionGenerationTest) {
     EXPECT_EQ(2.5, action->speed());
     EXPECT_NEAR(0, action->heading_offset(), 0.001);
     EXPECT_EQ(-0.5, action->edge_offset());
-    EXPECT_NEAR(1.1, action->aspect_ratio(), 0.01);
+    EXPECT_NEAR(4, action->aspect_ratio(), 0.01);
 
     // Tests nullptr action
     action = static_cast<
@@ -126,16 +126,16 @@ TEST_F(OOActionSpaceFixture, GetObjectOrientedActionTest) {
         object_state,
         &action);
     EXPECT_NEAR(action.start_pose().x(), 8.989592, 0.001);
-    EXPECT_NEAR(action.start_pose().y(), 8.989592, 0.001);
+    EXPECT_NEAR(action.start_pose().y(), 12.525126, 0.001);
     EXPECT_NEAR(action.start_pose().z(), M_PI/4, 0.001);
 
     m_actionspace.get_generic_to_object_oriented_action(
-        40,
+        47,
         object_state,
         &action);
-    EXPECT_NEAR(action.start_pose().x(), 12.52512, 0.001);
-    EXPECT_NEAR(action.start_pose().y(), 12.52512, 0.001);
-    EXPECT_NEAR(action.start_pose().z(), M_PI + M_PI/4, 0.001);
+    EXPECT_NEAR(action.start_pose().x(), 15.70710, 0.001);
+    EXPECT_NEAR(action.start_pose().y(), 11.32304, 0.001);
+    EXPECT_NEAR(action.start_pose().z(), 3 * M_PI/2 + M_PI/4, 0.001);
 }
 
 TEST_F(OOActionSpaceFixture, ActionVectorTest) {
@@ -146,7 +146,7 @@ TEST_F(OOActionSpaceFixture, ActionVectorTest) {
             m_actionspace.get_action(4));
     Eigen::VectorXd action_vector = action->vector();
     EXPECT_NEAR(2.5, action_vector[0], 0.00001);
-    EXPECT_NEAR(1.1, action_vector[1], 0.00001);
+    EXPECT_NEAR(4, action_vector[1], 0.00001);
     EXPECT_NEAR(-0.5, action_vector[2], 0.00001);
     EXPECT_NEAR(0, action_vector[3], 0.00001);
 }
