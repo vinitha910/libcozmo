@@ -40,6 +40,9 @@ class StateSpace {
     /// Base class for all discrete states
     class State;
 
+    /// Base class for all continuous states
+    class ContinuousState;
+
     /// Checks if given (discrete) state exists in the statespace; if not,
     /// creates and adds the state to the statespace
     ///
@@ -186,6 +189,31 @@ class StateSpace::State {
     State() = default;
 
     ~State() = default;
+};
+
+class StateSpace::ContinuousState {
+	/// Convert state to its vector representation
+	///
+	/// \return Output state vector
+    virtual Eigen::VectorXd vector() const = 0;
+
+    /// Converts state value given vector representation
+    /// Throws an exception if the state vector size is incorrect; allowed
+    /// vector size depends on derived class
+    ///
+    /// \param state State vector
+    virtual void from_vector(const Eigen::VectorXd& state) = 0;
+
+    /// Converts vector representation to its continuous state value
+    /// virtual void to_vector(const ContinuousState& state) = 0;
+
+    /// Equality operator
+    virtual bool operator== (const ContinuousState& state) const = 0;
+ protected:
+    // This is a base class that should only only be used in derived classes.
+    ContinuousState() = default;
+
+    ~ContinuousState() = default;
 };
 
 }  // namespace statespace

@@ -73,6 +73,53 @@ int SE2::State::Theta() const {
     return theta;
 }
 
+SE2::ContinuousState::ContinuousState(
+        const double& x, const double& y, const double& theta) : \
+    x(x), y(y), theta(theta) {}
+
+bool SE2::ContinuousState::operator== (const StateSpace::ContinuousState& state) const {
+    auto state_ = static_cast<const ContinuousState&>(state);
+    return x == state_.x && y == state_.y && theta == state_.theta;
+}
+
+Eigen::VectorXd SE2::ContinuousState::vector() const {
+    Eigen::VectorXd state_vector(3);
+    state_vector << x, y, theta;
+    return state_vector;
+}
+
+void SE2::ContinuousState::from_vector(const Eigen::VectorXd& state) {
+    if (state.size() != 3) {
+        std::stringstream msg;
+        msg << "state has incorrect size: expected 3"
+            << ", got " << state.size() << ".\n";
+        throw std::runtime_error(msg.str());
+    }
+
+    x = state[0];
+    y = state[1];
+    theta = state[2];
+}
+
+/*
+void SE2::ContinuousState::to_vector(const StateSpace::ContinuousState & state) {
+    Eigen::VectorXd state_vector(3);
+    state_vector << state.X(), state.Y(), state.Theta();
+    return state_vector;
+}*/
+
+double SE2::ContinuousState::X() const {
+    return x;
+}
+
+double SE2::ContinuousState::Y() const {
+    return y;
+}
+
+double SE2::ContinuousState::Theta() const {
+    return theta;
+}
+
 SE2::~SE2() {
     for (int i = 0; i < m_state_map.size(); ++i) {
         delete(m_state_map[i]);

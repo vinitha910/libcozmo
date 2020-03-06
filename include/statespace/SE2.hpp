@@ -86,6 +86,50 @@ class SE2 : public virtual StateSpace {
         friend class SE2;
     };
 
+    class ContinuousState : public StateSpace::ContinuousState {
+     public:
+        /// Constructs identity state
+        ContinuousState() : x(0), y(0), theta(0) {}
+
+        ~ContinuousState() = default;
+
+        /// Constructs state with given parameters
+        explicit ContinuousState(const double& x, const double& y, const double& theta);
+
+        /// Documentation Inherited
+        /// Vector in format [x, y, theta]
+        void from_vector(const Eigen::VectorXd& state);
+
+        /// Documentation Inherited
+        /// void to_vector(const StateSpace::ContinuousState& state);
+        
+        /// Documentation Inherited
+        bool operator== (const StateSpace::ContinuousState& state) const override;
+
+        /// Custom state hash
+        friend std::size_t hash_value(const ContinuousState& state) {
+            std::size_t seed = 0;
+            boost::hash_combine(seed, boost::hash_value(state.x));
+            boost::hash_combine(seed, boost::hash_value(state.y));
+            boost::hash_combine(seed, boost::hash_value(state.theta));
+            return seed;
+        }
+
+        double X() const;
+        double Y() const;
+        double Theta() const;
+
+        /// Documentation Inherited
+        Eigen::VectorXd vector() const override;
+
+        private:
+            double x;
+            double y;
+            double theta;
+
+            friend class SE2;
+    };
+
     /// Constructs a discretized SE2 state space
     ///
     /// \param resolution_m Resolution of the environment (mm)
