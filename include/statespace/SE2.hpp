@@ -94,7 +94,10 @@ class SE2 : public virtual StateSpace {
         ~ContinuousState() = default;
 
         /// Constructs state with given parameters
-        explicit ContinuousState(const double& x, const double& y, const double& theta);
+        explicit ContinuousState(
+            const double& x,
+            const double& y,
+            const double& theta);
 
         /// Documentation Inherited
         /// Vector in format [x, y, theta]
@@ -104,7 +107,8 @@ class SE2 : public virtual StateSpace {
         /// void to_vector(const StateSpace::ContinuousState& state);
         
         /// Documentation Inherited
-        bool operator== (const StateSpace::ContinuousState& state) const override;
+        bool operator== (
+            const StateSpace::ContinuousState& state) const override;
 
         /// Custom state hash
         friend std::size_t hash_value(const ContinuousState& state) {

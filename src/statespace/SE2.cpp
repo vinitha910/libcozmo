@@ -77,9 +77,12 @@ SE2::ContinuousState::ContinuousState(
         const double& x, const double& y, const double& theta) : \
     x_mm(x), y_mm(y), theta_rad(theta) {}
 
-bool SE2::ContinuousState::operator== (const StateSpace::ContinuousState& state) const {
+bool SE2::ContinuousState::operator== (
+        const StateSpace::ContinuousState& state) const {
     auto state_ = static_cast<const ContinuousState&>(state);
-    return x_mm == state_.x_mm && y_mm == state_.y_mm && theta_rad == state_.theta_rad;
+    return x_mm == state_.x_mm && 
+           y_mm == state_.y_mm && 
+           theta_rad == state_.theta_rad;
 }
 
 Eigen::VectorXd SE2::ContinuousState::vector() const {
@@ -171,7 +174,8 @@ void SE2::continuous_state_to_discrete(
     StateSpace::State* _discrete_state) const {
     const ContinuousState state = static_cast<const ContinuousState&>(_state);
     const Eigen::Vector2i position =
-        continuous_position_to_discrete(Eigen::Vector2d(state.x_mm, state.y_mm));
+        continuous_position_to_discrete(
+        Eigen::Vector2d(state.x_mm, state.y_mm));
     const int theta = continuous_angle_to_discrete(state.theta_rad);
 
     State* discrete_state = static_cast<State*>(_discrete_state);
