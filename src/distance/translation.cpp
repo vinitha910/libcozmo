@@ -45,17 +45,18 @@ namespace distance {
     double Translation::get_distance(
         const libcozmo::statespace::StateSpace::State& _state_1,
         const libcozmo::statespace::StateSpace::State& _state_2) const {
-        aikido::statespace::SE2::State continuous_state_1;
-        m_statespace->
-            discrete_state_to_continuous(_state_1, &continuous_state_1);
-        aikido::statespace::SE2::State continuous_state_2;
-        m_statespace->
-            discrete_state_to_continuous(_state_2, &continuous_state_2);
-        auto translation = continuous_state_1.getIsometry().translation() -
-            continuous_state_2.getIsometry().translation();
-        Eigen::Vector2d position(translation);
-        Eigen::Vector2d zeros(0, 0);
-        return utils::euclidean_distance(position, zeros);
+        // aikido::statespace::SE2::State continuous_state_1;
+        // m_statespace->
+        //     discrete_state_to_continuous(_state_1, &continuous_state_1);
+        // aikido::statespace::SE2::State continuous_state_2;
+        // m_statespace->
+        //     discrete_state_to_continuous(_state_2, &continuous_state_2);
+        // auto translation = continuous_state_1.getIsometry().translation() -
+        //     continuous_state_2.getIsometry().translation();
+        // Eigen::Vector2d position(translation);
+        // Eigen::Vector2d zeros(0, 0);
+        // return utils::euclidean_distance(position, zeros);
+        return 0.0;
     }
 
 }  // namespace distance

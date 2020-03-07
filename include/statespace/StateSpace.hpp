@@ -56,7 +56,7 @@ class StateSpace {
     /// \param _state Input state
     /// \return State ID
     virtual int get_or_create_state(
-        const aikido::statespace::StateSpace::State& _state) = 0;
+        const ContinuousState& _state) = 0;
 
     /// Checks if given state via vector representation exists in the
     /// statespace; if not, creates and adds the state to the statespace
@@ -74,14 +74,14 @@ class StateSpace {
     /// \param[out] _continuous_state Output continuous state
     virtual void discrete_state_to_continuous(
         const State& _state,
-        aikido::statespace::StateSpace::State* _continuous_state) const = 0;
+        ContinuousState* _continuous_state) const = 0;
 
     /// Converts the given continuous state into a discrete state
     ///
     /// \param _state Input discrete state
     /// \param[out] _discrete_state Output continuous state
     virtual void continuous_state_to_discrete(
-        const aikido::statespace::StateSpace::State& _state,
+        const ContinuousState& _state,
         State* _discrete_state) const = 0;
 
     /// Gets the state ID for the given state if the state exists in the
@@ -125,8 +125,8 @@ class StateSpace {
     /// distance between; distance metric varies based on states
     /// \return Distance between the states
     virtual double get_distance(
-        const aikido::statespace::StateSpace::State& _state_1,
-        const aikido::statespace::StateSpace::State& _state_2) const = 0;
+        const ContinuousState& _state_1,
+        const ContinuousState& _state_2) const = 0;
 
     /// Copies a discrete state
     ///
