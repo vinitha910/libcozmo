@@ -32,7 +32,8 @@ if __name__ == "__main__":
 			  " topic in Rviz".format(topicName))
 
 		viewer = InteractiveMarkerViewer(topicName, baseFrameName)
-		cozmo_marker = viewer.addSkeleton(skeleton)
+		
+		cozmo_marker = viewer.addSkeletonMarker(skeleton)
 		viewer.setAutoUpdate(True);
 
 		waypoints = [

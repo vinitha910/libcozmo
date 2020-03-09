@@ -29,7 +29,7 @@ class Cozmo
 {
 public:
     /// Creates Cozmo object
-
+    ///
     /// \param mesh_dir path to the libcozmo/meshes folder
     Cozmo(const std::string& mesh_dir);
    
@@ -45,23 +45,30 @@ public:
     void setForkliftPosition(double pos);
     
     /// Executes a trajectory defined by a set of waypoints 
-
+    ///
     /// \param period The period of the trajectory 
     /// \param traj The Trajectory Pointer to the trajectory that needs to be executed
-    void executeTrajectory(std::chrono::milliseconds period,
-  			 TrajectoryPtr traj);
+    void executeTrajectory(
+        std::chrono::milliseconds period, TrajectoryPtr traj);
 
     void setState(const double& x, const double& y, const Eigen::Quaterniond& orientation);
 
+    /// Returns the (x, y, theta) of cozmo at time t
+    ///
+    /// \param path Cozmo's trajectory
+    /// \param time The time (ms)
+    Eigen::Vector3d getState(
+        const std::shared_ptr<Interpolated> path, const double& time);
+    
     /// Return and SE2 State defined by the inputted x, y and theta
-
+    ///
     /// \param x The x coordinate of the state
     /// \param y The y coordinate of the state
     /// \param th The rotation theta of the state
     SE2::State createState(double x, double y, double th);
 
     /// Creates an interpolated trajectory given a set of waypoints
-
+    ///
     /// \param waypoints A vector of waypoints
     std::shared_ptr<Interpolated> createInterpolatedTraj(std::vector<Waypoint> waypoints);
  
@@ -83,7 +90,7 @@ private:
     InverseKinematicsPtr ik;
 
     /// Creates and returns a BodyNodePtr to Cozmo's base
-    
+    ///
     /// \param cozmo SkeletonPtr to cozmo 
     /// \param mesh_name name of the mesh file without the extension
     /// \param mesh_dir path to the libcozmo/meshes folder
@@ -92,7 +99,7 @@ private:
   			   const std::string& mesh_dir);
 
     /// Helper method to create an individual link to the base; returns BodyNodePtr to body
-    
+    ///
     /// \param cozmo SkeletonPtr to cozmo 
     /// \param parent parent body node
     /// \param mesh_name name of the mesh file without the extension
@@ -107,7 +114,7 @@ private:
   		      Eigen::Vector3d transformFromChild);
 
     /// Creates and returns SkeletonPtr to Cozmo skeleton
-
+    ///
     /// \param mesh_dir path to the libcozmo/meshes folder
     SkeletonPtr createCozmo(const std::string& mesh_dir);
 
