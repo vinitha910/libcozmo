@@ -54,7 +54,7 @@ namespace distance {
         // Eigen::Rotation2Dd rotation_1 = Eigen::Rotation2Dd::Identity();
         // Eigen::Rotation2Dd rotation_2 = Eigen::Rotation2Dd::Identity();
         // rotation_1.fromRotationMatrix(
-        //     continuous_state_1.getIsometry().rotation());
+        //     continuous_state_1.getIsometry(1).rotation());
         // rotation_2.fromRotationMatrix(
         //     continuous_state_2.getIsometry().rotation());
         // return utils::angle_normalization(

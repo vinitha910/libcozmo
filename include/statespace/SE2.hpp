@@ -105,7 +105,7 @@ class SE2 : public virtual StateSpace {
 
         /// Documentation Inherited
         /// void to_vector(const StateSpace::ContinuousState& state);
-        
+
         /// Documentation Inherited
         bool operator== (
             const StateSpace::ContinuousState& state) const override;
@@ -119,19 +119,19 @@ class SE2 : public virtual StateSpace {
             return seed;
         }
 
-        double X() const;
-        double Y() const;
-        double Theta() const;
+        double X_mm() const;
+        double Y_mm() const;
+        double Theta_rad() const;
 
         /// Documentation Inherited
         Eigen::VectorXd vector() const override;
 
-        private:
-            double x_mm;
-            double y_mm;
-            double theta_rad;
+     private:
+        double x_mm;
+        double y_mm;
+        double theta_rad;
 
-            friend class SE2;
+        friend class SE2;
     };
 
     /// Constructs a discretized SE2 state space

@@ -192,9 +192,9 @@ class StateSpace::State {
 };
 
 class StateSpace::ContinuousState {
-	/// Convert state to its vector representation
-	///
-	/// \return Output state vector
+    /// Convert state to its vector representation
+    ///
+    /// \return Output state vector
     virtual Eigen::VectorXd vector() const = 0;
 
     /// Converts state value given vector representation

@@ -80,8 +80,8 @@ SE2::ContinuousState::ContinuousState(
 bool SE2::ContinuousState::operator== (
         const StateSpace::ContinuousState& state) const {
     auto state_ = static_cast<const ContinuousState&>(state);
-    return x_mm == state_.x_mm && 
-           y_mm == state_.y_mm && 
+    return x_mm == state_.x_mm &&
+           y_mm == state_.y_mm &&
            theta_rad == state_.theta_rad;
 }
 
@@ -104,15 +104,15 @@ void SE2::ContinuousState::from_vector(const Eigen::VectorXd& state) {
     theta_rad = state[2];
 }
 
-double SE2::ContinuousState::X() const {
+double SE2::ContinuousState::X_mm() const {
     return x_mm;
 }
 
-double SE2::ContinuousState::Y() const {
+double SE2::ContinuousState::Y_mm() const {
     return y_mm;
 }
 
-double SE2::ContinuousState::Theta() const {
+double SE2::ContinuousState::Theta_rad() const {
     return theta_rad;
 }
 
@@ -209,7 +209,7 @@ bool SE2::is_valid_state(const StateSpace::State& _state) const {
 
 int SE2::size() const {
     return m_state_map.size();
-}   
+}
 
 double SE2::get_distance(
     const StateSpace::State& _state_1,
@@ -227,11 +227,11 @@ double SE2::get_distance(
     const ContinuousState state_1 =
         static_cast<const ContinuousState&>(_state_1);
     const ContinuousState state_2 =
-        static_cast<const ContinuousState&>(_state_2); 
+        static_cast<const ContinuousState&>(_state_2);
     Eigen::Vector3d diff;
     diff.head<2>() = state_1.vector().head<2>() - state_2.vector().head<2>();
     diff[2] = normalize_angle_rad(state_1.vector()[2] - state_2.vector()[2]);
-    return diff.norm();     
+    return diff.norm();
 }
 
 void SE2::copy_state(
