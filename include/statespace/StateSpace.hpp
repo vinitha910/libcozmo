@@ -40,6 +40,9 @@ class StateSpace {
     /// Base class for all discrete states
     class State;
 
+    /// Base class for all continuous states
+    class ContinuousState;
+
     /// Checks if given (discrete) state exists in the statespace; if not,
     /// creates and adds the state to the statespace
     ///
@@ -53,7 +56,7 @@ class StateSpace {
     /// \param _state Input state
     /// \return State ID
     virtual int get_or_create_state(
-        const aikido::statespace::StateSpace::State& _state) = 0;
+        const ContinuousState& _state) = 0;
 
     /// Checks if given state via vector representation exists in the
     /// statespace; if not, creates and adds the state to the statespace
@@ -71,14 +74,14 @@ class StateSpace {
     /// \param[out] _continuous_state Output continuous state
     virtual void discrete_state_to_continuous(
         const State& _state,
-        aikido::statespace::StateSpace::State* _continuous_state) const = 0;
+        ContinuousState* _continuous_state) const = 0;
 
     /// Converts the given continuous state into a discrete state
     ///
     /// \param _state Input discrete state
     /// \param[out] _discrete_state Output continuous state
     virtual void continuous_state_to_discrete(
-        const aikido::statespace::StateSpace::State& _state,
+        const ContinuousState& _state,
         State* _discrete_state) const = 0;
 
     /// Gets the state ID for the given state if the state exists in the
@@ -122,8 +125,8 @@ class StateSpace {
     /// distance between; distance metric varies based on states
     /// \return Distance between the states
     virtual double get_distance(
-        const aikido::statespace::StateSpace::State& _state_1,
-        const aikido::statespace::StateSpace::State& _state_2) const = 0;
+        const ContinuousState& _state_1,
+        const ContinuousState& _state_2) const = 0;
 
     /// Copies a discrete state
     ///
@@ -186,6 +189,31 @@ class StateSpace::State {
     State() = default;
 
     ~State() = default;
+};
+
+class StateSpace::ContinuousState {
+    /// Convert state to its vector representation
+    ///
+    /// \return Output state vector
+    virtual Eigen::VectorXd vector() const = 0;
+
+    /// Converts state value given vector representation
+    /// Throws an exception if the state vector size is incorrect; allowed
+    /// vector size depends on derived class
+    ///
+    /// \param state State vector
+    virtual void from_vector(const Eigen::VectorXd& state) = 0;
+
+    /// Converts vector representation to its continuous state value
+    /// virtual void to_vector(const ContinuousState& state) = 0;
+
+    /// Equality operator
+    virtual bool operator== (const ContinuousState& state) const = 0;
+ protected:
+    // This is a base class that should only only be used in derived classes.
+    ContinuousState() = default;
+
+    ~ContinuousState() = default;
 };
 
 }  // namespace statespace

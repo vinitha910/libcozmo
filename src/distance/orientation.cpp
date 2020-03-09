@@ -45,20 +45,21 @@ namespace distance {
     double Orientation::get_distance(
         const libcozmo::statespace::StateSpace::State& _state_1,
         const libcozmo::statespace::StateSpace::State& _state_2) const {
-        aikido::statespace::SE2::State continuous_state_1;
-        m_statespace->
-            discrete_state_to_continuous(_state_1, &continuous_state_1);
-        aikido::statespace::SE2::State continuous_state_2;
-        m_statespace->
-            discrete_state_to_continuous(_state_2, &continuous_state_2);
-        Eigen::Rotation2Dd rotation_1 = Eigen::Rotation2Dd::Identity();
-        Eigen::Rotation2Dd rotation_2 = Eigen::Rotation2Dd::Identity();
-        rotation_1.fromRotationMatrix(
-            continuous_state_1.getIsometry().rotation());
-        rotation_2.fromRotationMatrix(
-            continuous_state_2.getIsometry().rotation());
-        return utils::angle_normalization(
-            std::abs(rotation_1.angle() - rotation_2.angle()));
+        // aikido::statespace::SE2::State continuous_state_1;
+        // m_statespace->
+        //     discrete_state_to_continuous(_state_1, &continuous_state_1);
+        // aikido::statespace::SE2::State continuous_state_2;
+        // m_statespace->
+        //     discrete_state_to_continuous(_state_2, &continuous_state_2);
+        // Eigen::Rotation2Dd rotation_1 = Eigen::Rotation2Dd::Identity();
+        // Eigen::Rotation2Dd rotation_2 = Eigen::Rotation2Dd::Identity();
+        // rotation_1.fromRotationMatrix(
+        //     continuous_state_1.getIsometry(1).rotation());
+        // rotation_2.fromRotationMatrix(
+        //     continuous_state_2.getIsometry().rotation());
+        // return utils::angle_normalization(
+        //     std::abs(rotation_1.angle() - rotation_2.angle()));
+        return 0.0;
     }
 
 }  // namespace distance
