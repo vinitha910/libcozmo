@@ -48,30 +48,6 @@ TEST(DistanceTest, TestSE2) {
         0.01);
 }
 
-TEST(DistanceTest, TestTranslation) {
-    // Checking translation calculated correctly
-    const auto statespace = std::make_shared<statespace::SE2>(0.1, 8);
-    distance::Translation trans = distance::Translation(statespace);
-    EXPECT_NEAR(
-        sqrt(pow(0.1, 2) + pow(0.3, 2)),
-        trans.get_distance(
-            statespace::SE2::State(0, 0, 1),
-            statespace::SE2::State(1, 3, 3)),
-        0.01);
-}
-
-TEST(DistanceTest, TestOrientation) {
-    // Checking orientation calculated correctly
-    const auto statespace = std::make_shared<statespace::SE2>(0.1, 8);
-    distance::Orientation orient = distance::Orientation(statespace);
-    EXPECT_NEAR(
-        M_PI / 2,
-        orient.get_distance(
-            statespace::SE2::State(0, 0, 1),
-            statespace::SE2::State(1, 3, 3)),
-        0.01);
-}
-
 }  // namespace test
 }  // namespace distance
 }  // namespace libcozmo
