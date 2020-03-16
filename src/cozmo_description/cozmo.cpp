@@ -268,4 +268,18 @@ std::shared_ptr<Interpolated> Cozmo::createInterpolatedTraj(
     return traj;
 }
 
+Eigen::Vector3d Cozmo::getState(
+    const std::shared_ptr<Interpolated> path, const double& time) {
+    auto space = path->getStateSpace();
+    auto scopedState = space->createState();
+    path->evaluate(time, scopedState);
+    const auto state = 
+        static_cast<aikido::statespace::SE2::State*>(scopedState.getState());
+    const auto transform = state->getIsometry();
+    Eigen::Rotation2Dd rotation = Eigen::Rotation2Dd::Identity();
+    rotation.fromRotationMatrix(transform.rotation());
+    const auto translation = transform.translation();
+    return Eigen::Vector3d(translation.x(), translation.y(), rotation.angle());
+}
+
 }  // namespace libcozmo

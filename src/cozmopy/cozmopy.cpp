@@ -66,7 +66,8 @@ PYBIND11_MODULE(cozmopy, m) {
             const std::vector<double>& quat) {
             Eigen::Quaterniond q(quat[0], quat[1], quat[2], quat[3]);
             cozmo.setState(x, y, q);
-        });
+        })
+        .def("getState", &Cozmo::getState, py::arg("path"), py::arg("time"));
 
         py::class_<libcozmo::Waypoint>(m, "Waypoint")
         .def(py::init([](const double x, const double y, const double th, const double t) {
