@@ -86,6 +86,54 @@ class SE2 : public virtual StateSpace {
         friend class SE2;
     };
 
+    class ContinuousState : public StateSpace::ContinuousState {
+     public:
+        /// Constructs identity state
+        ContinuousState() : x_mm(0), y_mm(0), theta_rad(0) {}
+
+        ~ContinuousState() = default;
+
+        /// Constructs state with given parameters
+        explicit ContinuousState(
+            const double& x,
+            const double& y,
+            const double& theta);
+
+        /// Documentation Inherited
+        /// Vector in format [x, y, theta]
+        void from_vector(const Eigen::VectorXd& state);
+
+        /// Documentation Inherited
+        /// void to_vector(const StateSpace::ContinuousState& state);
+
+        /// Documentation Inherited
+        bool operator== (
+            const StateSpace::ContinuousState& state) const override;
+
+        /// Custom state hash
+        friend std::size_t hash_value(const ContinuousState& state) {
+            std::size_t seed = 0;
+            boost::hash_combine(seed, boost::hash_value(state.x_mm));
+            boost::hash_combine(seed, boost::hash_value(state.y_mm));
+            boost::hash_combine(seed, boost::hash_value(state.theta_rad));
+            return seed;
+        }
+
+        double X_mm() const;
+        double Y_mm() const;
+        double Theta_rad() const;
+
+        /// Documentation Inherited
+        Eigen::VectorXd vector() const override;
+
+     private:
+        double x_mm;
+        double y_mm;
+        double theta_rad;
+
+        friend class SE2;
+    };
+
     /// Constructs a discretized SE2 state space
     ///
     /// \param resolution_m Resolution of the environment (mm)
@@ -95,9 +143,7 @@ class SE2 : public virtual StateSpace {
         const double& resolution_m,
         const int& num_theta_vals) : \
         m_resolution(resolution_m),
-        m_num_theta_vals(num_theta_vals),
-        m_statespace(std::make_shared<aikido::statespace::SE2>()),
-        m_distance_metric(aikido::distance::SE2(m_statespace)) {}
+        m_num_theta_vals(num_theta_vals) {}
 
     ~SE2();
 
@@ -106,7 +152,7 @@ class SE2 : public virtual StateSpace {
 
     /// Documentation inherited
     int get_or_create_state(
-        const aikido::statespace::StateSpace::State& _state) override;
+        const StateSpace::ContinuousState& _state) override;
 
     /// Documentation inherited
     /// Input vector in format [x, y, theta]
@@ -115,12 +161,11 @@ class SE2 : public virtual StateSpace {
     /// Documentation inherited
     void discrete_state_to_continuous(
         const StateSpace::State& _state,
-        aikido::statespace::StateSpace::State*
-            _continuous_state) const override;
+        StateSpace::ContinuousState* _continuous_state) const override;
 
     /// Documentation inherited
     void continuous_state_to_discrete(
-        const aikido::statespace::StateSpace::State& _state,
+        const StateSpace::ContinuousState& _state,
         StateSpace::State* _discrete_state) const override;
 
     /// Documentation inherited
@@ -138,16 +183,6 @@ class SE2 : public virtual StateSpace {
     int size() const override;
 
     /// Documentation inherited
-    double get_distance(
-        const StateSpace::State& _state_1,
-        const StateSpace::State& _state_2) const override;
-
-    /// Documentation inherited
-    double get_distance(
-        const aikido::statespace::StateSpace::State& _state_1,
-        const aikido::statespace::StateSpace::State& _state_2) const override;
-
-    /// Documentation inherited
     void copy_state(
         const StateSpace::State& _source,
         StateSpace::State* _destination) const override;
@@ -155,17 +190,17 @@ class SE2 : public virtual StateSpace {
     /// Documentation inherited
     double get_resolution() const override;
 
- private:
-    /// Creates a new state and adds it to the statespace
-    ///
-    /// \return pointer to the state
-    StateSpace::State* create_state() override;
-
     /// Gets normalized angle (radians) in [0, 2pi]
     ///
     /// \param theta_rad Angle (radians)
     /// \return normalized angle
     double normalize_angle_rad(const double& theta_rad) const;
+
+ private:
+    /// Creates a new state and adds it to the statespace
+    ///
+    /// \return pointer to the state
+    StateSpace::State* create_state() override;
 
     /// Converts discrete angle to continuous (radians)
     ///
@@ -205,9 +240,6 @@ class SE2 : public virtual StateSpace {
 
     /// Resolution of environment (mm)
     const double m_resolution;
-
-    std::shared_ptr<aikido::statespace::SE2> m_statespace;
-    aikido::distance::SE2 m_distance_metric;
 };
 
 }  // namespace statespace
