@@ -39,7 +39,7 @@ namespace distance {
 
 /// SE2 Distance Metric
 ///
-/// This class implements a distace metric between SE2 transformations.
+/// This class implements a distance metric between SE2 transformations.
 class SE2 : public Distance {
  public:
     /// Constructs metric with given statespace
@@ -53,6 +53,11 @@ class SE2 : public Distance {
     double get_distance(
         const statespace::StateSpace::State& _state_1,
         const statespace::StateSpace::State& _state_2) const override;
+
+    /// Documentation inherited
+    double get_distance(
+        const statespace::StateSpace::ContinuousState& _state_1,
+        const statespace::StateSpace::ContinuousState& _state_2) const override;
 
  private:
     const std::shared_ptr<statespace::SE2> m_statespace;
