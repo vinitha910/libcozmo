@@ -183,16 +183,6 @@ class SE2 : public virtual StateSpace {
     int size() const override;
 
     /// Documentation inherited
-    double get_distance(
-        const StateSpace::State& _state_1,
-        const StateSpace::State& _state_2) const override;
-
-    /// Documentation inherited
-    double get_distance(
-        const StateSpace::ContinuousState& _state_1,
-        const StateSpace::ContinuousState& _state_2) const override;
-
-    /// Documentation inherited
     void copy_state(
         const StateSpace::State& _source,
         StateSpace::State* _destination) const override;
@@ -200,17 +190,17 @@ class SE2 : public virtual StateSpace {
     /// Documentation inherited
     double get_resolution() const override;
 
- private:
-    /// Creates a new state and adds it to the statespace
-    ///
-    /// \return pointer to the state
-    StateSpace::State* create_state() override;
-
     /// Gets normalized angle (radians) in [0, 2pi]
     ///
     /// \param theta_rad Angle (radians)
     /// \return normalized angle
     double normalize_angle_rad(const double& theta_rad) const;
+
+ private:
+    /// Creates a new state and adds it to the statespace
+    ///
+    /// \return pointer to the state
+    StateSpace::State* create_state() override;
 
     /// Converts discrete angle to continuous (radians)
     ///

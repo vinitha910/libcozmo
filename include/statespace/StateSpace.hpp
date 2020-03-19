@@ -110,24 +110,6 @@ class StateSpace {
     /// \return Number of states
     virtual int size() const = 0;
 
-    /// Gets the distance between two SE2 states
-    ///
-    /// \param _state_1, _state_2 The discrete states to calculate the distance
-    /// between; distance metric varies based on states (assumption: states are
-    /// valid)
-    /// \return Distance between the states
-    virtual double get_distance(
-        const State& _state_1, const State& _state_2) const = 0;
-
-    /// Gets the distance between two SE2 states
-    ///
-    /// \param _state_1, _state_2 The continuous states to calculate the
-    /// distance between; distance metric varies based on states
-    /// \return Distance between the states
-    virtual double get_distance(
-        const ContinuousState& _state_1,
-        const ContinuousState& _state_2) const = 0;
-
     /// Copies a discrete state
     ///
     /// \param _source Input state (state to copy)

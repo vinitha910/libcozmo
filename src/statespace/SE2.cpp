@@ -211,29 +211,6 @@ int SE2::size() const {
     return m_state_map.size();
 }
 
-double SE2::get_distance(
-    const StateSpace::State& _state_1,
-    const StateSpace::State& _state_2) const {
-    ContinuousState continuous_state_1;
-    discrete_state_to_continuous(_state_1, &continuous_state_1);
-    ContinuousState continuous_state_2;
-    discrete_state_to_continuous(_state_2, &continuous_state_2);
-    return get_distance(continuous_state_1, continuous_state_2);
-}
-
-double SE2::get_distance(
-    const StateSpace::ContinuousState& _state_1,
-    const StateSpace::ContinuousState& _state_2) const {
-    const ContinuousState state_1 =
-        static_cast<const ContinuousState&>(_state_1);
-    const ContinuousState state_2 =
-        static_cast<const ContinuousState&>(_state_2);
-    Eigen::Vector3d diff;
-    diff.head<2>() = state_1.vector().head<2>() - state_2.vector().head<2>();
-    diff[2] = normalize_angle_rad(state_1.vector()[2] - state_2.vector()[2]);
-    return diff.norm();
-}
-
 void SE2::copy_state(
     const StateSpace::State& _source, StateSpace::State* _destination) const {
     const State& source = static_cast<const State&>(_source);
