@@ -39,10 +39,33 @@ namespace distance {
         }
     }
 
+    // double SE2::get_distance(
+    //     const statespace::StateSpace::State& _state_1,
+    //     const statespace::StateSpace::State& _state_2) const {
+    //     return m_statespace->get_distance(_state_1, _state_2);
+    // }
+
     double SE2::get_distance(
         const statespace::StateSpace::State& _state_1,
         const statespace::StateSpace::State& _state_2) const {
-        return m_statespace->get_distance(_state_1, _state_2);
+        ContinuousState continuous_state_1;
+        discrete_state_to_continuous(_state_1, &continuous_state_1);
+        ContinuousState continuous_state_2;
+        discrete_state_to_continuous(_state_2, &continuous_state_2);
+        return get_distance(continuous_state_1, continuous_state_2);
+    }
+
+    double SE2::get_distance(
+        const statespace::StateSpace::ContinuousState& _state_1,
+        const statespace::StateSpace::ContinuousState& _state_2) const {
+        const ContinuousState state_1 =
+            static_cast<const ContinuousState&>(_state_1);
+        const ContinuousState state_2 =
+            static_cast<const ContinuousState&>(_state_2);
+        Eigen::Vector3d diff;
+        diff.head<2>() = state_1.vector().head<2>() - state_2.vector().head<2>();
+        diff[2] = normalize_angle_rad(state_1.vector()[2] - state_2.vector()[2]);
+        return diff.norm();
     }
 
 }  // namespace distance
