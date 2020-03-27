@@ -42,7 +42,8 @@ namespace distance {
     double SE2::get_distance(
         const statespace::StateSpace::State& _state_1,
         const statespace::StateSpace::State& _state_2) const {
-        return m_statespace->get_distance(_state_1, _state_2);
+        // return m_statespace->get_distance(_state_1, _state_2);
+        return 0.0;
     }
 
 }  // namespace distance
